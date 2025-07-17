@@ -1,0 +1,92 @@
+name: start
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+  # Media & Files
+  image_picker: ^1.0.4
+  video_player: ^2.7.0
+  flutter_sound: ^9.2.13
+  just_audio: ^0.9.34
+
+  # UI/UX
+  google_fonts: ^5.1.0
+  lottie: ^3.3.1
+
+  # Firebase (versions compatibles)
+  firebase_core: ^3.14.0
+  firebase_auth: ^5.6.0
+  cloud_firestore: ^5.6.9
+  firebase_storage: ^12.4.7
+  firebase_messaging: ^15.2.7
+  firebase_app_check: ^0.3.2+7
+  visibility_detector: ^0.4.0+2
+  adaptive_theme: ^3.7.0
+  video_trimmer: ^5.0.0
+
+
+  # Utils
+  uuid: ^4.5.1
+
+  # Location (versions compatibles)
+  geolocator: ^10.1.0
+  geocoding: ^3.0.0
+
+  # Sharing & Notifications
+  share_plus: ^7.1.0
+  shared_preferences: ^2.2.0
+  timeago: ^3.4.0
+  camera: ^0.10.5+5
+  path: ^1.8.3
+  http: ^1.1.0
+  flutter_dotenv: ^5.2.1
+  permission_handler: ^11.3.1
+  video_thumbnail: ^0.5.3
+  path_provider: ^2.1.2
+  ffmpeg_kit_flutter_new: ^2.0.0
+  crop_your_image: ^2.0.0
+  cached_network_image: ^3.4.1
+  rxdart: ^0.28.0
+  provider: ^6.1.5
+  flutter_stripe: ^10.2.0
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.3
+  flutter_launcher_icons: ^0.13.1
+  build_runner: ^2.4.7
+  intl_utils: ^2.8.2
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - .env
+    - assets/icons/logo.jpg
+    - assets/animations/globe.json
+    - assets/images/space_background.jpg
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/logo.jpg"
+  remove_alpha_ios: true
+
+dependency_overrides:
+  geolocator_android: ^4.5.4

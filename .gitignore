@@ -1,0 +1,80 @@
+# Flutter core
+.dart_tool/
+.packages
+.pub-cache/
+build/
+flutter_*.png
+
+# Generated plugin registrant
+.generated_plugin_registrant.dart
+
+# IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code (optional, if you switch IDEs)
+.vscode/
+
+# macOS-specific
+.DS_Store
+
+# Android
+android/.gradle/
+android/captures/
+android/local.properties
+android/.idea/
+*.keystore
+*.jks
+
+# Gradle cache
+.gradle/
+**/build/
+
+# iOS
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/App.framework
+ios/Flutter/engine/
+ios/Pods/
+ios/.symlinks/
+ios/.flutter-plugins
+ios/.flutter-plugins-dependencies
+ios/.generated/
+ios/Runner.xcworkspace
+ios/Runner.xcodeproj/project.xcworkspace/
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+
+# Firebase crashlytics/symbol files
+ios/*.dSYM
+android/**/*.map
+
+# Others
+*.log
+*.tmp
+*.swp
+*.lock
+*.orig
+
+# Flutter build outputs
+*.android/
+*.ios/
+
+# Coverage reports
+coverage/
+
+# Env and config files
+.env
+.env.*
+firebase_app_id_file.json
