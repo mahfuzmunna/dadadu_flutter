@@ -342,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // 🏪 MARKETPLACE FUNCTIONS
-  Future<void> _openMarketplace(ThemeData theme) async {
+ /* Future<void> _openMarketplace(ThemeData theme) async {
     if (!mounted) return;
 
     showModalBottomSheet(
@@ -351,7 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       backgroundColor: Colors.transparent,
       builder: (context) => _buildMarketplaceModal(theme: theme),
     );
-  }
+  }*/
 
   Widget _badgeItem({
     required String emoji,
@@ -1792,7 +1792,9 @@ Widget _buildReferralSection({required ThemeData theme}) {
                     ),
                   ),
 
-                  Positioned(
+                  // MARKET PLACE TO BE IMPLEMENTED ON FUTURE UPDATES
+
+                  /*Positioned(
                     top: MediaQuery.of(context).padding.top + 16,
                     right:
                         70, // Position entre settings (gauche) et notifications (droite)
@@ -1818,7 +1820,7 @@ Widget _buildReferralSection({required ThemeData theme}) {
                       onPressed: () => _openMarketplace(theme),
                       tooltip: s.badgeMarketplace,
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             );
