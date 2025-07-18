@@ -12,6 +12,13 @@ class WelcomeScreen extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     final s = S.of(context); // Localization shortcut
 
+    // DARK MODE & LIGHT MODE NEEDS SEPARATE BACKGROUND IMAGE
+    // IMPLEMENTED LOGIC - IMAGES TO BE ADDED/UPDATED LATER
+    
+    var brightness = Theme.of(context).brightness;
+    String backgroundImage = brightness == Brightness.light ?
+    'assets/images/space_background.jpg' : 'assets/images/space_background_2.jpg';
+
     return Scaffold(
       extendBodyBehindAppBar: true,
       body: Stack(
@@ -19,7 +26,7 @@ class WelcomeScreen extends StatelessWidget {
           // 🌌 Background image
           Positioned.fill(
             child: Image.asset(
-              'assets/images/space_background.jpg',
+              backgroundImage,
               fit: BoxFit.cover,
             ),
           ),
