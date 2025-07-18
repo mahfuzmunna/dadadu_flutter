@@ -158,7 +158,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
       SizedBox(height: 12.h,),
 
       Text(s.welcomeSignUpSubHeader, style: TextStyle(
-        fontSize: isPortrait? 12.sp : 6.sp
+        fontSize: isPortrait? 14.sp : 6.sp
       ),),
       SizedBox(height: 10.h,),
       SizedBox(
@@ -172,8 +172,8 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
               );
             },
             style: FilledButton.styleFrom(
-                backgroundColor: colorScheme.primary,
-                foregroundColor: colorScheme.onPrimary,
+                backgroundColor: Colors.deepPurpleAccent,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                         24.r)
@@ -182,7 +182,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
             child: Text(s.welcomeSignUp,
               style: TextStyle(
                   fontSize: isPortrait?18.sp : 10.sp,
-                  fontWeight: FontWeight.w600
+                  fontWeight: FontWeight.w500
               ),
             )
         ),
