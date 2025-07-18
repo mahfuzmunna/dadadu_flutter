@@ -8,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'generated/l10n.dart';
 import 'package:start/dadadu/dadadu_screen.dart';
 import 'package:start/screens/home_screen.dart';
-import 'services/stripe_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'auth/welcome_screen.dart';
 import 'auth/login_screen.dart';
