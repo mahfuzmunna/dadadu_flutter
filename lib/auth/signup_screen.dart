@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:start/screens/home_screen.dart';
 import 'package:start/generated/l10n.dart';
@@ -163,91 +164,100 @@ Future<void> _signUpWithEmail() async {
   Widget build(BuildContext context) {
     final s = S.of(context);
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
-          Container(color: const Color.fromARGB(153, 0, 0, 0)),
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    s.createYourDadaduID,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _authToggle(s),
-                  const SizedBox(height: 14),
-                  _glassInput(
-                    controller: _usernameController,
-                    hint: s.username,
-                    icon: Icons.person_outline,
-                  ),
-                  const SizedBox(height: 14),
-                  _isPhoneMode
-                      ? _glassInput(
-                          controller: _phoneController,
-                          hint: s.phoneNumber,
-                          icon: Icons.phone)
-                      : _glassInput(
-                          controller: _emailController,
-                          hint: s.email,
-                          icon: Icons.email_outlined),
-                  const SizedBox(height: 14),
-                  if (!_isPhoneMode)
-                    _glassInput(
-                        controller: _passwordController,
-                        hint: s.password,
-                        icon: Icons.lock_outline,
-                        obscure: true),
-                  const SizedBox(height: 24),
-                  if (_errorText != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Text(
-                        _errorText!,
-                        style: const TextStyle(color: Colors.redAccent),
-                        textAlign: TextAlign.center,
+      body: OrientationBuilder(
+        builder: (context, orientation) {
+          final isPortrait = orientation == Orientation.portrait;
+          return Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
+              Container(color: const Color.fromARGB(153, 0, 0, 0)),
+              Center(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        s.createYourDadaduID,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.2,
+                        ),
                       ),
-                    ),
-                  ElevatedButton.icon(
-                    onPressed: _isLoading ? null : _signUp,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.tealAccent[400],
-                      foregroundColor: Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(24),
+                      const SizedBox(height: 12),
+                      _authToggle(s),
+                      const SizedBox(height: 14),
+                      _glassInput(
+                        controller: _usernameController,
+                        hint: s.username,
+                        icon: Icons.person_outline,
+                        isPortrait: isPortrait
                       ),
-                      padding: const EdgeInsets.symmetric(
-                          vertical: 14, horizontal: 32),
-                    ),
-                    icon: _isLoading
-                        ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.black,
-                            ),
-                          )
-                        : const Icon(Icons.person_add_alt_1),
-                    label: Text(_isLoading ? s.creating : s.signUp),
+                      const SizedBox(height: 14),
+                      _isPhoneMode
+                          ? _glassInput(
+                              controller: _phoneController,
+                              hint: s.phoneNumber,
+                              icon: Icons.phone,
+                              isPortrait: isPortrait)
+                          : _glassInput(
+                              controller: _emailController,
+                              hint: s.email,
+                              icon: Icons.email_outlined,
+                              isPortrait: isPortrait),
+                      const SizedBox(height: 14),
+                      if (!_isPhoneMode)
+                        _glassInput(
+                            controller: _passwordController,
+                            hint: s.password,
+                            icon: Icons.lock_outline,
+                            obscure: true,
+                            isPortrait: isPortrait),
+                      const SizedBox(height: 24),
+                      if (_errorText != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            _errorText!,
+                            style: const TextStyle(color: Colors.redAccent),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      FilledButton.icon(
+                        onPressed: _isLoading ? null : _signUp,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.tealAccent[400],
+                          foregroundColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 32),
+                        ),
+                        icon: _isLoading
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.black,
+                                ),
+                              )
+                            : const Icon(Icons.person_add_alt_1),
+                        label: Text(_isLoading ? s.creating : s.signUp),
+                      ),
+                      const SizedBox(height: 14),
+                      _buildLanguageDropdown(s),
+                    ],
                   ),
-                  const SizedBox(height: 14),
-                  _buildLanguageDropdown(s),
-                ],
+                ),
               ),
-            ),
-          ),
-        ],
+            ],
+          );
+        }
       ),
     );
   }
@@ -344,13 +354,18 @@ String _localeToFlag(String code) {
     );
   }
 
+  // THIS WIDGET IS REWRITTEN MULTIPLE TIMES
+  // MARKET TO BE REFACTORED LATER
+
   Widget _glassInput({
     required TextEditingController controller,
     required String hint,
     required IconData icon,
     bool obscure = false,
+    bool isPortrait = true
   }) {
     return Container(
+      width: isPortrait ? 0.9.sw : 0.7.sw,
       decoration: BoxDecoration(
         color: Colors.white12,
         borderRadius: BorderRadius.circular(20),

@@ -124,6 +124,15 @@ class S {
     return Intl.message('Loading...', name: 'loading', desc: '', args: []);
   }
 
+  /// `Forgot Password? Need Help?`
+  String get forgotPassword {
+    return Intl.message(
+      'Forgot Password ? Need Help?',
+      name: 'forgotPassword',
+      desc: '',
+      args: [],
+    );
+  }
   /// `Don't have an account? Sign up`
   String get noAccountSignUp {
     return Intl.message(

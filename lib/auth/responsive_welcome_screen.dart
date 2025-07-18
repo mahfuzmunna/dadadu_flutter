@@ -30,6 +30,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
             final isPortrait = orientation == Orientation.portrait;
             return Stack(
               children: [
+                // Positioned.fill(child: Container(color: Colors.white)),
                 // 🌌 Background image
                 Positioned.fill(
                   child: Image.asset(
