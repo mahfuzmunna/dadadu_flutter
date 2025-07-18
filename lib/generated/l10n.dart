@@ -163,6 +163,21 @@ class S {
       args: [],
     );
   }
+  /// `Your world of streaming, all in one place.`
+  String get welcomeToDadaduSubHeader {
+    return Intl.message(
+      'Your world of streaming, all in one place.',
+      name: 'welcomeToDadaduSubHeader',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sign Up`
+  String get welcomeSignUpSubHeader {
+    // return Intl.message('Just landed? Sign up right away!', name: 'welcomeSignUpSubHeader', desc: '', args: []);
+    return Intl.message('Or,', name: 'welcomeSignUpSubHeader', desc: '', args: []);
+  }
 
   /// `Sign Up`
   String get welcomeSignUp {
@@ -1982,6 +1997,7 @@ class S {
       desc: '',
       args: [error],
     );
+
   }
 }
 

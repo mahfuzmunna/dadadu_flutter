@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:start/auth/responsive_welcome_screen.dart';
 import 'generated/l10n.dart';
 import 'package:start/dadadu/dadadu_screen.dart';
 import 'package:start/screens/home_screen.dart';
@@ -27,7 +29,16 @@ void main() async {
   );
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
 
-  runApp(MyApp(savedThemeMode: savedThemeMode));
+  runApp(
+    ScreenUtilInit(
+      designSize: const Size(360, 640),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MyApp(savedThemeMode: savedThemeMode);
+      },
+    )
+  );
 }
 
 
@@ -176,7 +187,7 @@ class AuthWrapper extends StatelessWidget {
         if (snapshot.hasData) {
           return const HomeScreen();
         } else {
-          return const WelcomeScreen();
+          return const ResponsiveWelcomeScreen();
         }
       },
     );

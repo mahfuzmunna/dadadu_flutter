@@ -22,6 +22,9 @@ dependencies:
   google_fonts: ^5.1.0
   lottie: ^3.3.1
 
+  # Responsive UI
+  flutter_screenutil: ^5.9.0
+
   # Firebase (versions compatibles)
   firebase_core: ^3.14.0
   firebase_auth: ^5.6.0
@@ -79,6 +82,7 @@ flutter:
   assets:
     - .env
     - assets/icons/logo.jpg
+    - assets/icons/logo_v2.png
     - assets/animations/globe.json
     - assets/images/space_background.jpg
     - assets/images/space_background_2.jpg
@@ -86,7 +90,7 @@ flutter:
 flutter_icons:
   android: true
   ios: true
-  image_path: "assets/icons/logo.jpg"
+  image_path: "assets/icons/logo_v2.png"
   remove_alpha_ios: true
 
 dependency_overrides:
