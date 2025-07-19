@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:start/auth/responsive_login_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'package:start/generated/l10n.dart'; // Import your localization
@@ -156,15 +157,15 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
       //   },
       // ),
 
-      SizedBox(
-        width: 0.9.sw,
-        child: Text(
-          s.welcomeLoginSubHeader,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-              fontSize: isPortrait? 14.sp : 8.sp
-          ),),
-      ),
+      // SizedBox(
+      //   width: 0.9.sw,
+      //   child: Text(
+      //     s.welcomeLoginSubHeader,
+      //     textAlign: TextAlign.center,
+      //     style: TextStyle(
+      //         fontSize: isPortrait? 14.sp : 8.sp
+      //     ),),
+      // ),
       SizedBox(height: 10.h,),
 
       SizedBox(
@@ -175,7 +176,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (_) => const LoginScreen()),
+                    builder: (_) => const ResponsiveLoginScreen()),
               );
             },
             style: FilledButton.styleFrom(
@@ -188,7 +189,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
             ),
             child: Text(s.welcomeLogin,
               style: TextStyle(
-                  fontSize: isPortrait ? 18.sp : 10.sp,
+                  fontSize: isPortrait ? 18.sp : 8.sp,
                   fontWeight: FontWeight.w600
               ),
             )
@@ -197,15 +198,15 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
 
       SizedBox(height: 12.h,),
 
-      SizedBox(
-        width: 0.9.sw,
-        child: Text(
-          s.welcomeSignUpSubHeader,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-          fontSize: isPortrait? 14.sp : 8.sp
-        ),),
-      ),
+      // SizedBox(
+      //   width: 0.9.sw,
+      //   child: Text(
+      //     s.welcomeSignUpSubHeader,
+      //     textAlign: TextAlign.center,
+      //     style: TextStyle(
+      //     fontSize: isPortrait? 14.sp : 8.sp
+      //   ),),
+      // ),
       SizedBox(height: 10.h,),
       SizedBox(
         width: isPortrait? 0.9.sw : 0.9.sw,
@@ -227,7 +228,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
             ),
             child: Text(s.welcomeSignUp,
               style: TextStyle(
-                  fontSize: isPortrait?18.sp : 10.sp,
+                  fontSize: isPortrait?18.sp : 8.sp,
                   fontWeight: FontWeight.w500
               ),
             )

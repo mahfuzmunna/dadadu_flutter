@@ -130,39 +130,31 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                           ),
 
 
-                        TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const SignupScreen()),
-                          ),
-                          child: Text(
-                            s.forgotPassword,
-                            style: const TextStyle(color: Colors.white70),
-                          ),
-                        ),
-
-                        FilledButton.icon(
-                          onPressed: _isLoading ? null : _resetPassword,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.deepPurpleAccent,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
+                        SizedBox(
+                          width: isPortrait ? 0.9.sw : 0.7.sw,
+                          child: FilledButton.icon(
+                            onPressed: _isLoading ? null : _resetPassword,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.deepPurpleAccent,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14, horizontal: 32),
                             ),
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 14, horizontal: 32),
+                            icon: _isLoading
+                                ? const SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                                : const Icon(Icons.lock_reset),
+                            label: Text(_isLoading ? s.loading : 'Reset Password'),
                           ),
-                          icon: _isLoading
-                              ? const SizedBox(
-                            width: 18,
-                            height: 18,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
-                          )
-                              : const Icon(Icons.login),
-                          label: Text(_isLoading ? s.loading : 'Reset Password'),
                         ),
 
                         const SizedBox(height: 16),

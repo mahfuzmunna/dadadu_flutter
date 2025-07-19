@@ -104,10 +104,10 @@ class S {
     return Intl.message('Creating...', name: 'creating', desc: '', args: []);
   }
 
-  /// `Welcome back 👽`
+  /// `Welcome back`
   String get welcomeBack {
     return Intl.message(
-      'Welcome back 👽',
+      'Welcome back',
       name: 'welcomeBack',
       desc: '',
       args: [],
