@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:start/auth/responsive_login_screen.dart';
+import 'package:start/auth/responsive_signup_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'package:start/generated/l10n.dart'; // Import your localization
@@ -25,65 +26,62 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
 
     return Scaffold(
       extendBodyBehindAppBar: true,
-      body: SafeArea(
-        child: OrientationBuilder(
-          builder: (context, orientation) {
-            final isPortrait = orientation == Orientation.portrait;
-            return Stack(
-              children: [
-                // Positioned.fill(child: Container(color: Colors.white)),
-                // 🌌 Background image
-                // Positioned.fill(
-                //   child: Image.asset(
-                //     backgroundImage,
-                //     fit: BoxFit.cover,
-                //   ),
-                // ),
-                Container(color: const Color.fromARGB(170, 0, 0, 0)),
+      body: OrientationBuilder(
+        builder: (context, orientation) {
+          final isPortrait = orientation == Orientation.portrait;
+          return Stack(
+            children: [
+              // Positioned.fill(child: Container(color: Colors.white)),
+              // 🌌 Background image
+              // Positioned.fill(
+              //   child: Image.asset(
+              //     backgroundImage,
+              //     fit: BoxFit.cover,
+              //   ),
+              // ),
+              Container(color: const Color.fromARGB(170, 0, 0, 0)),
 
-                // 🌍 Foreground content
-                Container(
-                  margin: EdgeInsets.only(top: 24.h),
-                  child: Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 32.0),
-                      child: isPortrait ? Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // PORTRAIT CONTENTS
-                          ..._buildSectionA(context, size, s, colorScheme, true),
-                          ..._buildSectionB(context, size, s, colorScheme, true),
-                        ],
-                      ) : Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ..._buildSectionA(context, size, s, colorScheme, false)
-                            ],
-                          )
-                          ),
-                          SizedBox(width: 16.w,),
-                          Expanded(child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              ..._buildSectionB(context, size, s, colorScheme, false)
-                            ],
-                          ))
-                        ],
-                      ),
+              // 🌍 Foreground content
+              Container(
+                margin: EdgeInsets.all(18.h),
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32.0),
+                    child: isPortrait ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // PORTRAIT CONTENTS
+                        ..._buildSectionA(context, size, s, colorScheme, true),
+                        ..._buildSectionB(context, size, s, colorScheme, true),
+                      ],
+                    ) : Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ..._buildSectionA(context, size, s, colorScheme, false)
+                          ],
+                        )
+                        ),
+                        SizedBox(width: 16.w,),
+                        Expanded(child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ..._buildSectionB(context, size, s, colorScheme, false)
+                          ],
+                        ))
+                      ],
                     ),
                   ),
                 ),
-              ],
-            );
-          }),
-
-      ),
+              ),
+            ],
+          );
+        }),
     );
   }
 
@@ -219,7 +217,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(context,
                 MaterialPageRoute(
-                    builder: (_) => const SignupScreen()),
+                    builder: (_) => const ResponsiveSignupScreen()),
               );
             },
             style: FilledButton.styleFrom(
