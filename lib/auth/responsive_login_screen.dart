@@ -104,7 +104,7 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
             return Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
+                // Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
                 Container(color: const Color.fromARGB(170, 0, 0, 0)),
                 Center(
                   child: SingleChildScrollView(

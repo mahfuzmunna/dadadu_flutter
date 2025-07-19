@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:start/auth/login_screen.dart';
 import 'package:start/auth/otp_screen.dart';
+import 'package:start/auth/responsive_login_screen.dart';
 import 'package:start/screens/home_screen.dart';
 import 'signup_screen.dart';
 import 'package:start/generated/l10n.dart';
@@ -58,7 +59,7 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
             return Stack(
               fit: StackFit.expand,
               children: [
-                Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
+                // Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
                 Container(color: const Color.fromARGB(170, 0, 0, 0)),
                 Center(
                   child: SingleChildScrollView(
@@ -126,7 +127,7 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
   List<Widget> _buildSectionA(BuildContext context, Size size, S s, ColorScheme colorScheme, bool isPortrait) {
     return [
       Text(
-        s.welcomeBack,
+        s.resetPassword,
         style: const TextStyle(
           color: Colors.white,
           fontSize: 28,
@@ -221,24 +222,30 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
 
       const SizedBox(height: 16),
 
-      TextButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const LoginScreen()),
-        ),
-        child: Text(
-          'Back to Login',
-          style: const TextStyle(color: Colors.white70),
+      SizedBox(
+        width: isPortrait ? 0.9.sw : 0.7.sw,
+        child: TextButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ResponsiveLoginScreen()),
+          ),
+          child: Text(
+            'Back to Login',
+            style: const TextStyle(color: Colors.white70),
+          ),
         ),
       ),
-      TextButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SignupScreen()),
-        ),
-        child: Text(
-          'Sign Up',
-          style: const TextStyle(color: Colors.white70),
+      SizedBox(
+        width: isPortrait ? 0.9.sw : 0.7.sw,
+        child: TextButton(
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SignupScreen()),
+          ),
+          child: Text(
+            'Sign Up',
+            style: const TextStyle(color: Colors.white70),
+          ),
         ),
       ),
     ];

@@ -113,6 +113,15 @@ class S {
       args: [],
     );
   }
+  /// `Reset Password`
+  String get resetPassword {
+    return Intl.message(
+      'Reset Password',
+      name: 'resetPassword',
+      desc: '',
+      args: [],
+    );
+  }
 
   /// `LOGIN`
   String get login {

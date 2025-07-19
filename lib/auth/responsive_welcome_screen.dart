@@ -33,12 +33,13 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
               children: [
                 // Positioned.fill(child: Container(color: Colors.white)),
                 // 🌌 Background image
-                Positioned.fill(
-                  child: Image.asset(
-                    backgroundImage,
-                    fit: BoxFit.cover,
-                  ),
-                ),
+                // Positioned.fill(
+                //   child: Image.asset(
+                //     backgroundImage,
+                //     fit: BoxFit.cover,
+                //   ),
+                // ),
+                Container(color: const Color.fromARGB(170, 0, 0, 0)),
 
                 // 🌍 Foreground content
                 Container(
@@ -90,6 +91,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
 
   List<Widget> _buildSectionA(BuildContext context, Size size, S s, ColorScheme colorScheme, bool isPortrait) {
     return [
+      SizedBox(height: 18.h),
       SizedBox(
       // width: size.width * 0.45,
       width: isPortrait ? 72.w : 48.w,
@@ -99,7 +101,9 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
       ),
     ),
       SizedBox(height: 18.h),
-      Text(s.welcomeToDadaduSubHeader),
+      Text(s.welcomeToDadaduSubHeader, style: const TextStyle(
+        color: Colors.white
+      ),),
 
       isPortrait?Expanded(
         child: Text(
@@ -207,7 +211,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
       //     fontSize: isPortrait? 14.sp : 8.sp
       //   ),),
       // ),
-      SizedBox(height: 10.h,),
+      SizedBox(height: isPortrait? 8.h : 10.h,),
       SizedBox(
         width: isPortrait? 0.9.sw : 0.9.sw,
         height: isPortrait? 36.h  : 42.h,
@@ -219,8 +223,8 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
               );
             },
             style: FilledButton.styleFrom(
-                backgroundColor: Colors.deepPurpleAccent,
-                foregroundColor: Colors.white,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
                         24.r)
@@ -234,7 +238,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
             )
         ),
       ),
-      if(isPortrait)SizedBox(height: 12.h,),
+      if(isPortrait)SizedBox(height: 16.h,),
 
       // 🔑 Login button (yellow neon)
       // NeonButton(

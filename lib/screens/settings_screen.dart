@@ -11,6 +11,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:start/auth/responsive_welcome_screen.dart';
 import 'package:start/generated/l10n.dart';
 import 'package:start/main.dart';
 
@@ -707,9 +708,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _signOut(BuildContext context, ThemeData theme) async {
 
-
-
-
     await showDialog(
       context: context,
       useRootNavigator: true,
@@ -740,7 +738,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               if (mounted) {
                 Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+                  MaterialPageRoute(builder: (_) => const ResponsiveWelcomeScreen()),
                   (route) => false,
                 );
               }
