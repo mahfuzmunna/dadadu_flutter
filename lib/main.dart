@@ -6,6 +6,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:start/auth/responsive_login_screen.dart';
+import 'package:start/auth/responsive_reset_password_screen.dart';
+import 'package:start/auth/responsive_signup_screen.dart';
 import 'package:start/auth/responsive_welcome_screen.dart';
 import 'generated/l10n.dart';
 import 'package:start/dadadu/dadadu_screen.dart';
@@ -154,9 +157,10 @@ class _MyAppState extends State<MyApp> {
         initialRoute: '/',
         routes: {
           '/': (context) => const AuthWrapper(),
-          '/welcome': (context) => const WelcomeScreen(),
-          '/login': (context) => const LoginScreen(),
-          '/signup': (context) => const SignupScreen(),
+          '/welcome': (context) => const ResponsiveWelcomeScreen(),
+          '/login': (context) => const ResponsiveLoginScreen(),
+          '/signup': (context) => const ResponsiveSignupScreen(),
+          '/reset': (context) => const ResponsiveResetPasswordScreen(),
           '/home': (context) => const HomeScreen(),
           '/settings': (context) => const SettingsScreen(),
           '/profile': (context) => const ProfileScreen(),

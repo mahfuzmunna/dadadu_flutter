@@ -146,30 +146,8 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
 
   List<Widget> _buildSectionB(BuildContext context, Size size, S s, ColorScheme colorScheme, bool isPortrait) {
     return [
-      // SWITCHED TO MATERIAL FILLED BUTTONS
 
-      // 🔐 Signup button (blue neon)
-      // NeonButton(
-      //   text: s.welcomeSignUp,
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: (_) => const SignupScreen()),
-      //     );
-      //   },
-      // ),
-
-      // SizedBox(
-      //   width: 0.9.sw,
-      //   child: Text(
-      //     s.welcomeLoginSubHeader,
-      //     textAlign: TextAlign.center,
-      //     style: TextStyle(
-      //         fontSize: isPortrait? 14.sp : 8.sp
-      //     ),),
-      // ),
       SizedBox(height: 10.h,),
-
       SizedBox(
         width: isPortrait? 0.9.sw : 0.5.sw,
         height: isPortrait ? 36.h : 42.h,
@@ -200,15 +178,6 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
 
       SizedBox(height: 12.h,),
 
-      // SizedBox(
-      //   width: 0.9.sw,
-      //   child: Text(
-      //     s.welcomeSignUpSubHeader,
-      //     textAlign: TextAlign.center,
-      //     style: TextStyle(
-      //     fontSize: isPortrait? 14.sp : 8.sp
-      //   ),),
-      // ),
       SizedBox(height: isPortrait? 8.h : 10.h,),
       SizedBox(
         width: isPortrait? 0.9.sw : 0.9.sw,
@@ -238,17 +207,6 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
       ),
       if(isPortrait)SizedBox(height: 16.h,),
 
-      // 🔑 Login button (yellow neon)
-      // NeonButton(
-      //   text: s.welcomeLogin,
-      //   glowColor: Colors.amberAccent,
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(builder: (_) => const LoginScreen()),
-      //     );
-      //   },
-      // ),
     ];
   }
 

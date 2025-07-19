@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:start/auth/login_screen.dart';
 import 'package:start/auth/otp_screen.dart';
 import 'package:start/auth/responsive_login_screen.dart';
+import 'package:start/auth/responsive_signup_screen.dart';
 import 'package:start/screens/home_screen.dart';
 import 'signup_screen.dart';
 import 'package:start/generated/l10n.dart';
@@ -229,7 +230,7 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
       SizedBox(
         width: isPortrait ? 0.9.sw : 0.35.sw,
         child: TextButton(
-          onPressed: () => Navigator.push(
+          onPressed: () => Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const ResponsiveLoginScreen()),
           ),
@@ -242,9 +243,9 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
       SizedBox(
         width: isPortrait ? 0.9.sw : 0.35.sw,
         child: TextButton(
-          onPressed: () => Navigator.push(
+          onPressed: () => Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (_) => const SignupScreen()),
+            MaterialPageRoute(builder: (_) => const ResponsiveSignupScreen()),
           ),
           child: Text(
             'Sign Up',

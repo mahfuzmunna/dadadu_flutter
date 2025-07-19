@@ -249,7 +249,7 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
           ),
         ),
       TextButton(
-        onPressed: () => Navigator.push(
+        onPressed: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const ResponsiveResetPasswordScreen()),
         ),
@@ -288,7 +288,7 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
       const SizedBox(height: 16),
 
       TextButton(
-        onPressed: () => Navigator.push(
+        onPressed: () => Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const ResponsiveSignupScreen()),
         ),
