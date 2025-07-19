@@ -172,6 +172,24 @@ class S {
       args: [],
     );
   }
+  /// `Welcome to`
+  String get welcomeTo {
+    return Intl.message(
+      'Welcome to',
+      name: 'welcomeTo',
+      desc: '',
+      args: [],
+    );
+  }
+  /// `Dadadu`
+  String get appName {
+    return Intl.message(
+      'Dadadu',
+      name: 'appName',
+      desc: '',
+      args: [],
+    );
+  }
   /// `Your world of streaming, all in one place.`
   String get welcomeToDadaduSubHeader {
     return Intl.message(
@@ -183,9 +201,14 @@ class S {
   }
 
   /// `Sign Up`
+  String get welcomeLoginSubHeader {
+    return Intl.message('Let’s get you in', name: 'welcomeSignUpSubHeader', desc: '', args: []);
+    // return Intl.message('Or,', name: 'welcomeSignUpSubHeader', desc: '', args: []);
+  }
+  /// `Sign Up`
   String get welcomeSignUpSubHeader {
-    // return Intl.message('Just landed? Sign up right away!', name: 'welcomeSignUpSubHeader', desc: '', args: []);
-    return Intl.message('Or,', name: 'welcomeSignUpSubHeader', desc: '', args: []);
+    return Intl.message('Just landed?', name: 'welcomeSignUpSubHeader', desc: '', args: []);
+    // return Intl.message('Or New here,', name: 'welcomeSignUpSubHeader', desc: '', args: []);
   }
 
   /// `Sign Up`

@@ -53,22 +53,25 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
                           ..._buildSectionB(context, size, s, colorScheme, true),
                         ],
                       ) : Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               ..._buildSectionA(context, size, s, colorScheme, false)
                             ],
                           )
                           ),
                           SizedBox(width: 16.w,),
-                          Container(
-                            margin: EdgeInsets.only(top: 24.h),
-                            child: Expanded(child: Column(
-                              children: [
-                                ..._buildSectionB(context, size, s, colorScheme, false)
-                              ],
-                            )),
-                          )
+                          Expanded(child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              ..._buildSectionB(context, size, s, colorScheme, false)
+                            ],
+                          ))
                         ],
                       ),
                     ),
@@ -88,7 +91,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
     return [
       SizedBox(
       // width: size.width * 0.45,
-      width: 72.w,
+      width: isPortrait ? 72.w : 48.w,
       child: Image.asset(
         'assets/icons/logo_v2.png',
         fit: BoxFit.contain,
@@ -97,7 +100,7 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
       SizedBox(height: 18.h),
       Text(s.welcomeToDadaduSubHeader),
 
-      Expanded(
+      isPortrait?Expanded(
         child: Text(
           s.welcomeToDadadu, // Localized text
           textAlign: TextAlign.center,
@@ -108,6 +111,31 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
             letterSpacing: 1.2,
           ),
         ),
+      ):Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            s.welcomeTo, // Localized text
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              fontSize: isPortrait ? 26.sp : 14.sp,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+          Text(
+            s.appName, // Localized text
+            textAlign: TextAlign.start,
+            style: TextStyle(
+              fontSize: isPortrait ? 26.sp : 14.sp,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.2,
+            ),
+          ),
+        ],
       ),
 
      ];
@@ -129,7 +157,18 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
       // ),
 
       SizedBox(
-        width: isPortrait? 0.9.sw : 92.w,
+        width: 0.9.sw,
+        child: Text(
+          s.welcomeLoginSubHeader,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+              fontSize: isPortrait? 14.sp : 8.sp
+          ),),
+      ),
+      SizedBox(height: 10.h,),
+
+      SizedBox(
+        width: isPortrait? 0.9.sw : 0.5.sw,
         height: isPortrait ? 36.h : 42.h,
         child: FilledButton.tonal(
             onPressed: () {
@@ -158,12 +197,18 @@ class ResponsiveWelcomeScreen extends StatelessWidget {
 
       SizedBox(height: 12.h,),
 
-      Text(s.welcomeSignUpSubHeader, style: TextStyle(
-        fontSize: isPortrait? 14.sp : 6.sp
-      ),),
+      SizedBox(
+        width: 0.9.sw,
+        child: Text(
+          s.welcomeSignUpSubHeader,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+          fontSize: isPortrait? 14.sp : 8.sp
+        ),),
+      ),
       SizedBox(height: 10.h,),
       SizedBox(
-        width: isPortrait? 0.9.sw : 92.w,
+        width: isPortrait? 0.9.sw : 0.9.sw,
         height: isPortrait? 36.h  : 42.h,
         child: FilledButton(
             onPressed: () {
