@@ -81,7 +81,7 @@ class _ResponsiveSignupScreenState extends State<ResponsiveSignupScreen> {
         );
 
         // Optionally, you can redirect to login screen here
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
+        Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const HomeScreen()), (route) => false);
       }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorText = e.message);
