@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:start/auth/login_screen.dart';
 import 'package:start/auth/otp_screen.dart';
-import 'package:start/auth/reset_password_screen.dart';
-import 'package:start/auth/responsive_reset_password_screen.dart';
 import 'package:start/screens/home_screen.dart';
 import 'signup_screen.dart';
 import 'package:start/generated/l10n.dart';
 
-class ResponsiveLoginScreen extends StatefulWidget {
-  const ResponsiveLoginScreen({super.key});
+class ResponsiveResetPasswordScreen extends StatefulWidget {
+  const ResponsiveResetPasswordScreen({super.key});
 
   @override
-  State<ResponsiveLoginScreen> createState() => _ResponsiveLoginScreenState();
+  State<ResponsiveResetPasswordScreen> createState() => _ResponsiveResetPasswordScreenState();
 }
 
 enum AuthMethod { email, phone }
 
-class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
+class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordScreen> {
   final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
   final _phoneController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -27,63 +25,19 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
   bool _isLoading = false;
   String? _errorText;
 
-  Future<void> _signIn() async {
+  Future<void> _resetPassword() async {
     setState(() {
       _isLoading = true;
       _errorText = null;
     });
 
     try {
-      if (_authMethod == AuthMethod.phone) {
-        final phone = _phoneController.text.trim();
-        if (phone.isEmpty || !phone.startsWith('+')) {
-          setState(() {
-            _errorText = S.of(context).invalidPhone;
-            _isLoading = false;
-          });
-          return;
-        }
 
-        await _auth.verifyPhoneNumber(
-          phoneNumber: phone,
-          timeout: const Duration(seconds: 60),
-          verificationCompleted: (PhoneAuthCredential credential) async {
-            await _auth.signInWithCredential(credential);
-            if (!mounted) return;
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
-          },
-          verificationFailed: (FirebaseAuthException e) {
-            setState(() {
-              _errorText = e.message;
-              _isLoading = false;
-            });
-          },
-          codeSent: (verificationId, resendToken) {
-            setState(() => _isLoading = false);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => OtpScreen(verificationId: verificationId),
-              ),
-            );
-          },
-          codeAutoRetrievalTimeout: (_) {},
-        );
-      } else {
-        await _auth.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
+      await _auth.sendPasswordResetEmail(email: _emailController.text.trim());
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Password reset email sent to ${_emailController.text.trim()}'))
+      );
 
-        if (!mounted) return;
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-        );
-      }
     } on FirebaseAuthException catch (e) {
       setState(() => _errorText = e.message);
     } catch (_) {
@@ -109,26 +63,27 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
                 Center(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: isPortrait? Column(
+                    child: isPortrait ? Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
-                        ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
+                        ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
                       ],
-                    ) :Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    ) : Row(
                       children: [
                         Column(
                           children: [
-                             ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
+                            ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
+
                           ],
                         ),
                         Column(
                           children: [
-                            ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
+
+                            ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
                           ],
                         )
-                      ]
+                      ],
                     ),
                   ),
                 ),
@@ -147,7 +102,7 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
     bool isPortrait = true
   }) {
     return Container(
-      width: isPortrait ?  0.9.sw : 0.35.sw,
+      width: isPortrait ?  0.9.sw : 0.7.sw,
       decoration: BoxDecoration(
         color: Colors.white12,
         borderRadius: BorderRadius.circular(20),
@@ -205,12 +160,11 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
           ),
         ],
       ),
+      const SizedBox(height: 20),
     ];
   }
-
   List<Widget> _buildSectionB(BuildContext context, Size size, S s, ColorScheme colorScheme, bool isPortrait) {
     return [
-      const SizedBox(height: 20),
       _authMethod == AuthMethod.email
           ? _glassInput(
           controller: _emailController,
@@ -224,15 +178,7 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
           icon: Icons.phone,
           isPortrait: isPortrait
       ),
-      const SizedBox(height: 16),
-      if (_authMethod == AuthMethod.email)
-        _glassInput(
-            controller: _passwordController,
-            hint: s.password,
-            obscure: true,
-            icon: Icons.lock_outline,
-            isPortrait: isPortrait
-        ),
+
       const SizedBox(height: 24),
 
       if (_errorText != null)
@@ -244,20 +190,12 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
             textAlign: TextAlign.center,
           ),
         ),
-      TextButton(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ResponsiveResetPasswordScreen()),
-        ),
-        child: Text(
-          s.forgotPassword,
-          style: const TextStyle(color: Colors.white70),
-        ),
-      ),
+
+
       SizedBox(
-        width: isPortrait? 0.9.sw : 0.35.sw,
+        width: isPortrait ? 0.9.sw : 0.7.sw,
         child: FilledButton.icon(
-          onPressed: _isLoading ? null : _signIn,
+          onPressed: _isLoading ? null : _resetPassword,
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.deepPurpleAccent,
             foregroundColor: Colors.white,
@@ -276,8 +214,8 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
               color: Colors.white,
             ),
           )
-              : const Icon(Icons.login),
-          label: Text(_isLoading ? s.loading : s.login),
+              : const Icon(Icons.lock_reset),
+          label: Text(_isLoading ? s.loading : 'Reset Password'),
         ),
       ),
 
@@ -286,10 +224,20 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
       TextButton(
         onPressed: () => Navigator.push(
           context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        ),
+        child: Text(
+          'Back to Login',
+          style: const TextStyle(color: Colors.white70),
+        ),
+      ),
+      TextButton(
+        onPressed: () => Navigator.push(
+          context,
           MaterialPageRoute(builder: (_) => const SignupScreen()),
         ),
         child: Text(
-          s.noAccountSignUp,
+          'Sign Up',
           style: const TextStyle(color: Colors.white70),
         ),
       ),
