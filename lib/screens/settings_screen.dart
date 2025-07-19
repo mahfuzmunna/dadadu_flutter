@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:start/generated/l10n.dart';
 import 'package:start/main.dart';
+
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:start/screens/image_crop.dart';
 import 'dart:io';
@@ -33,19 +34,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _isLoading = false;
   Map<String, dynamic> _userData = {};
   Locale? _locale;
-Future<void> _changeLanguage(BuildContext context, String languageCode) async {
+
+  Future<void> _changeLanguage(
+      BuildContext context, String languageCode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('locale', languageCode);
-  setState(() {
-    _locale = Locale(languageCode);
-    
-  });
-  if (mounted) {
+    setState(() {
+      _locale = Locale(languageCode);
+    });
+    if (mounted) {
       // ignore: use_build_context_synchronously
       MyApp.setLocale(context, _locale!);
+    }
   }
 
-}
   @override
   void initState() {
     super.initState();
@@ -104,81 +106,83 @@ Future<void> _changeLanguage(BuildContext context, String languageCode) async {
       );
     }
   }
-Future<void> _changeUsername(ThemeData theme) async {
-  final uid = FirebaseAuth.instance.currentUser?.uid;
-  if (uid == null) return;
 
-  String? newUsername;
-
-  await showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      backgroundColor: theme.cardColor,
-      title: Text(
-        S.of(context).changeUsernameTitle,
-        style: TextStyle(color: theme.primaryColor),
-      ),
-      content: TextField(
-        onChanged: (value) => newUsername = value,
-        style: TextStyle(color: theme.primaryColor),
-        decoration: InputDecoration(
-          hintText: S.of(context).changeUsernameHint,
-          hintStyle: theme.inputDecorationTheme.hintStyle,
-          enabledBorder: theme.inputDecorationTheme.enabledBorder,
-          focusedBorder: theme.inputDecorationTheme.focusedBorder,
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(S.of(context).cancel,
-              style: TextStyle(color: theme.canvasColor)),
-        ),
-        ElevatedButton(
-          onPressed: () async {
-            if (newUsername != null && newUsername!.trim().isNotEmpty) {
-              Navigator.pop(context);
-              await _updateUsername(newUsername!.trim());
-            }
-          },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.amberAccent),
-          child: Text(S.of(context).confirm,
-              style: const TextStyle(color: Colors.black)),
-        ),
-      ],
-    ),
-  );
-}
-
-Future<void> _updateUsername(String username) async {
-  setState(() => _isLoading = true);
-
-  try {
+  Future<void> _changeUsername(ThemeData theme) async {
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) return;
 
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'username': username,
-      'updatedAt': FieldValue.serverTimestamp(),
-    });
+    String? newUsername;
 
-    await _loadUserData();
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).usernameUpdated)),
-      );
-    }
-  } catch (e) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(S.of(context).usernameUpdateError)),
-      );
-    }
-  } finally {
-    if (mounted) setState(() => _isLoading = false);
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        title: Text(
+          S.of(context).changeUsernameTitle,
+          style: TextStyle(color: theme.primaryColor),
+        ),
+        content: TextField(
+          onChanged: (value) => newUsername = value,
+          style: TextStyle(color: theme.primaryColor),
+          decoration: InputDecoration(
+            hintText: S.of(context).changeUsernameHint,
+            hintStyle: theme.inputDecorationTheme.hintStyle,
+            enabledBorder: theme.inputDecorationTheme.enabledBorder,
+            focusedBorder: theme.inputDecorationTheme.focusedBorder,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(S.of(context).cancel,
+                style: TextStyle(color: theme.canvasColor)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (newUsername != null && newUsername!.trim().isNotEmpty) {
+                Navigator.pop(context);
+                await _updateUsername(newUsername!.trim());
+              }
+            },
+            style:
+                ElevatedButton.styleFrom(backgroundColor: Colors.amberAccent),
+            child: Text(S.of(context).confirm,
+                style: const TextStyle(color: Colors.black)),
+          ),
+        ],
+      ),
+    );
   }
-}
+
+  Future<void> _updateUsername(String username) async {
+    setState(() => _isLoading = true);
+
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) return;
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'username': username,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      await _loadUserData();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).usernameUpdated)),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).usernameUpdateError)),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   Future<void> _changeProfilePicture(ThemeData theme) async {
     await showModalBottomSheet(
@@ -215,7 +219,7 @@ Future<void> _updateUsername(String username) async {
               children: [
                 _buildPhotoOption(
                   icon: Icons.camera_alt,
-                  label:  S.of(context).camera,
+                  label: S.of(context).camera,
                   onTap: () {
                     Navigator.pop(context);
                     _pickImage(ImageSource.camera);
@@ -308,11 +312,11 @@ Future<void> _updateUsername(String username) async {
       }
     } catch (e) {
       if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(
-    content: Text(S.of(context).imageSelectionError),
-  ),
-);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(S.of(context).imageSelectionError),
+          ),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -344,8 +348,8 @@ Future<void> _updateUsername(String username) async {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text(S.of(context).profilePhotoUpdateError)),
-);
+          SnackBar(content: Text(S.of(context).profilePhotoUpdateError)),
+        );
       }
     }
   }
@@ -701,9 +705,14 @@ Future<void> _updateUsername(String username) async {
     }
   }
 
-  Future<void> _signOut(ThemeData theme) async {
+  Future<void> _signOut(BuildContext context, ThemeData theme) async {
+
+
+
+
     await showDialog(
       context: context,
+      useRootNavigator: true,
       builder: (context) => AlertDialog(
         backgroundColor: theme.cardColor,
         title: Text(
@@ -747,53 +756,54 @@ Future<void> _updateUsername(String username) async {
     );
   }
 
-void _showLanguagePicker(BuildContext context, ThemeData theme) {
-  showModalBottomSheet(
-    context: context,
-    backgroundColor: theme.cardColor,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (context) => Container(
-      height: MediaQuery.of(context).size.height/3.5,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 10,),
-          ListTile(
-            title: const Text("🇬🇧 English"),
-            onTap: () {
-              Navigator.pop(context);
-              _changeLanguage(context, 'en');
-            },
-          ),
-          ListTile(
-            title: const Text("🇫🇷 Français"),
-            onTap: () {
-              Navigator.pop(context);
-              _changeLanguage(context, 'fr');
-            },
-          ),
-          ListTile(
-            title: const Text("🇩🇪 Deutsch"),
-            onTap: () {
-              Navigator.pop(context);
-              _changeLanguage(context, 'de');
-            },
-          ),
-        ],
+  void _showLanguagePicker(BuildContext context, ThemeData theme) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.cardColor,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-    ),
-  );
-}
-
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height / 3.5,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              height: 10,
+            ),
+            ListTile(
+              title: const Text("🇬🇧 English"),
+              onTap: () {
+                Navigator.pop(context);
+                _changeLanguage(context, 'en');
+              },
+            ),
+            ListTile(
+              title: const Text("🇫🇷 Français"),
+              onTap: () {
+                Navigator.pop(context);
+                _changeLanguage(context, 'fr');
+              },
+            ),
+            ListTile(
+              title: const Text("🇩🇪 Deutsch"),
+              onTap: () {
+                Navigator.pop(context);
+                _changeLanguage(context, 'de');
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     // final bgColor = _isDarkMode ? Colors.black : Colors.white;
     // final textColor = _isDarkMode ? Colors.white : Colors.black;
-final locale = Localizations.localeOf(context);
+    final locale = Localizations.localeOf(context);
     return ValueListenableBuilder(
       valueListenable: AdaptiveTheme.of(context).modeChangeNotifier,
       builder: (context, mode, _) {
@@ -918,18 +928,18 @@ final locale = Localizations.localeOf(context);
                       onTap: () => _toggleTheme(isDarkMode, theme),
                       theme: theme,
                     ),
-    _buildTile(
-  icon: Icons.language,
-  title: S.of(context).language,
-  subtitle: locale.languageCode == 'de'
-      ? 'Deutsch'
-      : locale.languageCode == 'fr'
-          ? 'Français'
-          : 'English',
-  onTap: () => _showLanguagePicker(context, theme),
-  theme: theme,
-),
-                  
+                    _buildTile(
+                      icon: Icons.language,
+                      title: S.of(context).language,
+                      subtitle: locale.languageCode == 'de'
+                          ? 'Deutsch'
+                          : locale.languageCode == 'fr'
+                              ? 'Français'
+                              : 'English',
+                      onTap: () => _showLanguagePicker(context, theme),
+                      theme: theme,
+                    ),
+
                     _buildSectionTitle(S.of(context).securitySection, theme),
                     _buildTile(
                       icon: Icons.lock_outline,
@@ -938,11 +948,11 @@ final locale = Localizations.localeOf(context);
                       onTap: _changePassword,
                       theme: theme,
                     ),
-                  _buildTile(
+                    _buildTile(
                       icon: Icons.logout,
                       title: S.of(context).logout,
                       subtitle: S.of(context).logoutDescription,
-                      onTap: () => _signOut,
+                      onTap: () => _signOut(context, theme),
                       isDestructive: true,
                       theme: theme,
                     ),
