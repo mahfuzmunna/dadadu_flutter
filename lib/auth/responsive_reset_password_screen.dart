@@ -61,30 +61,34 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
               children: [
                 // Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
                 Container(color: const Color.fromARGB(170, 0, 0, 0)),
-                Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: isPortrait ? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
-                        ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
-                      ],
-                    ) : Row(
-                      children: [
-                        Column(
-                          children: [
-                            ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
+                Container(
+                  margin: EdgeInsets.all(18.h),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: isPortrait ? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
+                          ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
+                        ],
+                      ) : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                              ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
 
-                          ],
-                        ),
-                        Column(
-                          children: [
+                            ],
+                          ),
+                          Column(
+                            children: [
 
-                            ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
-                          ],
-                        )
-                      ],
+                              ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -103,7 +107,7 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
     bool isPortrait = true
   }) {
     return Container(
-      width: isPortrait ?  0.9.sw : 0.7.sw,
+      width: isPortrait ?  0.9.sw : 0.35.sw,
       decoration: BoxDecoration(
         color: Colors.white12,
         borderRadius: BorderRadius.circular(20),
@@ -194,7 +198,7 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
 
 
       SizedBox(
-        width: isPortrait ? 0.9.sw : 0.7.sw,
+        width: isPortrait ? 0.9.sw : 0.35.sw,
         child: FilledButton.icon(
           onPressed: _isLoading ? null : _resetPassword,
           style: ElevatedButton.styleFrom(
@@ -223,7 +227,7 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
       const SizedBox(height: 16),
 
       SizedBox(
-        width: isPortrait ? 0.9.sw : 0.7.sw,
+        width: isPortrait ? 0.9.sw : 0.35.sw,
         child: TextButton(
           onPressed: () => Navigator.push(
             context,
@@ -236,7 +240,7 @@ class _ResponsiveResetPasswordScreenState extends State<ResponsiveResetPasswordS
         ),
       ),
       SizedBox(
-        width: isPortrait ? 0.9.sw : 0.7.sw,
+        width: isPortrait ? 0.9.sw : 0.35.sw,
         child: TextButton(
           onPressed: () => Navigator.push(
             context,

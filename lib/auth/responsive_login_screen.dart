@@ -106,29 +106,32 @@ class _ResponsiveLoginScreenState extends State<ResponsiveLoginScreen> {
               children: [
                 // Image.asset("assets/images/space_background.jpg", fit: BoxFit.cover),
                 Container(color: const Color.fromARGB(170, 0, 0, 0)),
-                Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
-                    child: isPortrait? Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
-                        ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
-                      ],
-                    ) :Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          children: [
-                             ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
-                          ],
-                        ),
-                        Column(
-                          children: [
-                            ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
-                          ],
-                        )
-                      ]
+                Container(
+                  margin: EdgeInsets.all(18.h),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: isPortrait? Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait),
+                          ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
+                        ],
+                      ) :Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            children: [
+                               ..._buildSectionA(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
+                            ],
+                          ),
+                          Column(
+                            children: [
+                              ..._buildSectionB(context, MediaQuery.of(context).size, s, Theme.of(context).colorScheme, isPortrait)
+                            ],
+                          )
+                        ]
+                      ),
                     ),
                   ),
                 ),
