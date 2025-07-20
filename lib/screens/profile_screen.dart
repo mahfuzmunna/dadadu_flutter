@@ -30,6 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final picker = ImagePicker();
   String _selectedMood = "Happy";
   final List<String> _moods = ["Happy", "Sad", "Excited"];
+
   // ignore: non_constant_identifier_names
   final current_user_id = FirebaseAuth.instance.currentUser!.uid;
   int _totalDiamonds = 0;
@@ -39,6 +40,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isOwnProfile = true;
   final DatabaseService _databaseService = DatabaseService();
   bool isFollowing = false;
+
   @override
   void initState() {
     super.initState();
@@ -73,15 +75,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       // await _loadUserData();
 
       if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text(S.of(context).profilePhotoUpdated)),
-);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).profilePhotoUpdated)),
+        );
       }
     } catch (e) {
       if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text(S.of(context).profilePhotoUpdateError)),
-);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).profilePhotoUpdateError)),
+        );
       }
     }
   }
@@ -110,15 +112,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _loadUserData();
 
       if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text(S.of(context).profilePhotoRemoved)),
-);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).profilePhotoRemoved)),
+        );
       }
     } catch (e) {
       if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-  SnackBar(content: Text(S.of(context).profilePhotoRemoveError)),
-);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(S.of(context).profilePhotoRemoveError)),
+        );
       }
     }
   }
@@ -342,7 +344,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   // 🏪 MARKETPLACE FUNCTIONS
- /* Future<void> _openMarketplace(ThemeData theme) async {
+  /* Future<void> _openMarketplace(ThemeData theme) async {
     if (!mounted) return;
 
     showModalBottomSheet(
@@ -428,7 +430,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Expanded(
                     child: Text(
                       S.of(context).badgeMarketplace,
-
                       style: TextStyle(
                         color: theme.primaryColor,
                         fontSize: 24,
@@ -460,9 +461,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 labelColor: theme.primaryColor,
                 unselectedLabelColor: Colors.grey,
-                tabs:  [
-                Tab(text: S.of(context).buy),
-Tab(text: S.of(context).sell),
+                tabs: [
+                  Tab(text: S.of(context).buy),
+                  Tab(text: S.of(context).sell),
                 ],
               ),
             ),
@@ -494,7 +495,7 @@ Tab(text: S.of(context).sell),
             borderRadius: BorderRadius.circular(20),
           ),
           title: Text(
-             S.of(context).badgeSystemTitle,
+            S.of(context).badgeSystemTitle,
             style: TextStyle(
               color: isDark ? Colors.tealAccent : Colors.teal,
               fontWeight: FontWeight.bold,
@@ -509,34 +510,34 @@ Tab(text: S.of(context).sell),
                 _badgeItem(
                   emoji: '🍃',
                   title: S.of(context).badgeLeafTitle,
-  description: S.of(context).badgeLeafDesc,
+                  description: S.of(context).badgeLeafDesc,
                   theme: theme,
                   isDark: isDark,
                 ),
                 _badgeItem(
                   emoji: '☘️',
-                 title: S.of(context).badgeThreeleafTitle,
-  description: S.of(context).badgeThreeleafDesc,
+                  title: S.of(context).badgeThreeleafTitle,
+                  description: S.of(context).badgeThreeleafDesc,
                   theme: theme,
                   isDark: isDark,
                 ),
                 _badgeItem(
                   emoji: '🎀',
-                 title: S.of(context).badgeFiveleafTitle,
-  description: S.of(context).badgeFiveleafDesc,
+                  title: S.of(context).badgeFiveleafTitle,
+                  description: S.of(context).badgeFiveleafDesc,
                   theme: theme,
                   isDark: isDark,
                 ),
                 _badgeItem(
                   emoji: '👑',
-                title: S.of(context).badgeDadalordTitle,
-  description: S.of(context).badgeDadalordDesc,
+                  title: S.of(context).badgeDadalordTitle,
+                  description: S.of(context).badgeDadalordDesc,
                   theme: theme,
                   isDark: isDark,
                 ),
                 const SizedBox(height: 16),
                 Text(
-                   S.of(context).badgeNote,
+                  S.of(context).badgeNote,
                   style: TextStyle(
                       color: isDark ? Colors.white70 : Colors.black54,
                       fontSize: 14),
@@ -566,49 +567,49 @@ Tab(text: S.of(context).sell),
     );
   }
 
-Widget _buildBuyTab({required ThemeData theme}) {
-  return StreamBuilder<QuerySnapshot>(
-    stream: FirebaseFirestore.instance
-        .collection('marketplace_badges')
-        .where('status', isEqualTo: 'available')
-        .where('sellerId', isNotEqualTo: current_user_id)
-        .orderBy('createdAt', descending: true)
-        .snapshots(),
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return const Center(
-          child: CircularProgressIndicator(color: Colors.amber),
-        );
-      }
+  Widget _buildBuyTab({required ThemeData theme}) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('marketplace_badges')
+          .where('status', isEqualTo: 'available')
+          .where('sellerId', isNotEqualTo: current_user_id)
+          .orderBy('createdAt', descending: true)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: Colors.amber),
+          );
+        }
 
-      if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.store_outlined, size: 80, color: Colors.grey),
-              const SizedBox(height: 16),
-              Text(
-                S.of(context).noBadgesForSale,
-                style: const TextStyle(color: Colors.grey, fontSize: 18),
-              ),
-            ],
-          ),
-        );
-      }
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.store_outlined, size: 80, color: Colors.grey),
+                const SizedBox(height: 16),
+                Text(
+                  S.of(context).noBadgesForSale,
+                  style: const TextStyle(color: Colors.grey, fontSize: 18),
+                ),
+              ],
+            ),
+          );
+        }
 
-      return ListView.builder(
-        padding: const EdgeInsets.all(20),
-        itemCount: snapshot.data!.docs.length,
-        itemBuilder: (context, index) {
-          final doc = snapshot.data!.docs[index];
-          final data = doc.data() as Map<String, dynamic>;
-          return _buildBadgeCard(doc.id, data, theme);
-        },
-      );
-    },
-  );
-}
+        return ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: snapshot.data!.docs.length,
+          itemBuilder: (context, index) {
+            final doc = snapshot.data!.docs[index];
+            final data = doc.data() as Map<String, dynamic>;
+            return _buildBadgeCard(doc.id, data, theme);
+          },
+        );
+      },
+    );
+  }
 
   Widget _buildBadgeCard(
       String badgeId, Map<String, dynamic> data, ThemeData theme) {
@@ -696,7 +697,9 @@ Widget _buildBuyTab({required ThemeData theme}) {
                 onPressed: () => _buyBadge(badgeId, priceInDiamonds.toInt()),
                 icon: const Icon(Icons.diamond, size: 18),
                 label: Text(
-                   S.of(context).buyForDiamonds(priceInDiamonds.toInt().toString()),
+                  S
+                      .of(context)
+                      .buyForDiamonds(priceInDiamonds.toInt().toString()),
                   style: TextStyle(color: theme.primaryColor, fontSize: 14),
                 ),
                 style: ElevatedButton.styleFrom(
@@ -736,70 +739,66 @@ Widget _buildBuyTab({required ThemeData theme}) {
     );
   }
 
- Widget _buildSellTab({required ThemeData theme}) {
-  if (!_isOwnProfile) {
-    return Center(
-      child: Text(
-        S.of(context).ownBadgeSellError,
-        style: const TextStyle(color: Colors.grey),
+  Widget _buildSellTab({required ThemeData theme}) {
+    if (!_isOwnProfile) {
+      return Center(
+        child: Text(
+          S.of(context).ownBadgeSellError,
+          style: const TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_badgeInfo.isNotEmpty && _badgeInfo['type'] != 'leaf')
+            _buildSellCurrentBadge(theme: theme),
+          const SizedBox(height: 24),
+          Text(
+            S.of(context).myBadgesForSale,
+            style: TextStyle(
+              color: theme.primaryColor,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('marketplace_badges')
+                  .where('sellerId', isEqualTo: current_user_id)
+                  .where('status', isEqualTo: 'available')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return Center(
+                    child: Text(
+                      S.of(context).noBadgesForSale,
+                      style: const TextStyle(color: Colors.grey),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    final doc = snapshot.data!.docs[index];
+                    final data = doc.data() as Map<String, dynamic>;
+
+                    return _buildMyListingCard(doc.id, data, theme);
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
-
-  return Padding(
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_badgeInfo.isNotEmpty && _badgeInfo['type'] != 'leaf')
-          _buildSellCurrentBadge(theme: theme),
-
-        const SizedBox(height: 24),
-
-        Text(
-          S.of(context).myBadgesForSale,
-          style: TextStyle(
-            color: theme.primaryColor,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('marketplace_badges')
-                .where('sellerId', isEqualTo: current_user_id)
-                .where('status', isEqualTo: 'available')
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                return Center(
-                  child: Text(
-                    S.of(context).noBadgesForSale,
-                    style: const TextStyle(color: Colors.grey),
-                  ),
-                );
-              }
-
-              return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: (context, index) {
-                  final doc = snapshot.data!.docs[index];
-                  final data = doc.data() as Map<String, dynamic>;
-
-                  return _buildMyListingCard(doc.id, data, theme);
-                },
-              );
-            },
-          ),
-        ),
-      ],
-    ),
-  );
-}
 
   Widget _buildSellCurrentBadge({required ThemeData theme}) {
     return Container(
@@ -923,158 +922,155 @@ Widget _buildBuyTab({required ThemeData theme}) {
     );
   }
 
- Future<void> _showSellDialog(ThemeData theme) async {
-  final priceController = TextEditingController();
-  final descriptionController = TextEditingController();
+  Future<void> _showSellDialog(ThemeData theme) async {
+    final priceController = TextEditingController();
+    final descriptionController = TextEditingController();
 
-  int suggestedPrice = 0;
-  switch (_badgeInfo['type']) {
-    case 'threeleaf':
-      suggestedPrice = 5000;
-      break;
-    case 'fiveleaf':
-      suggestedPrice = 50000;
-      break;
-    case 'dadalord':
-      suggestedPrice = 500000;
-      break;
-  }
+    int suggestedPrice = 0;
+    switch (_badgeInfo['type']) {
+      case 'threeleaf':
+        suggestedPrice = 5000;
+        break;
+      case 'fiveleaf':
+        suggestedPrice = 50000;
+        break;
+      case 'dadalord':
+        suggestedPrice = 500000;
+        break;
+    }
 
-  priceController.text = suggestedPrice.toString();
+    priceController.text = suggestedPrice.toString();
 
-  if (!mounted) return;
+    if (!mounted) return;
 
-  showDialog(
-    context: context,
-    builder: (BuildContext dialogContext) => AlertDialog(
-      backgroundColor: theme.cardColor,
-      title: Text(
-        S.of(context).sellBadgeTitle,
-        style: TextStyle(color: theme.primaryColor),
-      ),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: priceController,
-            keyboardType: TextInputType.number,
-            style: TextStyle(color: theme.primaryColor),
-            decoration: InputDecoration(
-              labelText: S.of(context).priceLabel,
-              labelStyle: const TextStyle(color: Colors.amber),
-              hintText: S.of(context).priceHint(suggestedPrice),
-              hintStyle: const TextStyle(color: Colors.grey),
-              enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.amber),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.amber),
-                borderRadius: BorderRadius.circular(10),
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        title: Text(
+          S.of(context).sellBadgeTitle,
+          style: TextStyle(color: theme.primaryColor),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: priceController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(color: theme.primaryColor),
+              decoration: InputDecoration(
+                labelText: S.of(context).priceLabel,
+                labelStyle: const TextStyle(color: Colors.amber),
+                hintText: S.of(context).priceHint(suggestedPrice),
+                hintStyle: const TextStyle(color: Colors.grey),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.amber),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.amber),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: descriptionController,
-            style: TextStyle(color: theme.primaryColor),
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: S.of(context).descriptionLabel,
-              labelStyle: const TextStyle(color: Colors.grey),
-              enabledBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.grey),
-                borderRadius: BorderRadius.circular(10),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              style: TextStyle(color: theme.primaryColor),
+              maxLines: 3,
+              decoration: InputDecoration(
+                labelText: S.of(context).descriptionLabel,
+                labelStyle: const TextStyle(color: Colors.grey),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: const BorderSide(color: Colors.amber),
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: const BorderSide(color: Colors.amber),
-                borderRadius: BorderRadius.circular(10),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(S.of(context).cancel,
+                style: const TextStyle(color: Colors.grey)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final price = int.tryParse(priceController.text) ?? 0;
+              if (price > 0) {
+                _sellBadge(price, descriptionController.text);
+                Navigator.pop(dialogContext);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+            child: Text(
+              S.of(context).sell,
+              style: const TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: Text(S.of(context).cancel,
-              style: const TextStyle(color: Colors.grey)),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            final price = int.tryParse(priceController.text) ?? 0;
-            if (price > 0) {
-              _sellBadge(price, descriptionController.text);
-              Navigator.pop(dialogContext);
-            }
-          },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
-          child: Text(
-            S.of(context).sell,
-            style: const TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-Future<void> _sellBadge(int price, String description) async {
-  try {
-    await _databaseService.createBadgeListing(
-      badgeType: _badgeInfo['type'],
-      price: price.toDouble(),
-      description: description,
     );
-
-    if (mounted) {
-      _showSnackBar(S.of(context).badgeListed);
-    }
-  } catch (e) {
-    if (mounted) {
-      _showSnackBar(S.of(context).badgeListingError(e.toString()));
-    }
-  }
-}
-
-
-Future<void> _buyBadge(String badgeId, int price) async {
-  if (_totalDiamonds < price) {
-    _showSnackBar(S.of(context).notEnoughDiamonds);
-    return;
   }
 
-  try {
-    await _databaseService.purchaseBadge(badgeId);
-    if (mounted) {
-      _showSnackBar(S.of(context).badgePurchased);
-      Navigator.pop(context);
-      await _loadUserData();
-    }
-  } catch (e) {
-    if (mounted) {
-      _showSnackBar(S.of(context).badgePurchaseError(e.toString()));
+  Future<void> _sellBadge(int price, String description) async {
+    try {
+      await _databaseService.createBadgeListing(
+        badgeType: _badgeInfo['type'],
+        price: price.toDouble(),
+        description: description,
+      );
+
+      if (mounted) {
+        _showSnackBar(S.of(context).badgeListed);
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(S.of(context).badgeListingError(e.toString()));
+      }
     }
   }
-}
 
-
-Future<void> _removeListing(String badgeId) async {
-  try {
-    await _databaseService.removeBadgeListing(badgeId);
-    if (mounted) {
-      _showSnackBar(S.of(context).listingRemoved);
+  Future<void> _buyBadge(String badgeId, int price) async {
+    if (_totalDiamonds < price) {
+      _showSnackBar(S.of(context).notEnoughDiamonds);
+      return;
     }
-  } catch (e) {
-    if (mounted) {
-      _showSnackBar(S.of(context).errorRemovingListing(e.toString()));
+
+    try {
+      await _databaseService.purchaseBadge(badgeId);
+      if (mounted) {
+        _showSnackBar(S.of(context).badgePurchased);
+        Navigator.pop(context);
+        await _loadUserData();
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(S.of(context).badgePurchaseError(e.toString()));
+      }
     }
   }
-}
 
+  Future<void> _removeListing(String badgeId) async {
+    try {
+      await _databaseService.removeBadgeListing(badgeId);
+      if (mounted) {
+        _showSnackBar(S.of(context).listingRemoved);
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(S.of(context).errorRemovingListing(e.toString()));
+      }
+    }
+  }
 
   Map<String, dynamic> _getBadgeInfoByType(String type) {
     switch (type) {
@@ -1101,39 +1097,40 @@ Future<void> _removeListing(String badgeId) async {
     }
   }
 
- Future<void> _shareReferralLink() async {
-  if (_referralCode.isEmpty) return;
+  Future<void> _shareReferralLink() async {
+    if (_referralCode.isEmpty) return;
 
-  const baseUrl = 'https://dadadu.app/invite/';
-  final referralLink = '$baseUrl$_referralCode';
+    const baseUrl = 'https://dadadu.app/invite/';
+    final referralLink = '$baseUrl$_referralCode';
 
-  try {
-    await Share.share(
-      S.of(context).shareReferralText(referralLink),
-      subject: S.of(context).shareReferralSubject,
-    );
-  } catch (e) {
-    if (mounted) {
-      _showSnackBar(S.of(context).shareProfileError(e.toString())); // optional: use localized error
+    try {
+      await Share.share(
+        S.of(context).shareReferralText(referralLink),
+        subject: S.of(context).shareReferralSubject,
+      );
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(S
+            .of(context)
+            .shareProfileError(e.toString())); // optional: use localized error
+      }
     }
   }
-}
 
-Future<void> _shareProfile(String username) async {
-  final profileUrl = 'https://dadadu.app/user/$current_user_id';
+  Future<void> _shareProfile(String username) async {
+    final profileUrl = 'https://dadadu.app/user/$current_user_id';
 
-  try {
-    await Share.share(
-      S.of(context).shareProfileText(username, profileUrl),
-      subject: S.of(context).shareProfileSubject(username),
-    );
-  } catch (e) {
-    if (mounted) {
-      _showSnackBar(S.of(context).shareProfileError(e.toString()));
+    try {
+      await Share.share(
+        S.of(context).shareProfileText(username, profileUrl),
+        subject: S.of(context).shareProfileSubject(username),
+      );
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(S.of(context).shareProfileError(e.toString()));
+      }
     }
   }
-}
-
 
   Future<void> _getFollowers() async {
     final firestore = FirebaseFirestore.instance;
@@ -1159,7 +1156,6 @@ Future<void> _shareProfile(String username) async {
       }
     });
   }
-
 
   void _copyReferralLink() {
     if (_referralCode.isEmpty) return;
@@ -1211,165 +1207,167 @@ Future<void> _shareProfile(String username) async {
       await _removeProfilePicture();
     }
   }
-Future<void> _editUsernameDialog(dynamic username, User? user) async {
-  if (!_isOwnProfile) return;
 
-  final currentName = username;
-  final controller = TextEditingController(text: currentName);
+  Future<void> _editUsernameDialog(dynamic username, User? user) async {
+    if (!_isOwnProfile) return;
 
-  if (!mounted) return;
-  final newName = await showDialog<String>(
-    context: context,
-    builder: (BuildContext dialogContext) => AlertDialog(
-      backgroundColor: Colors.grey[900],
-      title: Text(
-        S.of(context).changeUsername,
-        style: const TextStyle(color: Colors.white),
+    final currentName = username;
+    final controller = TextEditingController(text: currentName);
+
+    if (!mounted) return;
+    final newName = await showDialog<String>(
+      context: context,
+      builder: (BuildContext dialogContext) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(
+          S.of(context).changeUsername,
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: S.of(context).newUsernameHint,
+            hintStyle: const TextStyle(color: Colors.white54),
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.tealAccent),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.tealAccent),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(
+              S.of(context).cancel,
+              style: const TextStyle(color: Colors.white54),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              final name = controller.text.trim();
+              Navigator.pop(dialogContext, name.isNotEmpty ? name : null);
+            },
+            child: Text(
+              S.of(context).save,
+              style: const TextStyle(color: Colors.tealAccent),
+            ),
+          ),
+        ],
       ),
-      content: TextField(
-        controller: controller,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintText: S.of(context).newUsernameHint,
-          hintStyle: const TextStyle(color: Colors.white54),
-          enabledBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.tealAccent),
-          ),
-          focusedBorder: const UnderlineInputBorder(
-            borderSide: BorderSide(color: Colors.tealAccent),
-          ),
-        ),
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(dialogContext),
-          child: Text(
-            S.of(context).cancel,
-            style: const TextStyle(color: Colors.white54),
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            final name = controller.text.trim();
-            Navigator.pop(dialogContext, name.isNotEmpty ? name : null);
-          },
-          child: Text(
-            S.of(context).save,
-            style: const TextStyle(color: Colors.tealAccent),
-          ),
-        ),
-      ],
-    ),
-  );
+    );
 
-  if (newName != null) {
-    if (user != null) {
-      try {
-        await user.updateDisplayName(newName);
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .update({'username': newName});
-      } catch (e) {
-        debugPrint('Error updating username: $e');
+    if (newName != null) {
+      if (user != null) {
+        try {
+          await user.updateDisplayName(newName);
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .update({'username': newName});
+        } catch (e) {
+          debugPrint('Error updating username: $e');
+        }
       }
     }
   }
-}
 
-Widget _buildReferralSection({required ThemeData theme}) {
-  if (!_isOwnProfile || _referralCode.isEmpty) return const SizedBox.shrink();
+  Widget _buildReferralSection({required ThemeData theme}) {
+    if (!_isOwnProfile || _referralCode.isEmpty) return const SizedBox.shrink();
 
-  return Container(
-    margin: const EdgeInsets.symmetric(vertical: 16),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [
-          Colors.tealAccent.withOpacity(0.1),
-          Colors.purpleAccent.withOpacity(0.1),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.tealAccent.withOpacity(0.1),
+            Colors.purpleAccent.withOpacity(0.1),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.tealAccent.withOpacity(0.3)),
       ),
-      borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: Colors.tealAccent.withOpacity(0.3)),
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(Icons.share, color: Colors.tealAccent, size: 20),
-            const SizedBox(width: 8),
-            Text(
-              S.of(context).referFriends,
-              style: const TextStyle(
-                color: Colors.tealAccent,
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Spacer(),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.amber.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                '+100 💎',
-                style: TextStyle(
-                  color: Colors.amber,
-                  fontSize: 12,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.share, color: Colors.tealAccent, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                S.of(context).referFriends,
+                style: const TextStyle(
+                  color: Colors.tealAccent,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          S.of(context).referralDescription,
-          style: TextStyle(color: theme.shadowColor, fontSize: 14),
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.3),
+                  color: Colors.amber.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withOpacity(0.2)),
                 ),
-                child: Text(
-                  'dadadu.app/invite/$_referralCode',
-                  style: TextStyle(color: theme.primaryColor, fontSize: 12),
-                  overflow: TextOverflow.ellipsis,
+                child: const Text(
+                  '+100 💎',
+                  style: TextStyle(
+                    color: Colors.amber,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: _copyReferralLink,
-              icon: const Icon(Icons.copy, color: Colors.tealAccent, size: 20),
-              tooltip: S.of(context).copyLink,
-            ),
-            IconButton(
-              onPressed: _shareReferralLink,
-              icon: const Icon(Icons.share, color: Colors.tealAccent, size: 20),
-              tooltip: S.of(context).share,
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            S.of(context).referralDescription,
+            style: TextStyle(color: theme.shadowColor, fontSize: 14),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  child: Text(
+                    'dadadu.app/invite/$_referralCode',
+                    style: TextStyle(color: theme.primaryColor, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: _copyReferralLink,
+                icon:
+                    const Icon(Icons.copy, color: Colors.tealAccent, size: 20),
+                tooltip: S.of(context).copyLink,
+              ),
+              IconButton(
+                onPressed: _shareReferralLink,
+                icon:
+                    const Icon(Icons.share, color: Colors.tealAccent, size: 20),
+                tooltip: S.of(context).share,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1436,7 +1434,7 @@ Widget _buildReferralSection({required ThemeData theme}) {
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Center(
                           child: Stack(
@@ -1490,6 +1488,8 @@ Widget _buildReferralSection({required ThemeData theme}) {
                             ),
                           ),
                         ),
+                        // USER'S LOCATION INFO PLACEHOLDER
+                        Text('California, CA'),
                         const SizedBox(height: 8),
                         if (badge.isNotEmpty)
                           Center(
@@ -1550,6 +1550,7 @@ Widget _buildReferralSection({required ThemeData theme}) {
                                       ),
                                     ),
                                   ],
+
                                 ],
                               ),
                             ),
@@ -1597,15 +1598,15 @@ Widget _buildReferralSection({required ThemeData theme}) {
                                         WidgetStateProperty.all(Colors.white),
                                   ),
                                   onPressed: () {
-                                    _showBadgeGuideDialog(context, isDark, theme);
+                                    _showBadgeGuideDialog(
+                                        context, isDark, theme);
                                   },
                                   child: Text(
                                     s.howBadgesWork,
                                     overflow: TextOverflow.ellipsis,
                                     maxLines: 1,
-                                    
                                   ),
-                                                             ),
+                                ),
                               ),
                             ],
                           )
@@ -1701,7 +1702,6 @@ Widget _buildReferralSection({required ThemeData theme}) {
                                 ),
                           const SizedBox(height: 24),
                         ],
-                      
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
@@ -1729,7 +1729,9 @@ Widget _buildReferralSection({required ThemeData theme}) {
                           height: 18,
                         ),
                         Text(
-                          _isOwnProfile ? s.myVideos : "${s.videosOf} @$username",
+                          _isOwnProfile
+                              ? s.myVideos
+                              : "${s.videosOf} @$username",
                           style:
                               TextStyle(color: theme.shadowColor, fontSize: 16),
                         ),

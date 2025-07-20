@@ -14,6 +14,7 @@ import '../services/database_service.dart';
 
 class FeedScreen extends StatefulWidget {
   final ValueNotifier<bool> tabChanged;
+
   const FeedScreen({super.key, required this.tabChanged});
 
   @override
@@ -373,8 +374,7 @@ class _FeedScreenState extends State<FeedScreen> with TickerProviderStateMixin {
     score += (intentLikes * 2.0).clamp(0.0, 10.0); // Max 10 points
 
     // 6. Fraîcheur (15 points max)
-    final hoursSincePosted =
-        DateTime.now().difference(video.createdAt).inHours;
+    final hoursSincePosted = DateTime.now().difference(video.createdAt).inHours;
 
     if (hoursSincePosted < 1)
       score += 15.0;
@@ -383,7 +383,7 @@ class _FeedScreenState extends State<FeedScreen> with TickerProviderStateMixin {
     else if (hoursSincePosted < 24)
       score += 8.0;
     else if (hoursSincePosted < 168) score += 4.0;
-  
+
     // 7. Diversité (pénalité pour répétition)
     final authorVideoCount =
         _personalizedVideos.where((v) => v.userId == video.userId).length;
@@ -663,7 +663,8 @@ class _FeedScreenState extends State<FeedScreen> with TickerProviderStateMixin {
             ),
             const SizedBox(height: 8),
             Text(
-              s.feedAnalyzingPreferences, // ✅ localized: 'Analyse de vos préférences'
+              s.feedAnalyzingPreferences,
+              // ✅ localized: 'Analyse de vos préférences'
               style: TextStyle(
                 color: isDarkMode ? Colors.white54 : Colors.black54,
                 fontSize: 14,
@@ -803,7 +804,9 @@ class _FeedScreenState extends State<FeedScreen> with TickerProviderStateMixin {
             isDarkMode: isDarkMode,
             currentVideoIndex: _currentVideoIndex == index,
             targetId: target_id,
-            tabChanged: widget.tabChanged, pageIndex: _currentVideoIndex, currentPageNotifier: currentPageNotifier,
+            tabChanged: widget.tabChanged,
+            pageIndex: _currentVideoIndex,
+            currentPageNotifier: currentPageNotifier,
           );
         },
       ),
@@ -992,9 +995,10 @@ class KeepAliveVideoCard extends StatefulWidget {
   final String targetId;
   final VoidCallback onDiamondTap;
   final VoidCallback onProfileTap;
-    final int pageIndex;
+  final int pageIndex;
   final ValueNotifier<int> currentPageNotifier;
   final ValueNotifier<bool> tabChanged;
+
   const KeepAliveVideoCard({
     super.key,
     required this.video,
@@ -1005,7 +1009,9 @@ class KeepAliveVideoCard extends StatefulWidget {
     required this.isDarkMode,
     required this.currentVideoIndex,
     required this.targetId,
-    required this.tabChanged, required this.pageIndex, required this.currentPageNotifier,
+    required this.tabChanged,
+    required this.pageIndex,
+    required this.currentPageNotifier,
   });
 
   @override
@@ -1028,7 +1034,9 @@ class _KeepAliveVideoCardState extends State<KeepAliveVideoCard>
       isDarkMode: widget.isDarkMode,
       currentPage: widget.currentVideoIndex,
       target: widget.targetId,
-      tabChanged: widget.tabChanged, pageIndex: widget.pageIndex, currentPageNotifier: widget.currentPageNotifier,
+      tabChanged: widget.tabChanged,
+      pageIndex: widget.pageIndex,
+      currentPageNotifier: widget.currentPageNotifier,
     );
   }
 }
