@@ -14,7 +14,7 @@ class HomePage extends StatelessWidget {
       create: (context) => sl<HomeBloc>(), // Get HomeBloc from DI
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Home'),
+          title: const Text('For You'),
           actions: [
             IconButton(
               icon: const Icon(Icons.logout),

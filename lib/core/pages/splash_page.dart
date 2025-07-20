@@ -1,6 +1,10 @@
 // lib/core/pages/splash_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+// import 'package:dadadu_app/features/auth/presentation/bloc/auth_state.dart';
 
 class SplashPage extends StatelessWidget {
   const SplashPage({super.key});
@@ -8,28 +12,64 @@ class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // You can replace this with your app's logo
-            // For example: Image.asset('assets/logo.png', width: 150, height: 150),
-            // Remember to add 'assets/' to your pubspec.yaml if you use local images.
-            Icon(
-              Icons.blur_on, // Placeholder icon
-              size: 100,
-              color: Theme.of(context).colorScheme.primary,
+      body: BlocListener<AuthBloc, AuthState>( // Listen to AuthBloc state changes
+        listener: (context, state) {
+          // This listener will only trigger when the state *changes*
+          // from AuthInitial/AuthLoading to Authenticated/Unauthenticated.
+          if (state is Authenticated) {
+            // User is authenticated, go to the home screen (which is part of the shell route)
+            context.go('/home');
+          } else if (state is Unauthenticated) {
+            // User is not authenticated, go to the sign-in page
+            context.go('/signIn');
+          }
+          // AuthInitial and AuthLoading states mean we're still checking, so do nothing.
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primaryContainer,
+              ],
             ),
-            const SizedBox(height: 24),
-            const CircularProgressIndicator(),
-            const SizedBox(height: 16),
-            Text(
-              'Loading...',
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Your app logo or icon
+                Icon(
+                  Icons.videocam, // Example icon, replace with your app's logo
+                  size: 100,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  'Dadadu App',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                // Show a progress indicator while checking auth status
+                BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) {
+                    if (state is AuthInitial || state is AuthLoading) {
+                      return CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                            Theme.of(context).colorScheme.onPrimary),
+                      );
+                    }
+                    return const SizedBox.shrink(); // Hide after status is known
+                  },
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
