@@ -1,38 +1,48 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/errors/exceptions.dart';
-import '../../../../core/errors/failures.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_data_source.dart';
-import '../models/user_model.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:dadadu_app/core/errors/exceptions.dart';
+import 'package:dadadu_app/core/errors/failures.dart';
+import 'package:dadadu_app/features/auth/data/datasources/auth_remote_data_source.dart';
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:dadadu_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth; // Import for Stream type
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
   AuthRepositoryImpl({required this.remoteDataSource});
 
+  // Implement the new getter:
+  @override
+  Stream<firebase_auth.User?> get authStateChanges => remoteDataSource.authStateChanges();
+
   @override
   Future<Either<Failure, UserEntity>> signInWithEmailPassword(
       String email, String password) async {
     try {
-      final userModel =
-      await remoteDataSource.signInWithEmailPassword(email, password);
+      final userModel = await remoteDataSource.signInWithEmailPassword(
+        email,
+        password,
+      );
       return Right(userModel);
     } on ServerException catch (e) {
-      return Left(_handleFirebaseAuthException(e.message));
+      return Left(ServerFailure(message: e.message));
     }
   }
 
   @override
   Future<Either<Failure, UserEntity>> signUpWithEmailPassword(
-      String email, String password) async {
+      String email, String password, String firstName, String lastName, String username) async {
     try {
-      final userModel =
-      await remoteDataSource.signUpWithEmailPassword(email, password);
+      final userModel = await remoteDataSource.signUpWithEmailPassword(
+        email,
+        password,
+        firstName,
+        lastName,
+        username,
+      );
       return Right(userModel);
     } on ServerException catch (e) {
-      return Left(_handleFirebaseAuthException(e.message));
+      return Left(ServerFailure(message: e.message));
     }
   }
 
@@ -42,49 +52,27 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.signOut();
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(_handleFirebaseAuthException(e.message));
+      return Left(ServerFailure(message: e.message));
     }
   }
 
   @override
-  Stream<UserEntity?> get authStateChanges {
-    return remoteDataSource.authStateChanges.map((firebaseUser) {
-      if (firebaseUser == null) {
-        return null;
-      }
-      return UserModel.fromFirebaseUser(firebaseUser);
-    });
+  Future<Either<Failure, UserEntity?>> getCurrentUser() async {
+    try {
+      final userModel = await remoteDataSource.getCurrentUser();
+      return Right(userModel);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    }
   }
 
   @override
-  UserEntity? get currentUser {
-    final firebaseUser = remoteDataSource.currentUser;
-    if (firebaseUser == null) {
-      return null;
-    }
-    return UserModel.fromFirebaseUser(firebaseUser);
-  }
-
-  Failure _handleFirebaseAuthException(String errorCode) {
-    switch (errorCode) {
-      case 'user-not-found':
-        return UserNotFoundFailure(
-            message: 'No user found for that email.');
-      case 'wrong-password':
-        return WrongPasswordFailure(
-            message: 'Wrong password provided for that user.');
-      case 'email-already-in-use':
-        return EmailAlreadyInUseFailure(
-            message: 'The email address is already in use by another account.');
-      case 'weak-password':
-        return WeakPasswordFailure(
-            message: 'The password provided is too weak.');
-      case 'invalid-email':
-        return InvalidCredentialsFailure(
-            message: 'The email address is not valid.');
-      default:
-        return UnknownAuthFailure(
-            message: 'An unknown authentication error occurred: $errorCode');
+  Future<Either<Failure, void>> sendPasswordResetEmail(String email) async {
+    try {
+      await remoteDataSource.sendPasswordResetEmail(email);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
     }
   }
 }

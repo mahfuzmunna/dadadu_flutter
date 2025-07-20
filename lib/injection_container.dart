@@ -15,6 +15,12 @@ import 'features/home/domain/usecases/get_feed_posts_usecase.dart';
 import 'features/home/home_injection.dart';
 import 'features/discover/discover_injection.dart';
 import 'features/home/presentation/bloc/home_bloc.dart';
+import 'features/profile/data/datasources/profile_remote_data_source.dart';
+import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/get_user_profile_usecase.dart';
+import 'features/profile/domain/usecases/update_profile_usecase.dart';
+import 'features/profile/presentation/bloc/profile_bloc.dart';
 import 'features/upload/upload_injection.dart';
 import 'features/friends/friends_injection.dart';
 import 'features/profile/profile_injection.dart';
@@ -37,29 +43,31 @@ Future<void> init() async {
 
 // Function to call Auth feature's injection setup
 Future<void> authInjection() async {
-  // BLoC
-  sl.registerFactory(
-        () => AuthBloc(
-      signInUseCase: sl(),
-      signUpUseCase: sl(),
-      authRepository: sl(),
-    ),
-  );
+  // Bloc
+  sl.registerFactory(() => AuthBloc(
+    signInUseCase: sl(),
+    signUpUseCase: sl(),
+    authRepository: sl(), // AuthBloc now takes AuthRepository to listen to authStateChanges
+  ));
 
-  // Use cases
+  // Use Cases
   sl.registerLazySingleton(() => SignInUseCase(sl()));
   sl.registerLazySingleton(() => SignUpUseCase(sl()));
+  // sl.registerLazySingleton(() => SignOutUseCase(sl()));
+  // sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
+  // sl.registerLazySingleton(() => SendPasswordResetEmailUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
-        () => AuthRepositoryImpl(
-      remoteDataSource: sl(),
-    ),
-  );
+          () => AuthRepositoryImpl(remoteDataSource: sl()));
 
-  // Data sources
+  // Data Sources
+  // LINE 68 IS LIKELY HERE: Ensure both sl() calls are present
   sl.registerLazySingleton<AuthRemoteDataSource>(
-        () => FirebaseAuthRemoteDataSourceImpl(sl()),
+        () => FirebaseAuthRemoteDataSourceImpl(
+      sl<firebase_auth.FirebaseAuth>(), // First positional argument
+      sl<FirebaseFirestore>(),       // Second positional argument
+    ),
   );
 }
 
@@ -90,5 +98,27 @@ Future<void> friendsInjection() async {
   // sl.registerFactory(() => FriendsBloc(...));
 }
 Future<void> profileInjection() async {
-  // sl.registerFactory(() => ProfileBloc(...));
+  // BLoC
+  sl.registerFactory(
+        () => ProfileBloc(
+      getUserProfileUseCase: sl(),
+      updateProfileUseCase: sl(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+
+  // Repository
+  sl.registerLazySingleton<ProfileRepository>(
+        () => ProfileRepositoryImpl(
+      remoteDataSource: sl(),
+    ),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<ProfileRemoteDataSource>(
+        () => ProfileRemoteDataSourceImpl(sl(), sl()), // Pass Firestore and FirebaseAuth
+  );
 }
