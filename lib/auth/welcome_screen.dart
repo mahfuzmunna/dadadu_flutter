@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
-import '../widgets/neon_button.dart';
+import '../shared/widgets/neon_button.dart';
 import 'package:start/generated/l10n.dart'; // Import your localization
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

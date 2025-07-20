@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:start/generated/l10n.dart';
 import 'package:video_player/video_player.dart';
-import '../widgets/video_card.dart';
+import '../shared/widgets/video_card.dart';
 import '../dadadu/globe_button.dart';
 import '../models/video_model.dart';
 import '../screens/profile_screen.dart';
