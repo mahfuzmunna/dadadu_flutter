@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "871770676449",
-    "project_id": "brosisus-f3ce9",
-    "storage_bucket": "brosisus-f3ce9.firebasestorage.app"
+    "project_number": "129605762315",
+    "project_id": "dadadu-flutter",
+    "storage_bucket": "dadadu-flutter.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:871770676449:android:c0fad9a6f7493582c96ba0",
+        "mobilesdk_app_id": "1:129605762315:android:79ad126b43150d4b82360e",
         "android_client_info": {
           "package_name": "com.example.start"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDOm-pt10gOxu7q7bo0ICwLMk1o2flElNo"
+          "current_key": "AIzaSyCoJNSb_RwEUuVME2u1mVuSz8fyQYr0QFI"
         }
       ],
       "services": {

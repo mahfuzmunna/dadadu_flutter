@@ -1,30 +1,99 @@
+import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // Import BlocProvider
+import 'firebase_options.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/pages/sign_in_page.dart';
+import 'features/auth/presentation/pages/home_page.dart'; // We'll create this
+import 'injection_container.dart' as di; // Alias for injection_container
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await di.init(); // Initialize GetIt
+  runApp(const MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => di.sl<AuthBloc>(), // Provide AuthBloc
+      child: MaterialApp(
+        title: 'Firebase Auth Clean Arch',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const AuthWrapper(),
+      ),
+    );
+  }
+}
+
+class AuthWrapper extends StatelessWidget {
+  const AuthWrapper({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is Authenticated) {
+          return HomePage(user: state.user);
+        } else if (state is Unauthenticated) {
+          return const SignInPage();
+        }
+        return const Scaffold(
+          body: Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/*
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:start/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:start/features/auth/presentation/pages/login_page.dart';
 import 'package:start/features/auth/responsive_login_screen.dart';
 import 'package:start/features/auth/responsive_reset_password_screen.dart';
 import 'package:start/features/auth/responsive_signup_screen.dart';
-import 'package:start/features/auth/responsive_welcome_screen.dart';
 import 'package:start/features/auth/responsive_welcome_screen.dart';
 import 'generated/l10n.dart';
 import 'package:start/dadadu/dadadu_screen.dart';
 import 'package:start/screens/home_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'features/auth/welcome_screen.dart';
-import 'features/auth/login_screen.dart';
-import 'features/auth/signup_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/settings_screen.dart';
+import 'injection_container.dart' as di;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
  await dotenv.load(fileName: ".env"); 
   await Firebase.initializeApp();
+  await di.init();
   // await StripeService.init();
 
   await FirebaseAppCheck.instance.activate(
@@ -155,18 +224,19 @@ class _MyAppState extends State<MyApp> {
           }
           return supportedLocales.first;
         },
-        initialRoute: '/',
-        routes: {
-          '/': (context) => const AuthWrapper(),
-          '/welcome': (context) => const ResponsiveWelcomeScreen(),
-          '/login': (context) => const ResponsiveLoginScreen(),
-          '/signup': (context) => const ResponsiveSignupScreen(),
-          '/reset': (context) => const ResponsiveResetPasswordScreen(),
-          '/home': (context) => const HomeScreen(),
-          '/settings': (context) => const SettingsScreen(),
-          '/profile': (context) => const ProfileScreen(),
-          '/discover': (context) => const DadaduScreen(),
-        },
+        home: BlocProvider(create: (_) => di.sl<AuthBloc>(), child: LoginPage(),),
+        // initialRoute: '/',
+        // routes: {
+        //   '/': (context) => const AuthWrapper(),
+        //   '/welcome': (context) => const ResponsiveWelcomeScreen(),
+        //   '/login': (context) => const ResponsiveLoginScreen(),
+        //   '/signup': (context) => const ResponsiveSignupScreen(),
+        //   '/reset': (context) => const ResponsiveResetPasswordScreen(),
+        //   '/home': (context) => const HomeScreen(),
+        //   '/settings': (context) => const SettingsScreen(),
+        //   '/profile': (context) => const ProfileScreen(),
+        //   '/discover': (context) => const DadaduScreen(),
+        // },
       ),
     );
   }
@@ -198,3 +268,4 @@ class AuthWrapper extends StatelessWidget {
     );
   }
 }
+*/
