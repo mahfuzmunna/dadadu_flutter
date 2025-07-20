@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
-import 'package:start/auth/responsive_login_screen.dart';
-import 'package:start/auth/responsive_signup_screen.dart';
+import 'package:start/features/auth/responsive_login_screen.dart';
+import 'package:start/features/auth/responsive_signup_screen.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 import 'package:start/generated/l10n.dart'; // Import your localization

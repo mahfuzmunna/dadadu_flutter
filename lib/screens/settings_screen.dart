@@ -11,14 +11,14 @@ import 'package:geocoding/geocoding.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:start/auth/responsive_welcome_screen.dart';
+import 'package:start/features/auth/responsive_welcome_screen.dart';
 import 'package:start/generated/l10n.dart';
 import 'package:start/main.dart';
 
 // import 'package:shared_preferences/shared_preferences.dart';
 import 'package:start/screens/image_crop.dart';
 import 'dart:io';
-import '../auth/welcome_screen.dart';
+import '../features/auth/welcome_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   // ignore: non_constant_identifier_names
