@@ -12,8 +12,8 @@ import 'package:start/generated/l10n.dart';
 import 'package:start/screens/image_crop.dart';
 import 'dart:io';
 import '../models/video_model.dart';
-import '../services/video_service.dart';
-import '../services/database_service.dart';
+import '../shared/services/video_service.dart';
+import '../shared/services/database_service.dart';
 import 'settings_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 

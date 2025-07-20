@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/stripe_service.dart';
+import '../services/stripe_service.dart';
 
 class StripePaymentWidget extends StatefulWidget {
   final String badgeId;

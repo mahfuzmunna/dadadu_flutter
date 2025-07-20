@@ -10,7 +10,7 @@ import '../shared/widgets/video_card.dart';
 import '../dadadu/globe_button.dart';
 import '../models/video_model.dart';
 import '../screens/profile_screen.dart';
-import '../services/database_service.dart';
+import '../shared/services/database_service.dart';
 
 class FeedScreen extends StatefulWidget {
   final ValueNotifier<bool> tabChanged;

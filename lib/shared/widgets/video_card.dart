@@ -16,7 +16,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import 'dart:ui' as ui;
 import '../../models/video_model.dart';
 import '../widgets/comment_sheet.dart';
-import '../../services/database_service.dart';
+import '../services/database_service.dart';
 
 class VideoCard extends StatefulWidget {
   final Video video;

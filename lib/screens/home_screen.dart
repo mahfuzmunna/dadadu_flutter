@@ -4,7 +4,7 @@ import 'package:start/dadadu/globe_button.dart';
 import 'package:start/screens/feed_screen.dart';
 import 'package:start/screens/profile_screen.dart';
 import 'package:start/screens/upload_screen.dart';
-import 'package:start/services/notifications_service.dart';
+import 'package:start/shared/services/notifications_service.dart';
 import 'package:start/generated/l10n.dart'; // ✅ localization import
 
 class HomeScreen extends StatefulWidget {

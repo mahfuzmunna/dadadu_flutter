@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:start/generated/l10n.dart';
-import 'dadadu_constants.dart';
+import '../core/constants/dadadu_constants.dart';
 import 'dadadu_match_model.dart';
 
 class DadaduScreen extends StatefulWidget {
