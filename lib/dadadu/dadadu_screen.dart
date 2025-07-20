@@ -6,7 +6,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:start/generated/l10n.dart';
+import 'package:dadadu_app/generated/l10n.dart';
 import '../core/constants/dadadu_constants.dart';
 import 'dadadu_match_model.dart';
 

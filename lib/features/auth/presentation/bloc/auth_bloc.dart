@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
-import 'package:start/core/errors/failures.dart';
-import 'package:start/features/auth/domain/entities/user_entity.dart';
-import 'package:start/features/auth/domain/usecases/params.dart';
-import 'package:start/features/auth/domain/usecases/sign_in_usecase.dart';
-import 'package:start/features/auth/domain/usecases/sign_up_usecase.dart';
-import 'package:start/features/auth/domain/repositories/auth_repository.dart'; // Import the repository for authStateChanges
+import '../../../../core/errors/failures.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/usecases/params.dart';
+import '../../domain/usecases/sign_in_usecase.dart';
+import '../../domain/usecases/sign_up_usecase.dart';
+import '../../domain/repositories/auth_repository.dart'; // Import the repository for authStateChanges
 
 part 'auth_event.dart';
 part 'auth_state.dart';

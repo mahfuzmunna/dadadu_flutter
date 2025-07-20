@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:start/features/auth/domain/entities/user_entity.dart';
-import 'package:start/features/auth/presentation/bloc/auth_bloc.dart';
+import '../../domain/entities/user_entity.dart';
+import '../bloc/auth_bloc.dart';
 
 class HomePage extends StatelessWidget {
   final UserEntity user;

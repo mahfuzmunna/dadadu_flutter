@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:start/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:start/features/auth/presentation/pages/sign_up_page.dart'; // For navigation
+import '../bloc/auth_bloc.dart';
+import 'sign_up_page.dart'; // For navigation
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
