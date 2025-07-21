@@ -1,10 +1,10 @@
 // lib/features/auth/presentation/pages/sign_in_page.dart
 
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Updated package name
+import 'package:dadadu_app/injection_container.dart'; // For dependency injection
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart'; // For navigation
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Updated package name
-import 'package:dadadu_app/injection_container.dart'; // For dependency injection
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -28,8 +28,8 @@ class _SignInPageState extends State<SignInPage> {
   void _onSignInPressed(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
-        SignInRequested(
-          email: _emailController.text.trim(),
+            AuthSignInRequested(
+              email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
         ),
       );
@@ -59,7 +59,7 @@ class _SignInPageState extends State<SignInPage> {
                   duration: const Duration(seconds: 1),
                 ),
               );
-            } else if (state is Authenticated) {
+            } else if (state is AuthAuthenticated) {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -73,12 +73,12 @@ class _SignInPageState extends State<SignInPage> {
               );
               // Navigate to home after successful login
               context.go('/home');
-            } else if (state is Unauthenticated && state.message != null) {
+            } else if (state is AuthUnauthenticated) {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Sign In Failed: ${state.message}',
+                    'Sign In Failed: ',
                     style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
                   ),
                   backgroundColor: Theme.of(context).colorScheme.errorContainer,

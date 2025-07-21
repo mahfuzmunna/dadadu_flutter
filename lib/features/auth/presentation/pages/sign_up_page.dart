@@ -1,10 +1,10 @@
 // lib/features/auth/presentation/pages/sign_up_page.dart
 
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Updated package name
+import 'package:dadadu_app/injection_container.dart'; // For dependency injection
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart'; // For navigation
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Updated package name
-import 'package:dadadu_app/injection_container.dart'; // For dependency injection
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -34,8 +34,8 @@ class _SignUpPageState extends State<SignUpPage> {
   void _onSignUpPressed(BuildContext context) {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(
-        SignUpRequested(
-          firstName: _firstNameController.text.trim(),
+            AuthSignUpRequested(
+              firstName: _firstNameController.text.trim(),
           lastName: _lastNameController.text.trim(),
           username: _usernameController.text.trim(),
           email: _emailController.text.trim(),
@@ -68,7 +68,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   duration: const Duration(seconds: 1),
                 ),
               );
-            } else if (state is Authenticated) {
+            } else if (state is AuthAuthenticated) {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -82,12 +82,12 @@ class _SignUpPageState extends State<SignUpPage> {
               );
               // Navigate to home after successful signup and auto-login
               context.go('/home');
-            } else if (state is Unauthenticated && state.message != null) {
+            } else if (state is AuthUnauthenticated) {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
-                    'Sign Up Failed: ${state.message}',
+                    'Sign Up Failed:',
                     style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
                   ),
                   backgroundColor: Theme.of(context).colorScheme.errorContainer,

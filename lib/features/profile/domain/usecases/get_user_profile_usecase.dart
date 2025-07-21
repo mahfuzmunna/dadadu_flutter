@@ -1,8 +1,11 @@
+// lib/features/profile/domain/usecases/get_user_profile_usecase.dart
+
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+
 import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart';
-import '../../../auth/domain/entities/user_entity.dart';
+import '../../../../core/usecases/usecase.dart'; // For UseCase and NoParams if needed
+import '../../../auth/domain/entities/user_entity.dart'; // Reusing UserEntity
 import '../repositories/profile_repository.dart';
 
 class GetUserProfileUseCase implements UseCase<UserEntity, GetUserProfileParams> {
@@ -12,15 +15,15 @@ class GetUserProfileUseCase implements UseCase<UserEntity, GetUserProfileParams>
 
   @override
   Future<Either<Failure, UserEntity>> call(GetUserProfileParams params) async {
-    return await repository.getUserProfile(params.uid);
+    return await repository.getUserProfile(params.userId);
   }
 }
 
 class GetUserProfileParams extends Equatable {
-  final String uid;
+  final String userId;
 
-  const GetUserProfileParams({required this.uid});
+  const GetUserProfileParams({required this.userId});
 
   @override
-  List<Object> get props => [uid];
+  List<Object> get props => [userId];
 }

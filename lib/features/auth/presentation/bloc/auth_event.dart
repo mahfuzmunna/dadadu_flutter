@@ -7,47 +7,56 @@ abstract class AuthEvent extends Equatable {
   const AuthEvent();
 
   @override
-  List<Object?> get props => [];
+  List<Object> get props => [];
 }
 
-class AuthStatusChanged extends AuthEvent {
-  final UserEntity? user;
-  const AuthStatusChanged(this.user);
-
-  @override
-  List<Object?> get props => [user];
+class AuthCheckRequested extends AuthEvent {
+  const AuthCheckRequested();
 }
 
-class SignInRequested extends AuthEvent {
+class AuthSignInRequested extends AuthEvent {
   final String email;
   final String password;
 
-  const SignInRequested({
-    required this.email,
-    required this.password,
-  });
+  const AuthSignInRequested({required this.email, required this.password});
 
   @override
   List<Object> get props => [email, password];
 }
 
-class SignUpRequested extends AuthEvent {
+class AuthSignUpRequested extends AuthEvent {
   final String email;
   final String password;
-  final String firstName; // <--- ADD THIS
-  final String lastName;  // <--- ADD THIS
-  final String username;  // <--- ADD THIS
+  final String username;
+  final String firstName;
+  final String lastName;
 
-  const SignUpRequested({
+  const AuthSignUpRequested({
     required this.email,
     required this.password,
-    required this.firstName, // <--- AND ADD TO CONSTRUCTOR
-    required this.lastName,  // <--- AND ADD TO CONSTRUCTOR
-    required this.username,  // <--- AND ADD TO CONSTRUCTOR
+    required this.username,
+    required this.firstName,
+    required this.lastName,
   });
 
   @override
-  List<Object> get props => [email, password, firstName, lastName, username]; // <--- AND ADD TO PROPS
+  List<Object> get props => [email, password, username, firstName, lastName];
 }
 
-class SignOutRequested extends AuthEvent {}
+class AuthSignOutRequested extends AuthEvent {
+  const AuthSignOutRequested();
+}
+
+class AuthResetPasswordRequested extends AuthEvent {
+  final String email;
+
+  const AuthResetPasswordRequested({required this.email});
+
+  @override
+  List<Object> get props => [email];
+}
+
+// NEW: Event to refresh current user data (e.g., after profile update)
+class AuthRefreshCurrentUser extends AuthEvent {
+  const AuthRefreshCurrentUser();
+}

@@ -18,7 +18,13 @@ class ServerFailure extends Failure {
   ServerFailure({required this.message}) : super([message]);
 }
 
-class CacheFailure extends Failure {}
+class CacheFailure extends Failure {
+  final String message;
+
+  // Removed 'const' from the constructor here.
+  // Now, 'message' can be a runtime value, and it can be passed to super.
+  CacheFailure({required this.message}) : super([message]);
+}
 
 // Specific Authentication Failures
 class InvalidCredentialsFailure extends ServerFailure {
@@ -43,4 +49,16 @@ class WrongPasswordFailure extends ServerFailure {
 
 class UnknownAuthFailure extends ServerFailure {
   UnknownAuthFailure({required String message}) : super(message: message);
+}
+// NEW: Storage specific failure
+class StorageFailure extends ServerFailure {
+  StorageFailure({required super.message});
+}
+
+class AuthFailure extends Failure {
+  final String message;
+
+  // Removed 'const' from the constructor here.
+  // Now, 'message' can be a runtime value, and it can be passed to super.
+  AuthFailure({required this.message}) : super([message]);
 }

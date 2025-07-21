@@ -1,10 +1,14 @@
+// lib/features/profile/data/repositories/profile_repository_impl.dart
+
 import 'package:dartz/dartz.dart';
+
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../auth/domain/entities/user_entity.dart';
-import '../datasources/profile_remote_data_source.dart';
-import '../../domain/repositories/profile_repository.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../auth/domain/entities/user_entity.dart';
+import '../../../home/domain/entities/post_entity.dart';
+import '../../domain/repositories/profile_repository.dart';
+import '../datasources/profile_remote_data_source.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource remoteDataSource;
@@ -12,43 +16,92 @@ class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, UserEntity>> getUserProfile(String uid) async {
+  Future<Either<Failure, UserEntity>> getUserProfile(String userId) async {
     try {
-      final userModel = await remoteDataSource.getUserProfile(uid);
+      final userModel = await remoteDataSource.getUserProfile(userId);
       return Right(userModel);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
+    } on CacheException catch (e) {
+      // If you later add local cache
+      return Left(CacheFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(
+          message: 'An unexpected error occurred: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> updateProfile(UserEntity user) async {
+  Future<Either<Failure, void>> updateUserProfile(UserEntity user) async {
     try {
-      // Assuming UserEntity can be cast to UserModel or converted
-      // In a real app, you might have a mapper from Entity to Model
-      if (user is UserModel) {
-        await remoteDataSource.updateProfile(user);
-      } else {
-        // Handle conversion if UserEntity is not directly UserModel
-        final userModel = UserModel(
-          uid: user.uid,
-          email: user.email,
-          displayName: user.displayName,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          username: user.username,
-          profilePhotoUrl: user.profilePhotoUrl,
-          userModeEmoji: user.userModeEmoji,
-          followersCount: user.followersCount,
-          followingCount: user.followingCount,
-          rank: user.rank,
-          uploadedVideoUrls: user.uploadedVideoUrls,
-        );
-        await remoteDataSource.updateProfile(userModel);
-      }
+      // Assuming UserModel can be created from UserEntity for data layer operations
+      final userModel = UserModel(
+        uid: user.uid,
+        email: user.email,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        profilePhotoUrl: user.profilePhotoUrl,
+        displayName: user.displayName,
+        bio: user.bio,
+        userModeEmoji: user.userModeEmoji,
+        rank: user.rank,
+        followersCount: user.followersCount,
+        followingCount: user.followingCount,
+        postCount: user.postCount,
+        uploadedVideoUrls: user.uploadedVideoUrls,
+      );
+      await remoteDataSource.updateUserProfile(userModel);
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(
+          message: 'An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<PostEntity>>> getUserPosts(String userId) async {
+    try {
+      final postModels = await remoteDataSource.getUserPosts(userId);
+      // Assuming PostModel extends PostEntity or has a toEntity method
+      return Right(postModels.map((model) => model as PostEntity).toList());
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(
+          message: 'An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadProfileImage(
+      String userId, String imagePath) async {
+    try {
+      final imageUrl =
+          await remoteDataSource.uploadProfileImage(userId, imagePath);
+      return Right(imageUrl);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(
+          message:
+              'An unexpected error occurred during image upload: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteProfileImage(String userId) async {
+    try {
+      await remoteDataSource.deleteProfileImage(userId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(
+          message:
+              'An unexpected error occurred during image deletion: ${e.toString()}'));
     }
   }
 }

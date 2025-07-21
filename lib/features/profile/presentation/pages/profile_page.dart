@@ -1,8 +1,8 @@
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 // import 'package:dadadu_app/features/auth/presentation/bloc/auth_state.dart';
 
 
@@ -33,12 +33,12 @@ class ProfilePage extends StatelessWidget {
         listener: (context, state) {
           // This listener is important for reacting to authentication state changes,
           // for example, when a user signs out.
-          if (state is Unauthenticated) {
+          if (state is AuthUnauthenticated) {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  state.message ?? 'You have been signed out.',
+                  'You have been signed out.',
                   style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
                 ),
                 backgroundColor: Theme.of(context).colorScheme.errorContainer,
@@ -56,7 +56,7 @@ class ProfilePage extends StatelessWidget {
             );
           }
           // Display the user's profile if they are authenticated.
-          else if (state is Authenticated) {
+          else if (state is AuthAuthenticated) {
             final UserEntity user = state.user;
 
             // --- IMPORTANT FOR TESTING SCROLLABILITY ---
@@ -164,7 +164,7 @@ class ProfilePage extends StatelessWidget {
                       icon: const Icon(Icons.logout),
                       label: const Text('Sign Out'),
                       onPressed: () {
-                        context.read<AuthBloc>().add(SignOutRequested());
+                        context.read<AuthBloc>().add(AuthSignOutRequested());
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Theme.of(context).colorScheme.error,

@@ -1,156 +1,123 @@
 // lib/core/routes/app_router.dart
 
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
-import 'package:flutter/material.dart';
 import 'dart:async'; // For StreamSubscription
 
+import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // Ensure this path is correct
+// Core imports
+import 'package:dadadu_app/core/pages/splash_page.dart';
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
+// Feature-specific page imports
 import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart';
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
-// import 'package:dadadu_app/features/auth/presentation/bloc/auth_state.dart';
+import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
+import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
+import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
-import 'package:dadadu_app/core/pages/splash_page.dart';
-
-import '../../features/discover/presentation/pages/discover_page.dart';
-import '../../features/friends/presentation/pages/friends_page.dart';
-import '../../features/home/presentation/bloc/home_feed_bloc.dart';
-import '../../features/profile/presentation/pages/edit_profile_page.dart';
-import '../../features/upload/presentation/pages/camera_screen.dart';
-import '../../features/upload/presentation/pages/create_post_page.dart';
-import '../../features/upload/presentation/pages/upload_page.dart';
-import '../../injection_container.dart' as di;
-import '../common/widgets/scaffold_with_nav_bar.dart';
-// import 'package:dadadu_app/core/widgets/scaffold_with_navbar.dart';
-
-// --- Placeholder Pages for new tabs (move to respective feature folders later) ---
+import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
+import 'package:dadadu_app/features/upload/presentation/pages/create_post_page.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class AppRouter {
   static GoRouter router({required AuthBloc authBloc}) {
     return GoRouter(
+      // The initial location for the router
+      initialLocation: '/',
+
       routes: <RouteBase>[
-        // --- Routes outside the ShellRoute (no bottom navigation) ---
+        // --- Routes that do NOT have the bottom navigation bar ---
 
         GoRoute(
           path: '/',
-          builder: (BuildContext context, GoRouterState state) {
-            return const SplashPage();
-            // return BlocProvider(
-            //   create: (context) {
-            //     try {
-            //       final bloc = di.sl<HomeFeedBloc>();
-            //       debugPrint('HomeFeedBloc created successfully!'); // Debug message
-            //       return bloc;
-            //     } catch (e) {
-            //       debugPrint('ERROR CREATING HomeFeedBloc: $e'); // Log any error during creation
-            //       rethrow; // Re-throw to see the original error
-            //     }
-            //   },
-            //   child: const HomePage(),
-            // );
-          },
+          builder: (BuildContext context, GoRouterState state) =>
+              const SplashPage(),
         ),
         GoRoute(
           path: '/signIn',
-          builder: (BuildContext context, GoRouterState state) {
-            return const SignInPage();
-          },
+          builder: (BuildContext context, GoRouterState state) =>
+              const SignInPage(),
         ),
         GoRoute(
           path: '/signUp',
-          builder: (BuildContext context, GoRouterState state) {
-            return const SignUpPage();
-          },
+          builder: (BuildContext context, GoRouterState state) =>
+              const SignUpPage(),
         ),
-        // NEW CAMERA ROUTE
         GoRoute(
           path: '/camera',
-          builder: (BuildContext context, GoRouterState state) {
-            return const CameraScreen();
-          },
+          builder: (BuildContext context, GoRouterState state) =>
+              const CameraScreen(),
         ),
-        // NEW CREATE POST ROUTE
         GoRoute(
           path: '/createPost',
           builder: (BuildContext context, GoRouterState state) {
-            // Retrieve the videoPath passed as an extra
-            final String videoPath = state.extra as String;
+            final String videoPath =
+                state.extra as String; // Cast extra to String
             return CreatePostPage(videoPath: videoPath);
           },
         ),
-        // Inside AppRouter.router's routes list:
         GoRoute(
-          path: '/editProfile', // <-- This path must match exactly with context.push()
-          builder: (BuildContext context, GoRouterState state) {
-            return const EditProfilePage(); // <-- Ensure you're returning EditProfilePage
-          },
+          path: '/editProfile',
+          builder: (BuildContext context, GoRouterState state) =>
+              const EditProfilePage(),
         ),
 
         // --- ShellRoute for the main app content with a bottom navigation bar ---
+        // This is where the main navigation branches start.
         StatefulShellRoute.indexedStack(
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
             return ScaffoldWithNavBar(navigationShell: navigationShell);
           },
           branches: <StatefulShellBranch>[
-            // Branch 1: Home
+            // Branch 1: Home Tab
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
                   path: '/home',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const HomePage();
-                  },
+                  builder: (BuildContext context, GoRouterState state) =>
+                      const HomePage(),
                 ),
               ],
             ),
-            // Branch 2: Discover
+            // Branch 2: Discover Tab
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
                   path: '/discover',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const DiscoverPage(); // Placeholder
-                  },
+                  builder: (BuildContext context, GoRouterState state) =>
+                      const DiscoverPage(),
                 ),
               ],
             ),
-            // Branch 3: Upload
+            // Branch 3: Upload Tab (Redirects to Camera)
             StatefulShellBranch(
-              // Update this branch to navigate to /camera when /upload is tapped
               routes: <RouteBase>[
                 GoRoute(
                   path: '/upload',
-                  // Builder returns a simple placeholder as the actual upload flow starts on a different route
+                  // This builder is effectively never reached due to the redirect
                   builder: (BuildContext context, GoRouterState state) => const Center(child: Text('Initiating Upload...')),
-                  // We use a redirect here to immediately go to the camera screen
-                  redirect: (context, state) {
-                    // This redirect will trigger when the bottom nav bar item for /upload is tapped.
-                    // It ensures that /upload directly leads to the /camera screen.
-                    return '/camera';
-                  },
+                  // Redirect from '/upload' (tab tap) directly to '/camera'
+                  redirect: (context, state) => '/camera',
                 ),
               ],
             ),
-            // Branch 4: Friends
+            // Branch 4: Friends Tab
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
                   path: '/friends',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const FriendsPage(); // Placeholder
-                  },
+                  builder: (BuildContext context, GoRouterState state) =>
+                      const FriendsPage(),
                 ),
               ],
             ),
-            // Branch 5: Profile
+            // Branch 5: Profile Tab
             StatefulShellBranch(
               routes: <RouteBase>[
                 GoRoute(
                   path: '/profile',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const ProfilePage();
-                  },
+                  builder: (BuildContext context, GoRouterState state) =>
+                      const ProfilePage(),
                 ),
               ],
             ),
@@ -158,92 +125,124 @@ class AppRouter {
         ),
       ],
 
-      // --- Redirect Logic (Remains mostly the same, now accommodating new shell paths) ---
+      // --- Global Redirect Logic based on Authentication State ---
       redirect: (BuildContext context, GoRouterState state) {
         final AuthState authState = authBloc.state;
-        final bool loggedIn = authState is Authenticated;
+        final bool loggedIn = authState is AuthAuthenticated;
         final bool isAuthStatusChecking = authState is AuthInitial || authState is AuthLoading;
 
-        final bool isAuthPath = state.uri.path == '/signIn' || state.uri.path == '/signUp';
-        final bool isSplashPath = state.uri.path == '/';
-        final bool isCameraPath = state.uri.path == '/camera'; // Camera needs permissions, not necessarily logged in *yet* but usually part of post-login flow
-        final bool isCreatePostPath = state.uri.path == '/createPost'; // Post creation clearly requires being logged in
+        // Define specific path types
+        final String currentPath = state.uri.path;
+        final bool isSplashPath = currentPath == '/'; // <--- Defined here
+        final bool isSignInPath = currentPath == '/signIn';
+        final bool isSignUpPath = currentPath == '/signUp';
 
-        print('--- GoRouter Redirect Debug ---');
-        print('Current Path: ${state.uri.path}');
-        print('AuthBloc State: $authState');
-        print('Logged In: $loggedIn');
-        print('Is Auth Path: $isAuthPath');
-        print('Is Splash Path: $isSplashPath');
-        print('Is Camera Path: $isCameraPath'); // New debug
-        print('Is Create Post Path: $isCreatePostPath'); // New debug
-        // Check if the current path is one of the valid shell paths
+        // Define public paths (accessible without login or during login process)
+        // Public paths are splash, sign-in, sign-up
+        final bool isCurrentPathPublic =
+            isSplashPath || isSignInPath || isSignUpPath;
 
-        // final bool isWithinAppShell = state.uri.path.startsWith('/home') ||
-        //     state.uri.path.startsWith('/discover') ||
-        //     state.uri.path.startsWith('/upload') ||
-        //     state.uri.path.startsWith('/friends') ||
-        //     state.uri.path.startsWith('/profile');
+        // Define paths that implicitly require authentication (camera and create post are part of post-login flow)
+        // This includes all routes within the shell, plus direct routes like camera/createPost/editProfile
+        final bool isCurrentPathInAppShell = currentPath.startsWith('/home') ||
+            currentPath.startsWith('/discover') ||
+            currentPath.startsWith('/upload') ||
+            currentPath.startsWith('/friends') ||
+            currentPath.startsWith('/profile');
 
+        const List<String> protectedPathsOutsideShell = [
+          '/camera',
+          '/createPost',
+          '/editProfile'
+        ];
+        final bool isCurrentPathProtectedOutsideShell =
+            protectedPathsOutsideShell.contains(currentPath);
 
-        // 1. If authentication status is still being determined:
-        if (!loggedIn) {
-          print('Redirect Reason: User NOT logged in.');
-          // If trying to access protected content (not auth page, splash, camera, or create post), redirect to signIn.
-          // Note: Camera and CreatePost *should* be protected, but for initial flow they are direct routes.
-          // You might want to adjust this to redirect camera/createPost to signIn if user tries to directly access them without being logged in.
-          // For now, they are treated as non-protected by the router's redirect unless coming from a protected path.
-          final bool isPublicPath = isAuthPath || isSplashPath; // || isCameraPath || isCreatePostPath; // Consider making camera/createPost protected after user logs in.
+        final bool isCurrentPathProtected =
+            isCurrentPathInAppShell || isCurrentPathProtectedOutsideShell;
 
-          if (isPublicPath) {
-            print('Result: Stay on current (Auth/Splash) path.');
-            return null;
-          } else {
-            print('Result: Redirecting to /signIn from protected path.');
-            return '/signIn';
-          }
-        } else { // loggedIn is true
-          print('Redirect Reason: User IS logged in.');
-          // If trying to access splash or auth pages, redirect to home (default shell path).
-          // Otherwise (already within the app shell, or on camera/createPost), allow.
-          if (isSplashPath || isAuthPath) {
-            print('Result: Redirecting to /home (logged in, on auth/splash).');
-            return '/home';
-          } else {
-            print('Result: Stay on current (protected) path or new feature path.');
-            return null;
-          }
+        // --- Debugging Prints (helpful during development) ---
+        debugPrint('--- GoRouter Redirect Check ---');
+        debugPrint('Current Path: $currentPath');
+        debugPrint('AuthBloc State: $authState');
+        debugPrint('Logged In: $loggedIn');
+        debugPrint('Is Auth Status Checking: $isAuthStatusChecking');
+        debugPrint('Is Splash Path: $isSplashPath'); // Debug print
+        debugPrint('Is Sign In Path: $isSignInPath'); // Debug print
+        debugPrint('Is Sign Up Path: $isSignUpPath'); // Debug print
+        debugPrint('Is Current Path Public: $isCurrentPathPublic');
+        debugPrint('Is Current Path Protected: $isCurrentPathProtected');
+        debugPrint('-----------------------------');
+
+        // --- Redirect Logic ---
+
+        // Rule 1: While authentication status is still being determined (Splash Screen)
+        if (isAuthStatusChecking) {
+          debugPrint('Status: Auth checking.');
+          // Stay on splash page while checking auth status.
+          // If trying to access any other route before check is done, go to splash.
+          return isSplashPath ? null : '/';
         }
+
+        // Rule 2: User IS Authenticated
+        if (loggedIn) {
+          debugPrint('Status: User authenticated.');
+          // If on a public path (splash, sign-in, sign-up), redirect to home (default app start).
+          if (isCurrentPathPublic) {
+            debugPrint(
+                'Result: Logged in, on public path. Redirecting to /home.');
+            return '/home';
+          }
+          // Otherwise, allow to proceed to the current requested (protected) path.
+          debugPrint('Result: Logged in, on protected path. Allow access.');
+          return null;
+        }
+
+        // Rule 3: User is NOT Authenticated (and auth status check is complete)
+        // This means authState is AuthUnauthenticated or AuthError (without a logged-in user).
+        debugPrint('Status: User NOT authenticated (check complete).');
+        // If on a sign-in or sign-up page, allow.
+        if (isSignInPath || isSignUpPath) {
+          debugPrint('Result: Not logged in, on auth path. Allow access.');
+          return null;
+        }
+        // If on splash screen or any protected route, redirect to sign-in.
+        debugPrint(
+            'Result: Not logged in, on splash or protected path. Redirecting to /signIn.');
+        return '/signIn';
       },
 
-      // Error builder for 404 pages
-      errorBuilder: (context, state) => Scaffold(
-        appBar: AppBar(title: const Text('Error')),
+      // Error builder for 404 pages (route not found)
+      errorBuilder: (BuildContext context, GoRouterState state) => Scaffold(
+        appBar: AppBar(title: const Text('Page Not Found')),
         body: Center(
-          child: Text('Page not found: ${state.uri.path}'),
+          child: Text('Error: Page not found at ${state.uri.path}'),
         ),
       ),
 
-      // Listens to AuthBloc's stream to trigger redirects whenever auth state changes
+      // Listens to AuthBloc's stream to trigger redirects whenever auth state changes.
+      // This is crucial for reacting to login/logout events.
       refreshListenable: GoRouterRefreshStream(authBloc.stream),
     );
   }
 }
 
-// GoRouterRefreshStream remains the same
+/// A `Listenable` that notifies `GoRouter` when a `Stream` emits a new value.
+/// Used to trigger re-evaluation of the router's `redirect` logic.
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
 
   GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
+    notifyListeners(); // Notify listeners immediately on creation
     _subscription = stream.asBroadcastStream().listen(
-          (dynamic _) => notifyListeners(),
-    );
+          (dynamic _) =>
+              notifyListeners(), // Notify listeners whenever the stream emits
+        );
   }
 
   @override
   void dispose() {
-    _subscription.cancel();
+    _subscription.cancel(); // Cancel the subscription to prevent memory leaks
     super.dispose();
   }
 }

@@ -1,9 +1,9 @@
 // lib/core/pages/splash_page.dart
 
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 // import 'package:dadadu_app/features/auth/presentation/bloc/auth_state.dart';
 
 class SplashPage extends StatelessWidget {
@@ -16,10 +16,10 @@ class SplashPage extends StatelessWidget {
         listener: (context, state) {
           // This listener will only trigger when the state *changes*
           // from AuthInitial/AuthLoading to Authenticated/Unauthenticated.
-          if (state is Authenticated) {
+          if (state is AuthAuthenticated) {
             // User is authenticated, go to the home screen (which is part of the shell route)
             context.go('/home');
-          } else if (state is Unauthenticated) {
+          } else if (state is AuthUnauthenticated) {
             // User is not authenticated, go to the sign-in page
             context.go('/signIn');
           }

@@ -1,14 +1,15 @@
 // lib/features/upload/presentation/pages/create_post_page.dart
 
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:video_player/video_player.dart';
-import 'package:go_router/go_router.dart'; // For navigation
+
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // To get current user ID
 // import 'package:dadadu_app/features/auth/presentation/bloc/auth_state.dart';
 import 'package:dadadu_app/features/upload/presentation/bloc/upload_post_bloc.dart'; // Upload Bloc
 import 'package:dadadu_app/injection_container.dart'; // For GetIt
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart'; // For navigation
+import 'package:video_player/video_player.dart';
 
 class CreatePostPage extends StatefulWidget {
   final String videoPath;
@@ -45,7 +46,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   void _onPublishPressed(BuildContext context) {
     final authState = context.read<AuthBloc>().state;
-    if (authState is Authenticated) {
+    if (authState is AuthAuthenticated) {
       if (_descriptionController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

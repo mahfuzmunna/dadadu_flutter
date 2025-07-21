@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 
 class UserEntity extends Equatable {
@@ -7,12 +9,16 @@ class UserEntity extends Equatable {
   final String? firstName;
   final String? lastName;
   final String? username;
+  final String? bio;
   final String? profilePhotoUrl;
   final String? userModeEmoji; // New: For the emoji status
   final int followersCount; // New
   final int followingCount; // New
+  final int? postCount; // New
   final String? rank; // New
   final List<String> uploadedVideoUrls; // New: Assuming video URLs
+
+  final File? profilePhotoFile; // New: For profile image
 
   const UserEntity({
     required this.uid,
@@ -21,12 +27,15 @@ class UserEntity extends Equatable {
     this.firstName,
     this.lastName,
     this.username,
+    this.bio,
     this.profilePhotoUrl,
     this.userModeEmoji,
     this.followersCount = 0, // Default to 0
     this.followingCount = 0, // Default to 0
+    this.postCount, // New
     this.rank,
     this.uploadedVideoUrls = const [], // Default to empty list
+    this.profilePhotoFile, // New: For profile image
   });
 
   @override
@@ -37,13 +46,16 @@ class UserEntity extends Equatable {
     firstName,
     lastName,
     username,
-    profilePhotoUrl,
+        bio,
+        profilePhotoUrl,
     userModeEmoji,
     followersCount,
     followingCount,
-    rank,
+        postCount,
+        rank,
     uploadedVideoUrls,
-  ];
+        profilePhotoFile
+      ];
 
   // Helper to create a copy with updated values
   UserEntity copyWith({
@@ -53,12 +65,15 @@ class UserEntity extends Equatable {
     String? firstName,
     String? lastName,
     String? username,
+    String? bio,
     String? profilePhotoUrl,
     String? userModeEmoji,
     int? followersCount,
     int? followingCount,
+    int? postCount,
     String? rank,
     List<String>? uploadedVideoUrls,
+    File? profilePhotoFile,
   }) {
     return UserEntity(
       uid: uid ?? this.uid,
@@ -67,12 +82,15 @@ class UserEntity extends Equatable {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       username: username ?? this.username,
+      bio: bio ?? this.bio,
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
       userModeEmoji: userModeEmoji ?? this.userModeEmoji,
       followersCount: followersCount ?? this.followersCount,
       followingCount: followingCount ?? this.followingCount,
+      postCount: postCount ?? this.postCount,
       rank: rank ?? this.rank,
       uploadedVideoUrls: uploadedVideoUrls ?? this.uploadedVideoUrls,
+      profilePhotoFile: profilePhotoFile ?? this.profilePhotoFile,
     );
   }
 }

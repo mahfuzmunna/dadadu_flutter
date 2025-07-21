@@ -3,4 +3,17 @@ class ServerException implements Exception {
   ServerException({required this.message});
 }
 
-class CacheException implements Exception {}
+// lib/core/errors/exceptions.dart
+
+class CacheException implements Exception {
+  final String message;
+
+  const CacheException({this.message = 'A cache error occurred.'});
+}
+
+class AuthException implements Exception {
+  // Add this if not present
+  final String message;
+
+  const AuthException({this.message = 'An authentication error occurred.'});
+}

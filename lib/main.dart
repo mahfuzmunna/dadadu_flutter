@@ -1,14 +1,15 @@
 // lib/main.dart
 
+import 'package:dadadu_app/core/routes/app_router.dart';
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
+import 'package:dadadu_app/firebase_options.dart';
+import 'package:dadadu_app/injection_container.dart' as di;
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:dadadu_app/firebase_options.dart';
-import 'package:dadadu_app/core/routes/app_router.dart';
-import 'package:dadadu_app/core/theme/app_theme.dart';
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:dadadu_app/injection_container.dart' as di;
+import 'package:go_router/go_router.dart';
 
 import 'features/home/presentation/bloc/home_feed_bloc.dart';
 
@@ -44,46 +45,71 @@ void main() async {
   }
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final AuthBloc _authBloc;
+  late final HomeFeedBloc _homeFeedBloc;
+  late final ProfileBloc _profileBloc;
+
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _authBloc = di.sl<AuthBloc>();
+    _homeFeedBloc = di.sl<HomeFeedBloc>();
+    _profileBloc = di.sl<ProfileBloc>();
+
+    debugPrint('MyApp: AuthBloc instance retrieved from DI.');
+    debugPrint('MyApp: HomeFeedBloc instance retrieved from DI.');
+    debugPrint('MyApp: ProfileBloc instance retrieved from DI.');
+
+    _router = AppRouter.router(authBloc: _authBloc);
+    debugPrint('MyApp: GoRouter initialized with AuthBloc.');
+
+    _authBloc.add(AuthCheckRequested());
+  }
+
+  @override
+  void dispose() {
+    _authBloc.close();
+    _homeFeedBloc.close();
+    _profileBloc.close();
+    debugPrint('MyApp: AuthBloc disposed.');
+    debugPrint('MyApp: AuthBloc, HomeFeedBloc and ProfileBloc disposed.');
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    // 5. Provide the AuthBloc to the widget tree
+    // This allows other widgets (like SignInPage, ProfilePage, etc.) to access it.
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthBloc>(
-          create: (context) => di.sl<AuthBloc>(),
-          lazy: false,
+        BlocProvider<AuthBloc>.value(
+          value: _authBloc,
         ),
-        BlocProvider<HomeFeedBloc>( // Provide HomeFeedBloc here
-          create: (context) {
-            try {
-              final bloc = di.sl<HomeFeedBloc>();
-              debugPrint('HomeFeedBloc created by Root Provider!'); // Debug message
-              return bloc;
-            } catch (e) {
-              // Log any error during GetIt retrieval
-              debugPrint('ERROR in main.dart: Failed to create HomeFeedBloc from GetIt: $e');
-              rethrow; // Re-throw to see the original error if GetIt fails
-            }
-          },
+        BlocProvider<HomeFeedBloc>.value(
+          value: _homeFeedBloc,
+        ),
+        BlocProvider<ProfileBloc>.value(
+          value: _profileBloc,
         ),
       ],
-      child: Builder(
-        builder: (context) {
-          // Get the AuthBloc instance from the widget tree
-          final AuthBloc authBloc = context.read<AuthBloc>();
-
-          return MaterialApp.router(
-            title: 'Dadadu App',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            // CALL AppRouter.router and pass the authBloc instance
-            routerConfig: AppRouter.router(authBloc: authBloc),
-            debugShowCheckedModeBanner: false,
-          );
-        },
+      child: MaterialApp.router(
+        debugShowCheckedModeBanner: false, // Set to false for production
+        title: 'Dadadu App',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          useMaterial3: true,
+        ),
+        routerConfig: _router, // Use the configured GoRouter instance
       ),
     );
   }

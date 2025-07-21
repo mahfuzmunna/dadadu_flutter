@@ -1,35 +1,26 @@
-import '../../domain/entities/user_entity.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:cloud_firestore/cloud_firestore.dart'; // For DocumentSnapshot
+import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+
+import '../../domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
   const UserModel({
-    required String uid,
-    String? email,
-    String? displayName,
-    String? firstName,
-    String? lastName,
-    String? username,
-    String? profilePhotoUrl,
-    String? userModeEmoji,
-    int followersCount = 0,
-    int followingCount = 0,
-    String? rank,
-    List<String> uploadedVideoUrls = const [],
-  }) : super(
-    uid: uid,
-    email: email,
-    displayName: displayName,
-    firstName: firstName,
-    lastName: lastName,
-    username: username,
-    profilePhotoUrl: profilePhotoUrl,
-    userModeEmoji: userModeEmoji,
-    followersCount: followersCount,
-    followingCount: followingCount,
-    rank: rank,
-    uploadedVideoUrls: uploadedVideoUrls,
-  );
+    required super.uid,
+    super.email,
+    super.displayName,
+    super.firstName,
+    super.lastName,
+    super.username,
+    super.bio,
+    super.profilePhotoUrl,
+    super.userModeEmoji,
+    super.followersCount,
+    super.followingCount = 0,
+    super.postCount,
+    super.rank,
+    super.uploadedVideoUrls,
+    super.profilePhotoFile,
+  });
 
   factory UserModel.fromFirebaseUser(firebase_auth.User user) {
     return UserModel(
@@ -41,10 +32,12 @@ class UserModel extends UserEntity {
       firstName: null,
       lastName: null,
       username: null,
+      bio: null,
       profilePhotoUrl: null,
       userModeEmoji: null,
       followersCount: 0,
       followingCount: 0,
+      postCount: null,
       rank: null,
       uploadedVideoUrls: const [],
     );
@@ -60,10 +53,12 @@ class UserModel extends UserEntity {
       firstName: data['firstName'] as String?,
       lastName: data['lastName'] as String?,
       username: data['username'] as String?,
+      bio: data['bio'] as String?,
       profilePhotoUrl: data['profilePhotoUrl'] as String?,
       userModeEmoji: data['userModeEmoji'] as String?,
       followersCount: data['followersCount'] as int? ?? 0,
       followingCount: data['followingCount'] as int? ?? 0,
+      postCount: data['postCount'] as int?,
       rank: data['rank'] as String?,
       uploadedVideoUrls: (data['uploadedVideoUrls'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -80,10 +75,12 @@ class UserModel extends UserEntity {
       'firstName': firstName,
       'lastName': lastName,
       'username': username,
+      'bio': bio,
       'profilePhotoUrl': profilePhotoUrl,
       'userModeEmoji': userModeEmoji,
       'followersCount': followersCount,
       'followingCount': followingCount,
+      'postCount': postCount,
       'rank': rank,
       'uploadedVideoUrls': uploadedVideoUrls,
     };
