@@ -12,15 +12,21 @@ import 'package:share_plus/share_plus.dart'; // For sharing content
 // import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 // import 'package:dadadu_app/features/friends/presentation/bloc/friends_bloc.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   // This user will be null if viewing the current authenticated user's profile (from AuthBloc).
   // It will be provided if navigating to another user's profile.
   final UserEntity? viewedUser;
 
   const ProfilePage({
     super.key,
-    this.viewedUser, // Accepts an optional UserEntity
+    this.viewedUser,
   });
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
@@ -28,16 +34,15 @@ class ProfilePage extends StatelessWidget {
     final authState = context.watch<AuthBloc>().state;
     String appBarTitle = 'My Profile'; // Default title
 
-    if (viewedUser != null) {
+    if (widget.viewedUser != null) {
       // Viewing another user's profile
       appBarTitle =
-          '${viewedUser!.displayName ?? viewedUser!.username}\'s Profile';
+          '${widget.viewedUser!.displayName ?? widget.viewedUser!.username}\'s Profile';
     } else if (authState is AuthAuthenticated) {
       // Viewing current authenticated user's profile
       appBarTitle =
           '${authState.user.displayName ?? authState.user.username}\'s Profile';
     }
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -90,11 +95,11 @@ class ProfilePage extends StatelessWidget {
             // Determine which user's profile to display:
             // If viewedUser is provided, use that. Otherwise, use the current authenticated user.
             final UserEntity currentUser = state.user;
-            final UserEntity userToDisplay = viewedUser ?? currentUser;
+            final UserEntity userToDisplay = widget.viewedUser ?? currentUser;
 
             // Check if this is the current authenticated user's profile
             final bool isCurrentUserProfile =
-                (viewedUser == null || viewedUser?.uid == currentUser.uid);
+                (widget.viewedUser == null || widget.viewedUser?.uid == currentUser.uid);
 
             // Dummy data for uploaded videos
             final List<String> dummyVideoUrls = List.generate(
