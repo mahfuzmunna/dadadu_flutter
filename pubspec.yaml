@@ -27,6 +27,7 @@ dependencies:
   video_player: ^2.7.0
   flutter_sound: ^9.2.13
   just_audio: ^0.9.34
+  cached_video_player_plus: ^4.0.1 # for better performance and caching
 
   # UI/UX
   google_fonts: ^5.1.0

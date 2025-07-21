@@ -1,5 +1,6 @@
 // lib/core/routes/app_router.dart
 
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter/material.dart';
 import 'dart:async'; // For StreamSubscription
@@ -14,10 +15,12 @@ import 'package:dadadu_app/core/pages/splash_page.dart';
 
 import '../../features/discover/presentation/pages/discover_page.dart';
 import '../../features/friends/presentation/pages/friends_page.dart';
+import '../../features/home/presentation/bloc/home_feed_bloc.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 import '../../features/upload/presentation/pages/create_post_page.dart';
 import '../../features/upload/presentation/pages/upload_page.dart';
+import '../../injection_container.dart' as di;
 import '../common/widgets/scaffold_with_nav_bar.dart';
 // import 'package:dadadu_app/core/widgets/scaffold_with_navbar.dart';
 
@@ -33,6 +36,19 @@ class AppRouter {
           path: '/',
           builder: (BuildContext context, GoRouterState state) {
             return const SplashPage();
+            // return BlocProvider(
+            //   create: (context) {
+            //     try {
+            //       final bloc = di.sl<HomeFeedBloc>();
+            //       debugPrint('HomeFeedBloc created successfully!'); // Debug message
+            //       return bloc;
+            //     } catch (e) {
+            //       debugPrint('ERROR CREATING HomeFeedBloc: $e'); // Log any error during creation
+            //       rethrow; // Re-throw to see the original error
+            //     }
+            //   },
+            //   child: const HomePage(),
+            // );
           },
         ),
         GoRoute(

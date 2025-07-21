@@ -1,5 +1,6 @@
 // lib/main.dart
 
+import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,10 +10,14 @@ import 'package:dadadu_app/core/theme/app_theme.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
 
+import 'features/home/presentation/bloc/home_feed_bloc.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    await initializeCameras();
+
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
@@ -42,6 +47,7 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -49,6 +55,19 @@ class MyApp extends StatelessWidget {
         BlocProvider<AuthBloc>(
           create: (context) => di.sl<AuthBloc>(),
           lazy: false,
+        ),
+        BlocProvider<HomeFeedBloc>( // Provide HomeFeedBloc here
+          create: (context) {
+            try {
+              final bloc = di.sl<HomeFeedBloc>();
+              debugPrint('HomeFeedBloc created by Root Provider!'); // Debug message
+              return bloc;
+            } catch (e) {
+              // Log any error during GetIt retrieval
+              debugPrint('ERROR in main.dart: Failed to create HomeFeedBloc from GetIt: $e');
+              rethrow; // Re-throw to see the original error if GetIt fails
+            }
+          },
         ),
       ],
       child: Builder(

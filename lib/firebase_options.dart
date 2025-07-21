@@ -47,29 +47,30 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDg7JuspyN-8CBEKHAvHajeSa52vtK2mk0',
-    appId: '1:129605762315:web:db00ff441be2b99082360e',
-    messagingSenderId: '129605762315',
-    projectId: 'dadadu-flutter',
-    authDomain: 'dadadu-flutter.firebaseapp.com',
-    storageBucket: 'dadadu-flutter.firebasestorage.app',
-    measurementId: 'G-SM56W7T9R1',
+    apiKey: 'AIzaSyBmMpYQui8aGL1CX3493oQg4BkDzTCYi0U',
+    appId: '1:871770676449:web:c8d48650496613aac96ba0',
+    messagingSenderId: '871770676449',
+    projectId: 'brosisus-f3ce9',
+    authDomain: 'brosisus-f3ce9.firebaseapp.com',
+    storageBucket: 'brosisus-f3ce9.firebasestorage.app',
+    measurementId: 'G-RZZ2TZRHNM',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCoJNSb_RwEUuVME2u1mVuSz8fyQYr0QFI',
-    appId: '1:129605762315:android:79ad126b43150d4b82360e',
-    messagingSenderId: '129605762315',
-    projectId: 'dadadu-flutter',
-    storageBucket: 'dadadu-flutter.firebasestorage.app',
+    apiKey: 'AIzaSyDOm-pt10gOxu7q7bo0ICwLMk1o2flElNo',
+    appId: '1:871770676449:android:c0fad9a6f7493582c96ba0',
+    messagingSenderId: '871770676449',
+    projectId: 'brosisus-f3ce9',
+    storageBucket: 'brosisus-f3ce9.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBCc2glXx3UaXwYymLl95Z7bPoxgxwenKY',
-    appId: '1:129605762315:ios:974abe58ffbddacc82360e',
-    messagingSenderId: '129605762315',
-    projectId: 'dadadu-flutter',
-    storageBucket: 'dadadu-flutter.firebasestorage.app',
+    apiKey: 'AIzaSyCb4MzhMcree4mVvE1nboBaj-Man7WlVRA',
+    appId: '1:871770676449:ios:693ee6f1a9acde08c96ba0',
+    messagingSenderId: '871770676449',
+    projectId: 'brosisus-f3ce9',
+    storageBucket: 'brosisus-f3ce9.firebasestorage.app',
     iosBundleId: 'com.example.start',
   );
+
 }
