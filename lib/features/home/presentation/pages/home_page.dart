@@ -16,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final PageController _pageController = PageController();
+  late PageController _pageController;
   int _currentPageIndex = 0;
 
   @override
@@ -24,12 +24,13 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     // <<< This is where the HomeFeedBloc is being read
     // It must be available in the BuildContext at this point.
+    _pageController = PageController();
     context.read<HomeFeedBloc>().add(const FetchPosts(isInitialFetch: true));
 
     _pageController.addListener(() {
-      int newPageIndex = _pageController.page?.round() ?? 0;
+      final newPageIndex = _pageController.page?.round();
 
-      if (newPageIndex != _currentPageIndex) {
+      if (newPageIndex != null && newPageIndex != _currentPageIndex) {
         setState(() {
           _currentPageIndex = newPageIndex;
         });
@@ -105,6 +106,7 @@ class _HomePageState extends State<HomePage> {
                 final postUser = state.userCache[post.userId];
 
                 return VideoPostItem(
+                  key: ValueKey(post.id),
                   post: post,
                   postUser: postUser,
                   isCurrentPage: index == _currentPageIndex,

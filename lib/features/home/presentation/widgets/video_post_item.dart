@@ -42,28 +42,43 @@ class _VideoPostItemState extends State<VideoPostItem>
       duration: const Duration(milliseconds: 300),
     );
 
+    debugPrint(
+        'VideoPostItem ${widget.post.id} initState. isCurrentPage: ${widget.isCurrentPage}');
+
     // Initialize video only if it's the current page initially
-    // Or if the post data indicates it should be auto-played/initialized
     if (widget.isCurrentPage) {
       _initializeAndPlayVideo();
     }
   }
 
   void _initializeAndPlayVideo() {
+    debugPrint(
+        'VideoPostItem ${widget.post.id} _initializeAndPlayVideo called.');
+
     // If a controller already exists and is for the same video, don't re-initialize
     if (_videoController != null &&
         _videoController!.dataSource == widget.post.videoUrl) {
       debugPrint(
-          'Controller already exists and matches for ${widget.post.id}. Skipping re-init.');
+          'VideoPostItem ${widget.post.id} Controller already exists and matches. Skipping re-init.');
+      // Ensure it's playing if it's the current page and already initialized
+      if (widget.isCurrentPage &&
+          _videoController!.controller.value.isInitialized &&
+          !_videoController!.controller.value.isPlaying) {
+        debugPrint(
+            'VideoPostItem ${widget.post.id} Already initialized, now current, playing.');
+        _videoController!.controller.play();
+        _fadeAnimationController.forward();
+      }
       return;
     }
 
-    // Dispose of the old controller if it exists and is for a different video
+    // Dispose of the old controller if it exists (for different video or if re-init is needed)
     if (_videoController != null) {
-      debugPrint('Disposing old controller for ${widget.post.id}.');
-      _videoController!.controller
-          .removeListener(_videoListener); // Remove listener first
-      _videoController!.dispose();
+      debugPrint('VideoPostItem ${widget.post.id} Disposing old controller.');
+      if (_videoController!.controller.value.isInitialized) {
+        _videoController!.controller.removeListener(_videoListener);
+        _videoController!.dispose();
+      }
       _videoController = null; // Clear reference
     }
 
@@ -73,27 +88,37 @@ class _VideoPostItemState extends State<VideoPostItem>
     _videoController =
         CachedVideoPlayerPlus.networkUrl(Uri.parse(widget.post.videoUrl));
     debugPrint(
-        'Initializing video for ${widget.post.id}: ${widget.post.videoUrl}');
+        'VideoPostItem ${widget.post.id} Initializing new video: ${widget.post.videoUrl}');
 
     // Store the initialization future
     _initializeVideoPlayerFuture = _videoController!.initialize().then((_) {
       // Ensure widget is still mounted and controller is not null before proceeding
-      if (!mounted || _videoController == null) return;
+      if (!mounted || _videoController == null) {
+        debugPrint(
+            'VideoPostItem ${widget.post.id} Initialization finished, but widget not mounted or controller is null.');
+        return;
+      }
 
       // Check if the controller is indeed initialized before setting properties
       if (_videoController!.controller.value.isInitialized) {
+        debugPrint(
+            'VideoPostItem ${widget.post.id} Controller initialized successfully.');
         _videoController!.controller.setLooping(true);
         _videoController!.controller.setVolume(1.0);
         _videoController!.controller.addListener(_videoListener);
 
         if (widget.isCurrentPage) {
+          debugPrint(
+              'VideoPostItem ${widget.post.id} isCurrentPage is true, playing video.');
           _videoController!.controller.play();
           _fadeAnimationController.forward();
+        } else {
+          debugPrint(
+              'VideoPostItem ${widget.post.id} isCurrentPage is false, not playing video.');
         }
       } else {
-        // This case should ideally be caught by catchError, but good for robustness
         debugPrint(
-            'CachedVideoPlayerPlus failed to initialize value for ${widget.post.id}');
+            'VideoPostItem ${widget.post.id} CachedVideoPlayerPlus failed to initialize value.');
         if (mounted) {
           setState(() {
             _hasError = true;
@@ -104,7 +129,7 @@ class _VideoPostItemState extends State<VideoPostItem>
       }
     }).catchError((error) {
       debugPrint(
-          'Error caught initializing video for ${widget.post.id}: $error');
+          'VideoPostItem ${widget.post.id} Error caught during initialization: $error');
       if (mounted) {
         setState(() {
           _hasError = true;
@@ -121,71 +146,101 @@ class _VideoPostItemState extends State<VideoPostItem>
   }
 
   void _videoListener() {
-    // Only call setState if there's a specific UI update dependent on the controller state (e.g., buffering indicator)
-    // Avoid excessive setState calls within listeners if not strictly necessary for performance.
-    // For buffering, you might only need to set state when isBuffering changes.
-    // if (mounted && _videoController!.controller.value.isBuffering != _isBuffering) {
-    //   setState(() {
-    //     _isBuffering = _videoController!.controller.value.isBuffering;
-    //   });
+    // Only call setState if you need UI updates based on video state (e.g., buffering).
+    // Avoid excessive setState calls here for performance.
+    // Example:
+    // if (_videoController != null && mounted) {
+    //   final isBuffering = _videoController!.controller.value.isBuffering;
+    //   if (_isBuffering != isBuffering) { // assuming _isBuffering is a state variable
+    //     setState(() {
+    //       _isBuffering = isBuffering;
+    //     });
+    //   }
     // }
   }
 
   @override
   void didUpdateWidget(covariant VideoPostItem oldWidget) {
     super.didUpdateWidget(oldWidget);
+    debugPrint(
+        'VideoPostItem ${widget.post.id} didUpdateWidget. oldCurrent: ${oldWidget.isCurrentPage}, newCurrent: ${widget.isCurrentPage}');
 
     // Scenario 1: Video URL changes (different post)
     if (widget.post.videoUrl != oldWidget.post.videoUrl) {
-      debugPrint('Video URL changed for ${widget.post.id}. Re-initializing.');
+      debugPrint(
+          'VideoPostItem ${widget.post.id} Video URL changed. Re-initializing.');
       _fadeAnimationController.reset();
+      // Dispose old controller BEFORE initializing new one when URL changes
+      if (_videoController != null) {
+        if (_videoController!.controller.value.isInitialized) {
+          _videoController!.controller.removeListener(_videoListener);
+        }
+        _videoController!.dispose();
+        _videoController = null; // Clear reference
+      }
       _initializeAndPlayVideo();
     }
     // Scenario 2: Current page status changes (same post, but visibility changed)
     else if (widget.isCurrentPage != oldWidget.isCurrentPage) {
       if (widget.isCurrentPage) {
+        debugPrint('VideoPostItem ${widget.post.id} BECAME current page.');
         // If it becomes the current page, and controller is ready, play.
         // If not ready, attempt to initialize it.
         if (_videoController != null &&
             _videoController!.controller.value.isInitialized) {
-          debugPrint('Now current page for ${widget.post.id}. Playing.');
+          debugPrint(
+              'VideoPostItem ${widget.post.id} Controller initialized, playing.');
           _videoController!.controller.play();
           _fadeAnimationController.forward();
         } else {
           debugPrint(
-              'Becoming current page for ${widget.post.id}, but not initialized. Attempting init.');
-          _initializeAndPlayVideo();
+              'VideoPostItem ${widget.post.id} Controller not initialized, attempting init and play.');
+          _initializeAndPlayVideo(); // Attempt to initialize and play
         }
       } else {
+        debugPrint(
+            'VideoPostItem ${widget.post.id} NO LONGER current page. Attempting to pause.');
         // No longer current page: pause and seek to zero
         if (_videoController != null &&
             _videoController!.controller.value.isInitialized) {
           debugPrint(
-              'No longer current page for ${widget.post.id}. Pausing and seeking to zero.');
+              'VideoPostItem ${widget.post.id} Controller initialized, pausing and seeking to zero.');
           _videoController!.controller.pause();
           _videoController!.controller.seekTo(Duration.zero);
           _fadeAnimationController.reverse();
+          debugPrint(
+              'VideoPostItem ${widget.post.id} After pause: isPlaying = ${_videoController!.controller.value.isPlaying}');
+        } else {
+          debugPrint(
+              'VideoPostItem ${widget.post.id} Controller not initialized, nothing to pause.');
         }
-        // Optionally, if the video is far off-screen, you might want to dispose of its controller
-        // to free up resources. This depends on your PageView's `viewportFraction` and `cacheExtent`.
-        // For simplicity, we're keeping it initialized but paused.
+        // Consider disposing controller if you want to free resources for distant pages
+        // if (_videoController != null) {
+        //   _videoController!.controller.removeListener(_videoListener);
+        //   _videoController!.dispose();
+        //   _videoController = null;
+        //   _initializeVideoPlayerFuture = null;
+        //   debugPrint('VideoPostItem ${widget.post.id} Controller disposed as no longer current.');
+        // }
       }
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    debugPrint(
+        'VideoPostItem ${widget.post.id} didChangeAppLifecycleState: $state');
     // Only control if controller exists and is initialized
     if (_videoController == null ||
         !_videoController!.controller.value.isInitialized) return;
 
     if (state == AppLifecycleState.paused) {
-      debugPrint('App paused. Pausing video for ${widget.post.id}.');
+      debugPrint('VideoPostItem ${widget.post.id} App paused. Pausing video.');
       _videoController!.controller.pause();
     } else if (state == AppLifecycleState.resumed) {
       if (widget.isCurrentPage) {
         debugPrint(
-            'App resumed and current page for ${widget.post.id}. Playing video.');
+            'VideoPostItem ${widget.post.id} App resumed and current. Playing video.');
         _videoController!.controller.play();
       }
     }
@@ -193,15 +248,14 @@ class _VideoPostItemState extends State<VideoPostItem>
 
   @override
   void dispose() {
-    debugPrint('Disposing VideoPostItem for ${widget.post.id}');
+    debugPrint('VideoPostItem ${widget.post.id} dispose called.');
     // Safely remove listener and dispose controller
     if (_videoController != null) {
-      // Check if controller value is initialized before removing listener
-      // This prevents errors if dispose is called before initialize finishes
       if (_videoController!.controller.value.isInitialized) {
         _videoController!.controller.removeListener(_videoListener);
       }
       _videoController!.dispose();
+      _videoController = null; // Clear reference
     }
     _fadeAnimationController.dispose();
     WidgetsBinding.instance.removeObserver(this);
@@ -209,6 +263,7 @@ class _VideoPostItemState extends State<VideoPostItem>
   }
 
   void _togglePlayPause() {
+    debugPrint('VideoPostItem ${widget.post.id} _togglePlayPause tapped.');
     // Only toggle if controller exists and is initialized
     if (_videoController != null &&
         _videoController!.controller.value.isInitialized) {
@@ -216,8 +271,10 @@ class _VideoPostItemState extends State<VideoPostItem>
         _showPlayPauseOverlay = true;
         if (_videoController!.controller.value.isPlaying) {
           _videoController!.controller.pause();
+          debugPrint('VideoPostItem ${widget.post.id} Manual pause.');
         } else {
           _videoController!.controller.play();
+          debugPrint('VideoPostItem ${widget.post.id} Manual play.');
         }
       });
 
@@ -231,7 +288,7 @@ class _VideoPostItemState extends State<VideoPostItem>
     } else {
       // If tapped and not initialized, try to initialize it
       debugPrint(
-          'Tapped uninitialized video for ${widget.post.id}. Attempting to initialize.');
+          'VideoPostItem ${widget.post.id} Tapped uninitialized video. Attempting to initialize.');
       _initializeAndPlayVideo();
     }
   }
@@ -246,6 +303,8 @@ class _VideoPostItemState extends State<VideoPostItem>
       future: _initializeVideoPlayerFuture,
       builder: (context, snapshot) {
         if (_hasError) {
+          debugPrint(
+              'VideoPostItem ${widget.post.id} Building with error state.');
           return Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -275,6 +334,7 @@ class _VideoPostItemState extends State<VideoPostItem>
         else if (_videoController != null &&
             snapshot.connectionState == ConnectionState.done &&
             _videoController!.controller.value.isInitialized) {
+          debugPrint('VideoPostItem ${widget.post.id} Building video player.');
           return GestureDetector(
             onTap: _togglePlayPause,
             child: Stack(
@@ -350,8 +410,8 @@ class _VideoPostItemState extends State<VideoPostItem>
                           // Invoke the callback if provided and user data exists
                           if (widget.onUserTapped != null &&
                               widget.postUser != null) {
-                            widget.onUserTapped!(
-                                widget.postUser!.uid); // Pass the user ID
+                            // Assuming UserEntity has a 'uid' field
+                            widget.onUserTapped!(widget.postUser!.uid);
                           } else {
                             // Optional: provide feedback if tap can't be handled
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -370,9 +430,8 @@ class _VideoPostItemState extends State<VideoPostItem>
                               backgroundImage: (widget
                                           .postUser?.profilePhotoUrl !=
                                       null)
-                                  ? NetworkImage(widget
-                                          .postUser?.profilePhotoUrl ??
-                                      '') // It was already like this in your code, but the problem is the type is still String?
+                                  ? NetworkImage(
+                                      widget.postUser!.profilePhotoUrl ?? '')
                                   : null,
                               child: (widget.postUser?.profilePhotoUrl == null)
                                   ? const Icon(Icons.person,
@@ -496,6 +555,8 @@ class _VideoPostItemState extends State<VideoPostItem>
             ),
           );
         } else {
+          debugPrint(
+              'VideoPostItem ${widget.post.id} Building loading/placeholder.');
           // Show a loading indicator while video is not ready
           // Only show progress for the current page, or if initialization has started
           return Container(
