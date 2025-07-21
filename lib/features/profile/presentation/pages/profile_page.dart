@@ -3,8 +3,10 @@
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // For Clipboard
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:share_plus/share_plus.dart'; // For sharing content
 // You might need a ProfileBloc or FriendsBloc for Follow/Unfollow logic
 // import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 // import 'package:dadadu_app/features/friends/presentation/bloc/friends_bloc.dart';
@@ -78,25 +80,86 @@ class ProfilePage extends StatelessWidget {
                   (index) => 'https://example.com/video_$index.mp4',
             );
 
+            // Dummy referral link (replace with actual generated link from your backend/logic)
+            final String referralLink =
+                'https://dadadu.app/invite/${userToDisplay.uid.substring(0, 8)}';
+
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Profile Photo
-                  CircleAvatar(
-                    radius: 70,
-                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    backgroundImage: userToDisplay.profilePhotoUrl != null && userToDisplay.profilePhotoUrl!.isNotEmpty
-                        ? NetworkImage(userToDisplay.profilePhotoUrl!)
-                        : null,
-                    child: userToDisplay.profilePhotoUrl == null || userToDisplay.profilePhotoUrl!.isEmpty
-                        ? Icon(
-                      Icons.person_rounded,
-                      size: 70,
-                      color: Theme.of(context).colorScheme.onPrimaryContainer,
-                    )
-                        : null,
+                  // Profile Photo with Mood Icon
+                  Stack(
+                    alignment: Alignment.bottomRight,
+                    // Position the mood icon at the bottom-right
+                    children: [
+                      CircleAvatar(
+                        radius: 70,
+                        backgroundColor:
+                            Theme.of(context).colorScheme.primaryContainer,
+                        backgroundImage:
+                            userToDisplay.profilePhotoUrl != null &&
+                                    userToDisplay.profilePhotoUrl!.isNotEmpty
+                                ? NetworkImage(userToDisplay.profilePhotoUrl!)
+                                : null,
+                        child: userToDisplay.profilePhotoUrl == null ||
+                                userToDisplay.profilePhotoUrl!.isEmpty
+                            ? Icon(
+                                Icons.person_rounded,
+                                size: 70,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              )
+                            : null,
+                      ),
+                      // User Mood Icon
+                      Positioned(
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surface, // Background for the mood icon
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .shadow
+                                    .withOpacity(0.3),
+                                spreadRadius: 1,
+                                blurRadius: 4,
+                                offset: const Offset(
+                                    0, 2), // changes position of shadow
+                              ),
+                            ],
+                            border: Border.all(
+                              color: Theme.of(context).colorScheme.background,
+                              // A border color to create a "cutout" effect
+                              width:
+                                  3, // Thicker border for more pronounced cutout look
+                            ),
+                          ),
+                          child: CircleAvatar(
+                            radius: 20, // Smaller radius for the mood icon
+                            backgroundColor: Theme.of(context)
+                                .colorScheme
+                                .secondary, // Background for the actual emoji
+                            child: Text(
+                              userToDisplay.userModeEmoji ?? '😊',
+                              // Use the user's emoji or a default
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(fontSize: 20), // Adjust font size
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
 
@@ -195,7 +258,8 @@ class ProfilePage extends StatelessWidget {
                     ),
                   const SizedBox(height: 24), // Increased spacing after the action button
 
-                  // User Mode/Rank as a Chip
+                  // User Mode/Rank as a Chip (Optional: Could remove this now that emoji is on profile)
+                  // Keeping for now, as it also displays the "rank" text.
                   Chip(
                     avatar: Icon(
                       Icons.star,
@@ -228,6 +292,139 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
 
+                  // Referral Link Card (Only for current user's profile)
+                  if (isCurrentUserProfile)
+                    Card(
+                      elevation: 2,
+                      color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      margin: EdgeInsets.zero,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Invite Friends & Earn Diamonds!',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleMedium
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Share your unique referral link and earn 100 💎 for every friend who signs up using your link!',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 10),
+                              decoration: BoxDecoration(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerLow,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .outlineVariant),
+                              ),
+                              width: double.infinity,
+                              child: Text(
+                                referralLink,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                overflow:
+                                    TextOverflow.ellipsis, // Handle long links
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceAround,
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton.icon(
+                                    icon: const Icon(Icons.copy_rounded),
+                                    label: const Text('Copy Link'),
+                                    onPressed: () async {
+                                      await Clipboard.setData(
+                                          ClipboardData(text: referralLink));
+                                      ScaffoldMessenger.of(context)
+                                          .hideCurrentSnackBar();
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(
+                                        const SnackBar(
+                                            content: Text(
+                                                'Referral link copied to clipboard!')),
+                                      );
+                                    },
+                                    style: OutlinedButton.styleFrom(
+                                      foregroundColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      side: BorderSide(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: FilledButton.icon(
+                                    icon: const Icon(Icons.share_rounded),
+                                    label: const Text('Share'),
+                                    onPressed: () async {
+                                      await Share.share(
+                                          'Join me on Dadadu! Use my referral link to sign up and get started: $referralLink');
+                                    },
+                                    style: FilledButton.styleFrom(
+                                      backgroundColor:
+                                          Theme.of(context).colorScheme.primary,
+                                      foregroundColor: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 12),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  const SizedBox(height: 32),
+                  // Spacing after referral card
+
                   // About Me Section
                   Align(
                     alignment: Alignment.centerLeft,
@@ -259,9 +456,6 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 32),
-
-                  // Sign Out Button removed from here!
-                  // const SizedBox(height: 32), // Keep spacing if needed, but likely not if Sign Out is gone
 
                   // My Uploaded Videos Section
                   Align(
