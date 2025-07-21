@@ -380,6 +380,8 @@ class ProfilePage extends StatelessWidget {
                       _buildStatColumn(context, Icons.people_alt_rounded,
                           '${userToDisplay.followersCount}', 'Followers'),
                       _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${userToDisplay.followingCount}', 'Following'),
+                      _buildStatColumn(context, Icons.ondemand_video_rounded,
+                          '${dummyVideoUrls.length}', 'Videos'), // Videos count moved to the right
                       // Rank is now displayed next to the name, but you could add 'Badges' or other stats here
                     ],
                   ),
