@@ -97,21 +97,21 @@ class ProfilePage extends StatelessWidget {
                       CircleAvatar(
                         radius: 70,
                         backgroundColor:
-                            Theme.of(context).colorScheme.primaryContainer,
+                        Theme.of(context).colorScheme.primaryContainer,
                         backgroundImage:
-                            userToDisplay.profilePhotoUrl != null &&
-                                    userToDisplay.profilePhotoUrl!.isNotEmpty
-                                ? NetworkImage(userToDisplay.profilePhotoUrl!)
-                                : null,
+                        userToDisplay.profilePhotoUrl != null &&
+                            userToDisplay.profilePhotoUrl!.isNotEmpty
+                            ? NetworkImage(userToDisplay.profilePhotoUrl!)
+                            : null,
                         child: userToDisplay.profilePhotoUrl == null ||
-                                userToDisplay.profilePhotoUrl!.isEmpty
+                            userToDisplay.profilePhotoUrl!.isEmpty
                             ? Icon(
-                                Icons.person_rounded,
-                                size: 70,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onPrimaryContainer,
-                              )
+                          Icons.person_rounded,
+                          size: 70,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onPrimaryContainer,
+                        )
                             : null,
                       ),
                       // User Mood Icon
@@ -140,7 +140,7 @@ class ProfilePage extends StatelessWidget {
                               color: Theme.of(context).colorScheme.background,
                               // A border color to create a "cutout" effect
                               width:
-                                  3, // Thicker border for more pronounced cutout look
+                              3, // Thicker border for more pronounced cutout look
                             ),
                           ),
                           child: CircleAvatar(
@@ -281,13 +281,13 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Stats (Followers, Following, Videos)
+                  // Stats (Followers, Following, Rank)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildStatColumn(context, Icons.people_alt_rounded, '${userToDisplay.followersCount}', 'Followers'),
                       _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${userToDisplay.followingCount}', 'Following'),
-                      _buildStatColumn(context, Icons.videocam_rounded, '${userToDisplay.uploadedVideoUrls?.length ?? dummyVideoUrls.length}', 'Videos'),
+                      _buildStatColumn(context, Icons.military_tech_rounded, '${userToDisplay.rank ?? 'N/A'}', 'Rank'), // Changed to Rank
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -312,10 +312,10 @@ class ProfilePage extends StatelessWidget {
                                   .textTheme
                                   .titleMedium
                                   ?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    color:
-                                        Theme.of(context).colorScheme.onSurface,
-                                  ),
+                                fontWeight: FontWeight.bold,
+                                color:
+                                Theme.of(context).colorScheme.onSurface,
+                              ),
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -324,10 +324,10 @@ class ProfilePage extends StatelessWidget {
                                   .textTheme
                                   .bodyMedium
                                   ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
-                                  ),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                              ),
                             ),
                             const SizedBox(height: 16),
                             Container(
@@ -350,12 +350,12 @@ class ProfilePage extends StatelessWidget {
                                     .textTheme
                                     .bodyLarge
                                     ?.copyWith(
-                                      color:
-                                          Theme.of(context).colorScheme.primary,
-                                      fontWeight: FontWeight.w500,
-                                    ),
+                                  color:
+                                  Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.w500,
+                                ),
                                 overflow:
-                                    TextOverflow.ellipsis, // Handle long links
+                                TextOverflow.ellipsis, // Handle long links
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -380,7 +380,7 @@ class ProfilePage extends StatelessWidget {
                                     },
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor:
-                                          Theme.of(context).colorScheme.primary,
+                                      Theme.of(context).colorScheme.primary,
                                       side: BorderSide(
                                           color: Theme.of(context)
                                               .colorScheme
@@ -404,7 +404,7 @@ class ProfilePage extends StatelessWidget {
                                     },
                                     style: FilledButton.styleFrom(
                                       backgroundColor:
-                                          Theme.of(context).colorScheme.primary,
+                                      Theme.of(context).colorScheme.primary,
                                       foregroundColor: Theme.of(context)
                                           .colorScheme
                                           .onPrimary,
@@ -425,37 +425,62 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 32),
                   // Spacing after referral card
 
-                  // About Me Section
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'About Me',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Card(
-                    elevation: 1,
-                    color: Theme.of(context).colorScheme.surfaceContainerLow,
-                    margin: EdgeInsets.zero,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: Text(
-                          userToDisplay.displayName ?? (isCurrentUserProfile ? 'No bio provided. Click "Edit Profile" to add one!' : 'This user has not provided a bio.'),
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  // Match History Card (Only for current user's profile)
+                  if (isCurrentUserProfile)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Match History',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
-                          textAlign: TextAlign.left,
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        Card(
+                          elevation: 1,
+                          color: Theme.of(context).colorScheme.surfaceContainerLow,
+                          margin: EdgeInsets.zero,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.videogame_asset_rounded,
+                                    size: 48,
+                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Text(
+                                    'No match history yet.',
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Play some games to see your results here!',
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 32), // Spacing after match history card
 
                   // My Uploaded Videos Section
                   Align(
