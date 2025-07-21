@@ -14,8 +14,11 @@ import 'package:dadadu_app/core/pages/splash_page.dart';
 
 import '../../features/discover/presentation/pages/discover_page.dart';
 import '../../features/friends/presentation/pages/friends_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
+import '../../features/upload/presentation/pages/camera_screen.dart';
+import '../../features/upload/presentation/pages/create_post_page.dart';
 import '../../features/upload/presentation/pages/upload_page.dart';
-import '../common/widgets/scaffold_with_navbar.dart';
+import '../common/widgets/scaffold_with_nav_bar.dart';
 // import 'package:dadadu_app/core/widgets/scaffold_with_navbar.dart';
 
 // --- Placeholder Pages for new tabs (move to respective feature folders later) ---
@@ -42,6 +45,29 @@ class AppRouter {
           path: '/signUp',
           builder: (BuildContext context, GoRouterState state) {
             return const SignUpPage();
+          },
+        ),
+        // NEW CAMERA ROUTE
+        GoRoute(
+          path: '/camera',
+          builder: (BuildContext context, GoRouterState state) {
+            return const CameraScreen();
+          },
+        ),
+        // NEW CREATE POST ROUTE
+        GoRoute(
+          path: '/createPost',
+          builder: (BuildContext context, GoRouterState state) {
+            // Retrieve the videoPath passed as an extra
+            final String videoPath = state.extra as String;
+            return CreatePostPage(videoPath: videoPath);
+          },
+        ),
+        // Inside AppRouter.router's routes list:
+        GoRoute(
+          path: '/editProfile', // <-- This path must match exactly with context.push()
+          builder: (BuildContext context, GoRouterState state) {
+            return const EditProfilePage(); // <-- Ensure you're returning EditProfilePage
           },
         ),
 
@@ -75,11 +101,17 @@ class AppRouter {
             ),
             // Branch 3: Upload
             StatefulShellBranch(
+              // Update this branch to navigate to /camera when /upload is tapped
               routes: <RouteBase>[
                 GoRoute(
                   path: '/upload',
-                  builder: (BuildContext context, GoRouterState state) {
-                    return const UploadPage(); // Placeholder
+                  // Builder returns a simple placeholder as the actual upload flow starts on a different route
+                  builder: (BuildContext context, GoRouterState state) => const Center(child: Text('Initiating Upload...')),
+                  // We use a redirect here to immediately go to the camera screen
+                  redirect: (context, state) {
+                    // This redirect will trigger when the bottom nav bar item for /upload is tapped.
+                    // It ensures that /upload directly leads to the /camera screen.
+                    return '/camera';
                   },
                 ),
               ],
@@ -118,31 +150,53 @@ class AppRouter {
 
         final bool isAuthPath = state.uri.path == '/signIn' || state.uri.path == '/signUp';
         final bool isSplashPath = state.uri.path == '/';
+        final bool isCameraPath = state.uri.path == '/camera'; // Camera needs permissions, not necessarily logged in *yet* but usually part of post-login flow
+        final bool isCreatePostPath = state.uri.path == '/createPost'; // Post creation clearly requires being logged in
+
+        print('--- GoRouter Redirect Debug ---');
+        print('Current Path: ${state.uri.path}');
+        print('AuthBloc State: $authState');
+        print('Logged In: $loggedIn');
+        print('Is Auth Path: $isAuthPath');
+        print('Is Splash Path: $isSplashPath');
+        print('Is Camera Path: $isCameraPath'); // New debug
+        print('Is Create Post Path: $isCreatePostPath'); // New debug
         // Check if the current path is one of the valid shell paths
-        final bool isWithinAppShell = state.uri.path.startsWith('/home') ||
-            state.uri.path.startsWith('/discover') ||
-            state.uri.path.startsWith('/upload') ||
-            state.uri.path.startsWith('/friends') ||
-            state.uri.path.startsWith('/profile');
+
+        // final bool isWithinAppShell = state.uri.path.startsWith('/home') ||
+        //     state.uri.path.startsWith('/discover') ||
+        //     state.uri.path.startsWith('/upload') ||
+        //     state.uri.path.startsWith('/friends') ||
+        //     state.uri.path.startsWith('/profile');
 
 
         // 1. If authentication status is still being determined:
-        if (isAuthStatusChecking) {
-          return isSplashPath ? null : '/'; // Stay on splash, or go to splash
-        }
-
-        // 2. If authentication status has been determined:
-        //    a. User is NOT logged in:
         if (!loggedIn) {
-          // If trying to access protected content (not auth page or splash), redirect to signIn.
-          // This includes any of the shell paths.
-          return isAuthPath || isSplashPath ? null : '/signIn';
-        }
-        //    b. User IS logged in:
-        else { // loggedIn is true
+          print('Redirect Reason: User NOT logged in.');
+          // If trying to access protected content (not auth page, splash, camera, or create post), redirect to signIn.
+          // Note: Camera and CreatePost *should* be protected, but for initial flow they are direct routes.
+          // You might want to adjust this to redirect camera/createPost to signIn if user tries to directly access them without being logged in.
+          // For now, they are treated as non-protected by the router's redirect unless coming from a protected path.
+          final bool isPublicPath = isAuthPath || isSplashPath; // || isCameraPath || isCreatePostPath; // Consider making camera/createPost protected after user logs in.
+
+          if (isPublicPath) {
+            print('Result: Stay on current (Auth/Splash) path.');
+            return null;
+          } else {
+            print('Result: Redirecting to /signIn from protected path.');
+            return '/signIn';
+          }
+        } else { // loggedIn is true
+          print('Redirect Reason: User IS logged in.');
           // If trying to access splash or auth pages, redirect to home (default shell path).
-          // Otherwise (already within the app shell), allow.
-          return (isSplashPath || isAuthPath) ? '/home' : null;
+          // Otherwise (already within the app shell, or on camera/createPost), allow.
+          if (isSplashPath || isAuthPath) {
+            print('Result: Redirecting to /home (logged in, on auth/splash).');
+            return '/home';
+          } else {
+            print('Result: Stay on current (protected) path or new feature path.');
+            return null;
+          }
         }
       },
 

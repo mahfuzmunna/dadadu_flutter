@@ -18,14 +18,13 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('My Profile'),
         actions: [
+          // In ProfilePage's AppBar actions:
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Edit Profile Not Implemented Yet!')),
-              );
-            },
             tooltip: 'Edit Profile',
+            onPressed: () {
+              context.push('/editProfile'); // <-- Make sure this line is exactly here
+            },
           ),
         ],
       ),
