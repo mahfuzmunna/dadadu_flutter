@@ -1,11 +1,12 @@
 // lib/features/home/presentation/widgets/video_post_item.dart
 
-import 'package:flutter/material.dart';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
-
-import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+// Ensure these imports point to your actual entity files
+import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
+import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+// import 'package:video_player/video_player.dart'; // This import is no longer needed as CachedVideoPlayerPlus wraps it.
 
 class VideoPostItem extends StatefulWidget {
   final PostEntity post;
@@ -23,16 +24,18 @@ class VideoPostItem extends StatefulWidget {
   State<VideoPostItem> createState() => _VideoPostItemState();
 }
 
-class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProviderStateMixin {
+class _VideoPostItemState extends State<VideoPostItem>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late CachedVideoPlayerPlus _videoController;
-  Future<void>? _initializeVideoPlayerFuture; // Nullable to re-assign
+  Future<void>? _initializeVideoPlayerFuture;
   bool _showPlayPauseOverlay = false;
-  bool _hasError = false; // Track video loading errors
+  bool _hasError = false;
   late AnimationController _fadeAnimationController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _fadeAnimationController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
@@ -40,9 +43,8 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
     _initializeAndPlayVideo();
   }
 
-  // Helper method to initialize and potentially play the video
   void _initializeAndPlayVideo() {
-    _hasError = false; // Reset error state
+    _hasError = false;
     _videoController = CachedVideoPlayerPlus.networkUrl(Uri.parse(widget.post.videoUrl));
 
     _initializeVideoPlayerFuture = _videoController.initialize().then((_) {
@@ -50,14 +52,14 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
       _videoController.controller.setVolume(1.0);
       if (widget.isCurrentPage) {
         _videoController.controller.play();
-        _fadeAnimationController.forward(); // Fade in video once initialized
+        _fadeAnimationController.forward();
       }
-      _videoController.controller.addListener(_videoListener); // Add listener for buffering
+      _videoController.controller.addListener(_videoListener);
     }).catchError((error) {
       debugPrint('Error initializing video for ${widget.post.id}: $error');
       if (mounted) {
         setState(() {
-          _hasError = true; // Set error state
+          _hasError = true;
         });
       }
     });
@@ -65,30 +67,40 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
 
   void _videoListener() {
     // Optional: You can add more detailed buffering indicators here
-    // For example, if (_videoController.value.isBuffering) { /* show buffering */ }
-    // setState(() {}); // No need to call setState for buffering unless UI changes
   }
 
   @override
   void didUpdateWidget(covariant VideoPostItem oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // If the video URL changes, dispose the old controller and initialize a new one
     if (widget.post.videoUrl != oldWidget.post.videoUrl) {
-      _videoController.controller.removeListener(_videoListener); // Remove old listener
+      _videoController.controller.removeListener(_videoListener);
       _videoController.dispose();
-      _fadeAnimationController.reset(); // Reset animation for new video
+      _fadeAnimationController.reset();
       _initializeAndPlayVideo();
+    } else if (widget.isCurrentPage != oldWidget.isCurrentPage) {
+      if (_videoController.controller.value.isInitialized) {
+        if (widget.isCurrentPage) {
+          _videoController.controller.play();
+          _fadeAnimationController.forward();
+        } else {
+          _videoController.controller.pause();
+          _videoController.controller.seekTo(Duration.zero);
+          _fadeAnimationController.reverse();
+        }
+      }
     }
-    // Control playback based on visibility (isCurrentPage)
-    else if (widget.isCurrentPage != oldWidget.isCurrentPage) {
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (!_videoController.controller.value.isInitialized) return;
+
+    if (state == AppLifecycleState.paused) {
+      _videoController.controller.pause();
+    } else if (state == AppLifecycleState.resumed) {
       if (widget.isCurrentPage) {
         _videoController.controller.play();
-        _fadeAnimationController.forward(); // Fade in if coming into view
-      } else {
-        _videoController.controller.pause();
-        _videoController.controller.seekTo(Duration.zero); // Reset to start
-        _fadeAnimationController.reverse(); // Fade out if leaving view
       }
     }
   }
@@ -98,13 +110,14 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
     _videoController.controller.removeListener(_videoListener);
     _videoController.dispose();
     _fadeAnimationController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
   void _togglePlayPause() {
     if (_videoController.controller.value.isInitialized) {
       setState(() {
-        _showPlayPauseOverlay = true; // Show overlay on tap
+        _showPlayPauseOverlay = true;
         if (_videoController.controller.value.isPlaying) {
           _videoController.controller.pause();
         } else {
@@ -112,7 +125,6 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
         }
       });
 
-      // Hide the overlay after a short delay
       Future.delayed(const Duration(milliseconds: 700), () {
         if (mounted) {
           setState(() {
@@ -137,16 +149,21 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.broken_image, color: Colors.grey, size: 80),
+                Icon(Icons.broken_image,
+                    color: Theme.of(context).colorScheme.error, size: 80),
                 const SizedBox(height: 10),
-                const Text(
+                Text(
                   'Failed to load video.',
-                  style: TextStyle(color: Colors.white70, fontSize: 16),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onErrorContainer,
+                      ),
                   textAlign: TextAlign.center,
                 ),
                 Text(
                   'Please try again later.',
-                  style: TextStyle(color: Colors.white54, fontSize: 14),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -212,33 +229,101 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
 
                 // User Info and Description (Bottom Left)
                 Positioned(
-                  bottom: 90, // Adjust this value based on your BottomNavigationBar height
+                  bottom: 90,
                   left: 16,
-                  right: 90, // Leave space for buttons on the right
+                  right: 90,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        '@$username',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          shadows: [
-                            Shadow(offset: Offset(1, 1), blurRadius: 2, color: Colors.black.withOpacity(0.6)),
-                          ],
-                        ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          // User Profile Avatar - CORRECTED HERE
+                          CircleAvatar(
+                            radius: 16,
+                            backgroundColor: Colors.white.withOpacity(0.2),
+                            backgroundImage: widget.postUser?.profilePhotoUrl !=
+                                        null &&
+                                    (widget.postUser?.profilePhotoUrl) != null
+                                ? NetworkImage(
+                                    widget.postUser?.profilePhotoUrl ?? '')
+                                : null,
+                            child: (widget.postUser?.profilePhotoUrl == null ||
+                                    (widget.postUser!.profilePhotoUrl) == null)
+                                ? Icon(Icons.person,
+                                    color: Colors.white, size: 20)
+                                : null,
+                          ),
+                          const SizedBox(width: 8),
+                          // Username (without '@')
+                          Text(
+                            username,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              shadows: [
+                                Shadow(
+                                    offset: Offset(1, 1),
+                                    blurRadius: 2,
+                                    color: Colors.black.withOpacity(0.6)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          // Follow Button
+                          FilledButton.tonal(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text(
+                                        'Follow functionality coming soon!')),
+                              );
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              minimumSize: Size(0, 28),
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 0),
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            child: Text(
+                              'Follow',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelLarge
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        widget.post.description,
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                          shadows: [
-                            Shadow(offset: Offset(1, 1), blurRadius: 2, color: Colors.black.withOpacity(0.6)),
-                          ],
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.7,
+                        child: Text(
+                          widget.post.description,
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            shadows: [
+                              Shadow(
+                                  offset: Offset(1, 1),
+                                  blurRadius: 2,
+                                  color: Colors.black.withOpacity(0.6)),
+                            ],
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -246,33 +331,30 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
 
                 // Action Buttons (Right Side)
                 Positioned(
-                  bottom: 90, // Align with text content
+                  bottom: 90,
                   right: 16,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       _buildActionButton(Icons.favorite, '${widget.post.likes}', () {
-                        // TODO: Implement Like functionality
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Like button tapped!')),
                         );
                       }),
                       const SizedBox(height: 16),
                       _buildActionButton(Icons.file_download, 'Download', () {
-                        // TODO: Implement Download functionality
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Download button tapped!')),
                         );
                       }),
                       const SizedBox(height: 16),
                       _buildActionButton(Icons.share, 'Share', () {
-                        // TODO: Implement Share functionality
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Share button tapped!')),
                         );
                       }),
                       const SizedBox(height: 16),
                       _buildActionButton(Icons.comment, '${widget.post.comments}', () {
-                        // TODO: Implement Comment functionality
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Comment button tapped!')),
                         );
@@ -284,9 +366,8 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
             ),
           );
         } else {
-          // Show a placeholder or loading indicator while the video is loading
           return Container(
-            color: Colors.black, // A solid black background as a placeholder
+            color: Colors.black,
             child: Center(
               child: CircularProgressIndicator(
                 color: Theme.of(context).colorScheme.primary,
@@ -307,7 +388,16 @@ class _VideoPostItemState extends State<VideoPostItem> with SingleTickerProvider
         ),
         Text(
           label,
-          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            shadows: [
+              Shadow(
+                  offset: Offset(1, 1),
+                  blurRadius: 1,
+                  color: Colors.black.withOpacity(0.5)),
+            ],
+          ),
         ),
       ],
     );
