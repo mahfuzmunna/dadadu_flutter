@@ -377,7 +377,7 @@ class _CameraScreenState extends State<CameraScreen> with WidgetsBindingObserver
               children: [
                 IconButton(
                   icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                  onPressed: () => context.pop(),
+                  onPressed: () => context.push('/home'),
                 ),
                 if (_cameras.length > 1)
                   IconButton(
