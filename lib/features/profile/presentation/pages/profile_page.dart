@@ -5,12 +5,12 @@ import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For Clipboard
 import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:flutter_bloc/flutter/material.dart'; // For Flutter_bloc
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart'; // For sharing content
 // You might need a ProfileBloc or FriendsBloc for Follow/Unfollow logic
 // import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 // import 'package:dadadu_app/features/friends/presentation/bloc/friends_bloc.dart';
-
 
 class ProfilePage extends StatelessWidget {
   // This user will be null if viewing the current authenticated user's profile (from AuthBloc).
@@ -27,16 +27,22 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          viewedUser != null ? '${viewedUser!.username}\'s Profile' : 'My Profile', // Dynamic title
-          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineSmall
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
+          viewedUser != null
+              ? '${viewedUser!.username}\'s Profile'
+              : 'My Profile', // Dynamic title
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                // Reduced from headlineSmall
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.primary), // Changed to settings icon
+            icon: Icon(Icons.settings_rounded,
+                color: Theme.of(context)
+                    .colorScheme
+                    .primary), // Changed to settings icon
             tooltip: 'Settings / Preferences',
             onPressed: () {
               // Navigate to settings or preferences page
@@ -52,8 +58,10 @@ class ProfilePage extends StatelessWidget {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text('You have been signed out.',
-                  style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
+                content: Text(
+                  'You have been signed out.',
+                  style: TextStyle(
+                      color: Theme.of(context).colorScheme.onErrorContainer),
                 ),
                 backgroundColor: Theme.of(context).colorScheme.errorContainer,
               ),
@@ -72,12 +80,13 @@ class ProfilePage extends StatelessWidget {
             final UserEntity userToDisplay = viewedUser ?? currentUser;
 
             // Check if this is the current authenticated user's profile
-            final bool isCurrentUserProfile = (viewedUser == null || viewedUser?.uid == currentUser.uid);
+            final bool isCurrentUserProfile =
+                (viewedUser == null || viewedUser?.uid == currentUser.uid);
 
             // Dummy data for uploaded videos
             final List<String> dummyVideoUrls = List.generate(
               20,
-                  (index) => 'https://example.com/video_$index.mp4',
+              (index) => 'https://example.com/video_$index.mp4',
             );
 
             // Dummy referral link (replace with actual generated link from your backend/logic)
@@ -85,7 +94,8 @@ class ProfilePage extends StatelessWidget {
                 'https://dadadu.app/invite/${userToDisplay.uid.substring(0, 8)}';
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -97,21 +107,21 @@ class ProfilePage extends StatelessWidget {
                       CircleAvatar(
                         radius: 70,
                         backgroundColor:
-                        Theme.of(context).colorScheme.primaryContainer,
+                            Theme.of(context).colorScheme.primaryContainer,
                         backgroundImage:
-                        userToDisplay.profilePhotoUrl != null &&
-                            userToDisplay.profilePhotoUrl!.isNotEmpty
-                            ? NetworkImage(userToDisplay.profilePhotoUrl!)
-                            : null,
+                            userToDisplay.profilePhotoUrl != null &&
+                                    userToDisplay.profilePhotoUrl!.isNotEmpty
+                                ? NetworkImage(userToDisplay.profilePhotoUrl!)
+                                : null,
                         child: userToDisplay.profilePhotoUrl == null ||
-                            userToDisplay.profilePhotoUrl!.isEmpty
+                                userToDisplay.profilePhotoUrl!.isEmpty
                             ? Icon(
-                          Icons.person_rounded,
-                          size: 70,
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onPrimaryContainer,
-                        )
+                                Icons.person_rounded,
+                                size: 70,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onPrimaryContainer,
+                              )
                             : null,
                       ),
                       // User Mood Icon
@@ -140,7 +150,7 @@ class ProfilePage extends StatelessWidget {
                               color: Theme.of(context).colorScheme.background,
                               // A border color to create a "cutout" effect
                               width:
-                              3, // Thicker border for more pronounced cutout look
+                                  3, // Thicker border for more pronounced cutout look
                             ),
                           ),
                           child: CircleAvatar(
@@ -154,7 +164,9 @@ class ProfilePage extends StatelessWidget {
                               style: Theme.of(context)
                                   .textTheme
                                   .titleMedium
-                                  ?.copyWith(fontSize: 20), // Adjust font size for consistency
+                                  ?.copyWith(
+                                      fontSize:
+                                          20), // Adjust font size for consistency
                             ),
                           ),
                         ),
@@ -166,22 +178,25 @@ class ProfilePage extends StatelessWidget {
                   // User Names
                   Text(
                     '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith( // Reduced from displaySmall
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          // Reduced from displaySmall
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '@${userToDisplay.username ?? 'No Username'}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith( // Reduced from titleLarge
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          // Reduced from titleLarge
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w500,
+                        ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 16), // Increased spacing after username
+                  const SizedBox(
+                      height: 16), // Increased spacing after username
 
                   // Dynamic Action Button (Edit Profile or Follow/Unfollow)
                   if (isCurrentUserProfile)
@@ -194,20 +209,23 @@ class ProfilePage extends StatelessWidget {
                           context.push('/editProfile');
                         },
                         style: FilledButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          backgroundColor:
+                              Theme.of(context).colorScheme.primary,
+                          foregroundColor:
+                              Theme.of(context).colorScheme.onPrimary,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24), // More rounded corners
+                            borderRadius: BorderRadius.circular(
+                                24), // More rounded corners
                           ),
                         ),
                       ),
                     )
                   else
-                  // This section assumes you have a way to determine if you are already following
-                  // For now, it's a simple toggle placeholder.
-                  // You'd typically need to check `currentUser.following.contains(userToDisplay.uid)`
-                  // and dispatch events to a `FriendsBloc` or `ProfileBloc`
+                    // This section assumes you have a way to determine if you are already following
+                    // For now, it's a simple toggle placeholder.
+                    // You'd typically need to check `currentUser.following.contains(userToDisplay.uid)`
+                    // and dispatch events to a `FriendsBloc` or `ProfileBloc`
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -218,13 +236,17 @@ class ProfilePage extends StatelessWidget {
                             label: const Text('Follow'),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Following ${userToDisplay.username}')),
+                                SnackBar(
+                                    content: Text(
+                                        'Following ${userToDisplay.username}')),
                               );
                               // context.read<FriendsBloc>().add(FollowUser(userToDisplay.uid));
                             },
                             style: FilledButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primary,
-                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onPrimary,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
@@ -240,13 +262,17 @@ class ProfilePage extends StatelessWidget {
                             label: const Text('Unfollow'),
                             onPressed: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Unfollowing ${userToDisplay.username}')),
+                                SnackBar(
+                                    content: Text(
+                                        'Unfollowing ${userToDisplay.username}')),
                               );
                               // context.read<FriendsBloc>().add(UnfollowUser(userToDisplay.uid));
                             },
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: Theme.of(context).colorScheme.outline,
-                              side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.outline,
+                              side: BorderSide(
+                                  color: Theme.of(context).colorScheme.outline),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(24),
@@ -256,38 +282,81 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                  const SizedBox(height: 24), // Increased spacing after the action button
+                  const SizedBox(
+                      height: 24), // Increased spacing after the action button
 
-                  // User Mode/Rank as a Chip (Optional: Could remove this now that emoji is on profile)
-                  // Keeping for now, as it also displays the "rank" text.
-                  Chip(
-                    avatar: Icon(
-                      Icons.star,
-                      color: Theme.of(context).colorScheme.onSecondaryContainer,
-                      size: 18,
+                  // --- Start of New Mood Switch and Badges Section ---
+                  if (isCurrentUserProfile)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        // Mood Switch (Dropdown Menu)
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            icon: const Icon(
+                                Icons.sentiment_satisfied_alt_rounded),
+                            label: Text(userToDisplay.userModeEmoji != null
+                                ? 'Mood: ${userToDisplay.userModeEmoji}'
+                                : 'Set Mood'),
+                            onPressed: () {
+                              _showMoodSelectionBottomSheet(
+                                  context, userToDisplay);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .secondaryContainer,
+                              foregroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .onSecondaryContainer,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        // How Badges Work Button
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            icon: const Icon(Icons.military_tech_outlined),
+                            label: const Text('How Badges Work'),
+                            onPressed: () {
+                              _showBadgesInfoDialog(context);
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                              side: BorderSide(
+                                  color: Theme.of(context).colorScheme.outline),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    label: Text(
-                      '${userToDisplay.userModeEmoji ?? '😊'} ${userToDisplay.rank ?? 'Newbie'}',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onSecondaryContainer,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
                   const SizedBox(height: 24),
+                  // --- End of New Mood Switch and Badges Section ---
 
-                  // Stats (Followers, Following, Rank)
+                  // Stats (Followers, Following, Rank) - Adjusted to remove 'Rank' if now handled by badges
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildStatColumn(context, Icons.people_alt_rounded, '${userToDisplay.followersCount}', 'Followers'),
-                      _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${userToDisplay.followingCount}', 'Following'),
-                      _buildStatColumn(context, Icons.military_tech_rounded, '${userToDisplay.rank ?? 'N/A'}', 'Rank'), // Changed to Rank
+                      _buildStatColumn(context, Icons.people_alt_rounded,
+                          '${userToDisplay.followersCount}', 'Followers'),
+                      _buildStatColumn(context, Icons.person_add_alt_1_rounded,
+                          '${userToDisplay.followingCount}', 'Following'),
+                      // If 'Rank' is separate, you might keep it, otherwise remove or adapt.
+                      // For now, keeping it here as a generic stat, but you could add a 'Badges Earned' stat.
+                      _buildStatColumn(context, Icons.star_rate_rounded,
+                          '${userToDisplay.rank ?? 'N/A'}', 'Rank'),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -312,10 +381,10 @@ class ProfilePage extends StatelessWidget {
                                   .textTheme
                                   .titleMedium // Kept as titleMedium, good for card titles
                                   ?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color:
-                                Theme.of(context).colorScheme.onSurface,
-                              ),
+                                    fontWeight: FontWeight.bold,
+                                    color:
+                                        Theme.of(context).colorScheme.onSurface,
+                                  ),
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -324,10 +393,10 @@ class ProfilePage extends StatelessWidget {
                                   .textTheme
                                   .bodyMedium // Kept as bodyMedium
                                   ?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
+                                  ),
                             ),
                             const SizedBox(height: 16),
                             Container(
@@ -350,12 +419,12 @@ class ProfilePage extends StatelessWidget {
                                     .textTheme
                                     .bodyLarge // Kept as bodyLarge
                                     ?.copyWith(
-                                  color:
-                                  Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.w500,
+                                    ),
                                 overflow:
-                                TextOverflow.ellipsis, // Handle long links
+                                    TextOverflow.ellipsis, // Handle long links
                               ),
                             ),
                             const SizedBox(height: 16),
@@ -380,7 +449,7 @@ class ProfilePage extends StatelessWidget {
                                     },
                                     style: OutlinedButton.styleFrom(
                                       foregroundColor:
-                                      Theme.of(context).colorScheme.primary,
+                                          Theme.of(context).colorScheme.primary,
                                       side: BorderSide(
                                           color: Theme.of(context)
                                               .colorScheme
@@ -404,7 +473,7 @@ class ProfilePage extends StatelessWidget {
                                     },
                                     style: FilledButton.styleFrom(
                                       backgroundColor:
-                                      Theme.of(context).colorScheme.primary,
+                                          Theme.of(context).colorScheme.primary,
                                       foregroundColor: Theme.of(context)
                                           .colorScheme
                                           .onPrimary,
@@ -432,15 +501,20 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         Text(
                           'Match History',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineSmall
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onSurface,
-                          ),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(
+                                // Reduced from headlineSmall
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Card(
                           elevation: 1,
-                          color: Theme.of(context).colorScheme.surfaceContainerLow,
+                          color:
+                              Theme.of(context).colorScheme.surfaceContainerLow,
                           margin: EdgeInsets.zero,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -455,22 +529,36 @@ class ProfilePage extends StatelessWidget {
                                   Icon(
                                     Icons.videogame_asset_rounded,
                                     size: 48,
-                                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                                   ),
                                   const SizedBox(height: 12),
                                   Text(
                                     'No match history yet.',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith( // Reduced from titleMedium for better hierarchy
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          // Reduced from titleMedium for better hierarchy
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
                                     'Play some games to see your results here!',
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith( // Kept bodyMedium
-                                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                    ),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodyMedium
+                                        ?.copyWith(
+                                          // Kept bodyMedium
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
                                     textAlign: TextAlign.center,
                                   ),
                                 ],
@@ -480,17 +568,19 @@ class ProfilePage extends StatelessWidget {
                         ),
                       ],
                     ),
-                  const SizedBox(height: 32), // Spacing after match history card
+                  const SizedBox(
+                      height: 32), // Spacing after match history card
 
                   // My Uploaded Videos Section
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '${userToDisplay.username ?? 'User'}\'s Uploaded Videos (${dummyVideoUrls.length})', // Dynamic title
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineSmall
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            // Reduced from headlineSmall
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -498,10 +588,15 @@ class ProfilePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        isCurrentUserProfile ? 'You haven\'t uploaded any videos yet. Start sharing your moments!' : 'This user has no videos uploaded yet.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith( // Kept bodyMedium
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                        isCurrentUserProfile
+                            ? 'You haven\'t uploaded any videos yet. Start sharing your moments!'
+                            : 'This user has no videos uploaded yet.',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              // Kept bodyMedium
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                         textAlign: TextAlign.center,
                       ),
                     )
@@ -509,7 +604,8 @@ class ProfilePage extends StatelessWidget {
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
@@ -523,11 +619,15 @@ class ProfilePage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
-                          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh,
                           child: InkWell(
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Tapped video ${index + 1} from ${userToDisplay.username}')),
+                                SnackBar(
+                                    content: Text(
+                                        'Tapped video ${index + 1} from ${userToDisplay.username}')),
                               );
                             },
                             child: Column(
@@ -541,10 +641,16 @@ class ProfilePage extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   'Video ${index + 1}',
-                                  style: Theme.of(context).textTheme.labelMedium?.copyWith( // Adjusted from labelMedium
-                                    color: Theme.of(context).colorScheme.onSurface,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .labelMedium
+                                      ?.copyWith(
+                                        // Adjusted from labelMedium
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurface,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                 ),
                               ],
                             ),
@@ -555,8 +661,7 @@ class ProfilePage extends StatelessWidget {
                 ],
               ),
             );
-          }
-          else if (state is AuthUnauthenticated || state is AuthError) {
+          } else if (state is AuthUnauthenticated || state is AuthError) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -571,10 +676,11 @@ class ProfilePage extends StatelessWidget {
                     const SizedBox(height: 24),
                     Text(
                       'Please sign in to view this profile.',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurface,
+                                fontWeight: FontWeight.bold,
+                              ),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 16),
@@ -584,9 +690,12 @@ class ProfilePage extends StatelessWidget {
                       label: const Text('Go to Sign In'),
                       style: FilledButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        foregroundColor:
+                            Theme.of(context).colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 16),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ],
@@ -600,26 +709,154 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatColumn(BuildContext context, IconData icon, String count, String label) {
+  Widget _buildStatColumn(
+      BuildContext context, IconData icon, String count, String label) {
     return Column(
       children: [
         Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
         const SizedBox(height: 4),
         Text(
           count,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineMedium
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                // Reduced from headlineMedium
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
         ),
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontWeight: FontWeight.w500,
-          ),
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontWeight: FontWeight.w500,
+              ),
         ),
       ],
+    );
+  }
+
+  // New method to show the mood selection bottom sheet
+  void _showMoodSelectionBottomSheet(BuildContext context, UserEntity user) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext bc) {
+        return Wrap(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Select Your Mood',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            ),
+            ListTile(
+              leading: const Text('😊', style: TextStyle(fontSize: 24)),
+              title: const Text('Happy'),
+              onTap: () {
+                // TODO: Dispatch an event to AuthBloc/ProfileBloc to update userModeEmoji
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mood set to Happy!')),
+                );
+                Navigator.pop(bc);
+              },
+            ),
+            ListTile(
+              leading: const Text('😞', style: TextStyle(fontSize: 24)),
+              title: const Text('Sad'),
+              onTap: () {
+                // TODO: Dispatch an event to AuthBloc/ProfileBloc to update userModeEmoji
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mood set to Sad.')),
+                );
+                Navigator.pop(bc);
+              },
+            ),
+            ListTile(
+              leading: const Text('🤩', style: TextStyle(fontSize: 24)),
+              title: const Text('Excited'),
+              onTap: () {
+                // TODO: Dispatch an event to AuthBloc/ProfileBloc to update userModeEmoji
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Mood set to Excited!')),
+                );
+                Navigator.pop(bc);
+              },
+            ),
+            const SizedBox(height: 20),
+          ],
+        );
+      },
+    );
+  }
+
+  // New method to show the badges info dialog
+  void _showBadgesInfoDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              Icon(Icons.military_tech_rounded,
+                  color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 10),
+              Text(
+                'Dadadu Badge System',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'Earn badges by achieving various milestones in Dadadu!',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                ),
+                const SizedBox(height: 10),
+                Text(
+                  '- **First Win Badge**: Awarded for your first game victory.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  '- **Social Butterfly**: Earned by following 10 friends.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  '- **Video Creator**: Upload 5 videos to your profile.',
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                Text(
+                  '\nKeep playing and exploring to discover more badges!',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(
+                'Got It!',
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }
