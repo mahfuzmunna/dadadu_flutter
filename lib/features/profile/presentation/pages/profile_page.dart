@@ -833,7 +833,7 @@ class ProfilePage extends StatelessWidget {
               Expanded( // Added Expanded to allow text to wrap if needed
                 child: Text(
                   'Dadadu Badge System',
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
@@ -852,24 +852,35 @@ class ProfilePage extends StatelessWidget {
                       ),
                 ),
                 const SizedBox(height: 10),
+                _buildBadgeInfoRow(context, '🍃', 'LEAF (0 - 9,999 diamonds)',
+                    'Starting level for new users.'),
+                _buildBadgeInfoRow(
+                    context,
+                    '☘️',
+                    'THREELEAF (10K - 999K diamonds)',
+                    'Active community member.'),
+                _buildBadgeInfoRow(context, '🎀',
+                    'FIVELEAF (1M - 9.9M diamonds)', 'Popular creator status.'),
+                _buildBadgeInfoRow(context, '👑', 'DADALORD (10M+ diamonds)',
+                    'Elite status worth \$10,000+ with +2% per million diamonds.'),
+                const SizedBox(height: 16),
                 Text(
-                  '- **First Win Badge**: Awarded for your first game victory.',
+                  '📈 Higher badges = more prestige + marketplace value',
                   style: Theme.of(context).textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
                 ),
-                Text(
-                  '- **Social Butterfly**: Earned by following 10 friends.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  '- **Video Creator**: Upload 5 videos to your profile.',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-                Text(
-                  '\nKeep playing and exploring to discover more badges!',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                ),
+                // Text(
+                //   '- **First Win Badge**: Awarded for your first game victory.',
+                //   style: Theme.of(context).textTheme.bodyMedium,
+                // ),
+                // Text(
+                //   '- **Social Butterfly**: Earned by following 10 friends.',
+                //   style: Theme.of(context).textTheme.bodyMedium,
+                // ),
+                // Text(
+                //   '- **Video Creator**: Upload 5 videos to your profile.',
+                //   style: Theme.of(context).textTheme.bodyMedium,
+                // ),
               ],
             ),
           ),
@@ -886,6 +897,39 @@ class ProfilePage extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildBadgeInfoRow(
+      BuildContext context, String emoji, String title, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 20)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  description,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
