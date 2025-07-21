@@ -189,24 +189,25 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // User Names
-                  // Display Name
-                  Text(
-                    '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          // Reduced from displaySmall
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
+                  // Display Name (Removed, username will be more prominent)
+                  // Text(
+                  //   '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
+                  //   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  //         // Reduced from displaySmall
+                  //         fontWeight: FontWeight.bold,
+                  //         color: Theme.of(context).colorScheme.onSurface,
+                  //       ),
+                  //   textAlign: TextAlign.center,
+                  //   overflow: TextOverflow.ellipsis,
+                  // ),
+                  // const SizedBox(height: 4),
                   // Username
                   Text(
                     '@${userToDisplay.username ?? 'No Username'}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        // Reduced from titleLarge
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        // Increased from titleMedium to headlineSmall
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        // color: Theme.of(context).colorScheme.onSurface, // Make it more prominent
                         fontWeight: FontWeight.w500),
                     textAlign: TextAlign.center,
                   ),
