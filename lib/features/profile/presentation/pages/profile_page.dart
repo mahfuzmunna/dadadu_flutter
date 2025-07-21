@@ -1,8 +1,9 @@
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+// Ensure your AuthState is correctly defined, likely in auth_bloc.dart itself
 // import 'package:dadadu_app/features/auth/presentation/bloc/auth_state.dart';
 
 
@@ -11,98 +12,95 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The Scaffold provides the basic visual structure, including the AppBar.
-    // This is fine to have even when nested inside a ShellRoute's body,
-    // as it allows for a page-specific AppBar.
+    // Scaffold provides the basic visual structure, allowing for a page-specific AppBar.
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: Text(
+          'My Profile',
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+        centerTitle: true, // Center the app bar title for a cleaner look
         actions: [
-          // In ProfilePage's AppBar actions:
           IconButton(
-            icon: const Icon(Icons.edit),
+            icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
             tooltip: 'Edit Profile',
             onPressed: () {
-              context.push('/editProfile'); // <-- Make sure this line is exactly here
+              context.push('/editProfile'); // Navigate to edit profile page
             },
           ),
+          // Adding a small gap to the edge for better visual balance
+          const SizedBox(width: 8),
         ],
       ),
-      // The body contains the main content of the page.
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          // This listener is important for reacting to authentication state changes,
-          // for example, when a user signs out.
           if (state is AuthUnauthenticated) {
             ScaffoldMessenger.of(context).hideCurrentSnackBar();
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(
-                  'You have been signed out.',
+                content: Text('You have been signed out.',
                   style: TextStyle(color: Theme.of(context).colorScheme.onErrorContainer),
                 ),
                 backgroundColor: Theme.of(context).colorScheme.errorContainer,
               ),
             );
-            // The GoRouter redirect in app_router.dart should handle navigation
-            // to signIn page.
+            // The GoRouter redirect in app_router.dart should handle navigation to signIn page.
           }
         },
         builder: (context, state) {
-          // Show a loading indicator if the authentication state is still being determined.
           if (state is AuthLoading) {
             return const Center(
               child: CircularProgressIndicator(),
             );
-          }
-          // Display the user's profile if they are authenticated.
-          else if (state is AuthAuthenticated) {
+          } else if (state is AuthAuthenticated) {
             final UserEntity user = state.user;
 
-            // --- IMPORTANT FOR TESTING SCROLLABILITY ---
-            // This dummy list ensures that the "My Uploaded Videos" section
-            // generates enough items to make the page scroll, even if the
-            // actual user.uploadedVideoUrls is empty or short.
+            // Dummy data for uploaded videos to ensure scrollability and visual demo
             final List<String> dummyVideoUrls = List.generate(
               20, // Generate 20 dummy video entries
                   (index) => 'https://example.com/video_$index.mp4', // Dummy URL
             );
-            // -------------------------------------------
 
-            return SingleChildScrollView( // <--- THIS WIDGET MAKES THE CONTENT SCROLLABLE
-              padding: const EdgeInsets.all(24.0), // Padding around the entire content
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center, // Center items horizontally
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Center(
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                      backgroundImage: user.profilePhotoUrl != null && user.profilePhotoUrl!.isNotEmpty
-                          ? NetworkImage(user.profilePhotoUrl!)
-                          : null,
-                      child: user.profilePhotoUrl == null || user.profilePhotoUrl!.isEmpty
-                          ? Icon(
-                        Icons.person,
-                        size: 60,
-                        color: Theme.of(context).colorScheme.onPrimaryContainer,
-                      )
-                          : null,
-                    ),
+                  // Profile Photo
+                  CircleAvatar(
+                    radius: 70, // Slightly larger avatar
+                    backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                    backgroundImage: user.profilePhotoUrl != null && user.profilePhotoUrl!.isNotEmpty
+                        ? NetworkImage(user.profilePhotoUrl!)
+                        : null,
+                    child: user.profilePhotoUrl == null || user.profilePhotoUrl!.isEmpty
+                        ? Icon(
+                      Icons.person_rounded, // Rounded person icon
+                      size: 70,
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                    )
+                        : null,
                   ),
                   const SizedBox(height: 24),
+
+                  // User Names
                   Text(
                     '${user.firstName ?? ''} ${user.lastName ?? ''}',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith( // Larger, more prominent name
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     '@${user.username ?? 'No Username'}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -115,109 +113,160 @@ class ProfilePage extends StatelessWidget {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(20),
+
+                  // User Mode/Rank as a Chip
+                  Chip(
+                    avatar: Icon(
+                      Icons.star, // Example icon for rank/mode
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      size: 18,
                     ),
-                    child: Text(
+                    label: Text(
                       '${user.userModeEmoji ?? '😊'} ${user.rank ?? 'Newbie'}',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSecondaryContainer,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  // Stats (Followers, Following, Videos)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildStatColumn(context, '${user.followersCount}', 'Followers'),
-                      _buildStatColumn(context, '${user.followingCount}', 'Following'),
-                      // Use actual user data for video count if available, otherwise dummy.
-                      _buildStatColumn(context, '${user.uploadedVideoUrls?.length ?? dummyVideoUrls.length}', 'Videos'),
+                      _buildStatColumn(context, Icons.people_alt_rounded, '${user.followersCount}', 'Followers'),
+                      _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${user.followingCount}', 'Following'),
+                      _buildStatColumn(context, Icons.videocam_rounded, '${user.uploadedVideoUrls?.length ?? dummyVideoUrls.length}', 'Videos'),
                     ],
                   ),
                   const SizedBox(height: 32),
+
+                  // About Me Section
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'About Me:',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      'About Me',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    user.displayName ?? 'No bio provided.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  Card(
+                    elevation: 1, // Subtle elevation for the card
+                    color: Theme.of(context).colorScheme.surfaceContainerLow, // Material 3 surface color
+                    margin: EdgeInsets.zero, // Remove default card margin
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SizedBox(
+                        width: double.infinity, // Expand to fill width
+                        child: Text(
+                          user.displayName ?? 'No bio provided. Click edit profile to add one!',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                          textAlign: TextAlign.left,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(height: 32),
+
+                  // Sign Out Button
                   SizedBox(
                     width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.logout),
+                    child: FilledButton.icon( // Using FilledButton for more prominence
+                      icon: const Icon(Icons.logout_rounded),
                       label: const Text('Sign Out'),
                       onPressed: () {
                         context.read<AuthBloc>().add(AuthSignOutRequested());
                       },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Theme.of(context).colorScheme.error,
-                        side: BorderSide(color: Theme.of(context).colorScheme.error),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.error, // Error color for sign out
+                        foregroundColor: Theme.of(context).colorScheme.onError,
                         padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
+
+                  // My Uploaded Videos Section
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'My Uploaded Videos (${dummyVideoUrls.length}):', // Display count based on dummy data for demo
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      'My Uploaded Videos (${dummyVideoUrls.length})', // Display count based on dummy data for demo
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // Conditionally display message or GridView
-                  if (dummyVideoUrls.isEmpty) // Check dummy list for demo
-                    Text(
-                      'No videos uploaded yet.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  if (dummyVideoUrls.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        'No videos uploaded yet. Start sharing your moments!',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     )
                   else
-                  // GridView.builder for displaying uploaded videos
+                  // GridView for displaying uploaded videos
                     GridView.builder(
-                      shrinkWrap: true, // Crucial: Makes GridView only take as much space as its children, preventing infinite height errors.
-                      physics: const NeverScrollableScrollPhysics(), // Crucial: Disables GridView's own scrolling, allowing the parent SingleChildScrollView to handle it.
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
-                        crossAxisSpacing: 8,
-                        mainAxisSpacing: 8,
+                        crossAxisSpacing: 10, // Increased spacing
+                        mainAxisSpacing: 10, // Increased spacing
                         childAspectRatio: 0.7, // Adjust aspect ratio of each video thumbnail
                       ),
-                      itemCount: dummyVideoUrls.length, // Use dummy list count for demo
+                      itemCount: dummyVideoUrls.length,
                       itemBuilder: (context, index) {
-                        // In a real app, you would use user.uploadedVideoUrls[index]
-                        // and load a video thumbnail or actual video player.
-                        return Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surfaceVariant,
-                            borderRadius: BorderRadius.circular(8),
+                        return Card( // Use Card for each video thumbnail
+                          clipBehavior: Clip.antiAlias, // For rounded corners on image/content
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Center(
-                            child: Icon(
-                              Icons.videocam,
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              size: 40,
+                          elevation: 2,
+                          color: Theme.of(context).colorScheme.surfaceContainerHigh,
+                          child: InkWell( // Make the card tappable
+                            onTap: () {
+                              // Handle video tap, e.g., navigate to video player
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Tapped video ${index + 1}')),
+                              );
+                            },
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.play_circle_filled_rounded, // Play icon
+                                  color: Theme.of(context).colorScheme.primary,
+                                  size: 48,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Video ${index + 1}',
+                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                    color: Theme.of(context).colorScheme.onSurface,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -227,28 +276,70 @@ class ProfilePage extends StatelessWidget {
               ),
             );
           }
-          // Fallback if authentication state is not handled, though redirects should prevent this.
-          return const Center(child: Text('User data not available or session expired.'));
+          // Fallback for unauthenticated or error state (though redirects should handle auth status)
+          else if (state is AuthUnauthenticated || state is AuthError) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.lock_person_rounded,
+                      size: 80,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Please sign in to view your profile.',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      onPressed: () => context.go('/signIn'), // Use go for full redirect
+                      icon: const Icon(Icons.login_rounded),
+                      label: const Text('Go to Sign In'),
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primary,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+          // Generic fallback
+          return const Center(child: Text('An unexpected error occurred.'));
         },
       ),
     );
   }
 
-  // Helper function to build stat columns (Followers, Following, Videos)
-  Widget _buildStatColumn(BuildContext context, String count, String label) {
+  // Helper function to build stat columns (Followers, Following, Videos) with an icon
+  Widget _buildStatColumn(BuildContext context, IconData icon, String count, String label) {
     return Column(
       children: [
+        Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary), // Added icon
+        const SizedBox(height: 4),
         Text(
           count,
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith( // Slightly larger count
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          style: Theme.of(context).textTheme.bodySmall?.copyWith( // Smaller label
             color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ],
