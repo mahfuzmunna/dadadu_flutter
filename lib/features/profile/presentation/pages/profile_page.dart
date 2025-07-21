@@ -804,12 +804,15 @@ class ProfilePage extends StatelessWidget {
               Icon(Icons.military_tech_rounded,
                   color: Theme.of(context).colorScheme.primary),
               const SizedBox(width: 10),
-              Text(
-                'Dadadu Badge System',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
+              Expanded( // Added Expanded to allow text to wrap if needed
+                child: Text(
+                  'Dadadu Badge System',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                  overflow: TextOverflow.ellipsis, // Optional: Handle overflow
+                ),
               ),
             ],
           ),
