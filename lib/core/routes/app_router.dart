@@ -5,6 +5,7 @@ import 'dart:async'; // For StreamSubscription
 import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // Ensure this path is correct
 // Core imports
 import 'package:dadadu_app/core/pages/splash_page.dart';
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart'; // Needed for ProfilePage viewedUser
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
 // Feature-specific page imports
 import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
@@ -14,19 +15,23 @@ import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart
 import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
-import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
+import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart'; // <--- NEW IMPORT for SettingsPage
 import 'package:dadadu_app/features/upload/presentation/pages/create_post_page.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../features/upload/presentation/pages/camera_screen.dart';
 
 class AppRouter {
   static GoRouter router({required AuthBloc authBloc}) {
     return GoRouter(
       // The initial location for the router
       initialLocation: '/',
+      debugLogDiagnostics: true,
+      // Keep for debugging redirects
 
       routes: <RouteBase>[
-        // --- Routes that do NOT have the bottom navigation bar ---
+        // --- Top-level Routes (no bottom navigation bar) ---
 
         GoRoute(
           path: '/',
@@ -51,8 +56,13 @@ class AppRouter {
         GoRoute(
           path: '/createPost',
           builder: (BuildContext context, GoRouterState state) {
-            final String videoPath =
-                state.extra as String; // Cast extra to String
+            // Ensure extra is not null and is of expected type before casting
+            final String? videoPath = state.extra as String?;
+            if (videoPath == null) {
+              // Handle error: perhaps redirect to camera or show an error page
+              return const Center(
+                  child: Text('Error: No video path provided!'));
+            }
             return CreatePostPage(videoPath: videoPath);
           },
         ),
@@ -61,9 +71,13 @@ class AppRouter {
           builder: (BuildContext context, GoRouterState state) =>
               const EditProfilePage(),
         ),
+        GoRoute(
+          path: '/settings', // <--- NEW SETTINGS ROUTE HERE
+          builder: (BuildContext context, GoRouterState state) =>
+              const SettingsPage(),
+        ),
 
         // --- ShellRoute for the main app content with a bottom navigation bar ---
-        // This is where the main navigation branches start.
         StatefulShellRoute.indexedStack(
           builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
             return ScaffoldWithNavBar(navigationShell: navigationShell);
@@ -117,7 +131,37 @@ class AppRouter {
                 GoRoute(
                   path: '/profile',
                   builder: (BuildContext context, GoRouterState state) =>
-                      const ProfilePage(),
+                      const ProfilePage(), // Displays current user's profile
+                  routes: [
+                    // Nested route for other user profiles: /profile/:userId
+                    GoRoute(
+                      path: ':userId',
+                      builder: (BuildContext context, GoRouterState state) {
+                        final String userId = state.pathParameters['userId']!;
+                        // TODO: Implement actual user fetching logic here based on userId.
+                        // This is a placeholder for fetching another user's profile data.
+                        final UserEntity dummyOtherUser = UserEntity(
+                          uid: userId,
+                          username: 'User_$userId',
+                          firstName: 'Other',
+                          lastName: 'User',
+                          profilePhotoUrl:
+                              'https://via.placeholder.com/150/CCCCCC/000000?text=$userId',
+                          email: 'user$userId@example.com',
+                          followersCount: 100,
+                          followingCount: 50,
+                          uploadedVideoUrls: List.generate(5, (i) => 'url_$i'),
+                          displayName:
+                              'This is a dummy bio for user $userId. They love Flutter!',
+                          userModeEmoji: '😎',
+                          rank: 'Pro',
+                        );
+                        return ProfilePage(
+                            viewedUser:
+                                dummyOtherUser); // Pass the fetched/dummy user
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -131,35 +175,18 @@ class AppRouter {
         final bool loggedIn = authState is AuthAuthenticated;
         final bool isAuthStatusChecking = authState is AuthInitial || authState is AuthLoading;
 
-        // Define specific path types
         final String currentPath = state.uri.path;
-        final bool isSplashPath = currentPath == '/'; // <--- Defined here
+        final bool isSplashPath = currentPath == '/';
         final bool isSignInPath = currentPath == '/signIn';
         final bool isSignUpPath = currentPath == '/signUp';
 
-        // Define public paths (accessible without login or during login process)
-        // Public paths are splash, sign-in, sign-up
-        final bool isCurrentPathPublic =
-            isSplashPath || isSignInPath || isSignUpPath;
+        // Define public paths that do NOT require authentication
+        const List<String> publicPaths = ['/', '/signIn', '/signUp'];
+        final bool isCurrentPathPublic = publicPaths.contains(currentPath);
 
-        // Define paths that implicitly require authentication (camera and create post are part of post-login flow)
-        // This includes all routes within the shell, plus direct routes like camera/createPost/editProfile
-        final bool isCurrentPathInAppShell = currentPath.startsWith('/home') ||
-            currentPath.startsWith('/discover') ||
-            currentPath.startsWith('/upload') ||
-            currentPath.startsWith('/friends') ||
-            currentPath.startsWith('/profile');
-
-        const List<String> protectedPathsOutsideShell = [
-          '/camera',
-          '/createPost',
-          '/editProfile'
-        ];
-        final bool isCurrentPathProtectedOutsideShell =
-            protectedPathsOutsideShell.contains(currentPath);
-
-        final bool isCurrentPathProtected =
-            isCurrentPathInAppShell || isCurrentPathProtectedOutsideShell;
+        // Define paths that require authentication (any path not public)
+        // This implicitly includes all shell routes and other direct protected routes
+        final bool isCurrentPathProtected = !isCurrentPathPublic;
 
         // --- Debugging Prints (helpful during development) ---
         debugPrint('--- GoRouter Redirect Check ---');
@@ -167,9 +194,6 @@ class AppRouter {
         debugPrint('AuthBloc State: $authState');
         debugPrint('Logged In: $loggedIn');
         debugPrint('Is Auth Status Checking: $isAuthStatusChecking');
-        debugPrint('Is Splash Path: $isSplashPath'); // Debug print
-        debugPrint('Is Sign In Path: $isSignInPath'); // Debug print
-        debugPrint('Is Sign Up Path: $isSignUpPath'); // Debug print
         debugPrint('Is Current Path Public: $isCurrentPathPublic');
         debugPrint('Is Current Path Protected: $isCurrentPathProtected');
         debugPrint('-----------------------------');
@@ -180,11 +204,11 @@ class AppRouter {
         if (isAuthStatusChecking) {
           debugPrint('Status: Auth checking.');
           // Stay on splash page while checking auth status.
-          // If trying to access any other route before check is done, go to splash.
+          // If trying to access any other route before check is done, redirect to splash.
           return isSplashPath ? null : '/';
         }
 
-        // Rule 2: User IS Authenticated
+        // Rule 2: User IS Authenticated (AuthAuthenticated)
         if (loggedIn) {
           debugPrint('Status: User authenticated.');
           // If on a public path (splash, sign-in, sign-up), redirect to home (default app start).
@@ -198,8 +222,7 @@ class AppRouter {
           return null;
         }
 
-        // Rule 3: User is NOT Authenticated (and auth status check is complete)
-        // This means authState is AuthUnauthenticated or AuthError (without a logged-in user).
+        // Rule 3: User is NOT Authenticated (AuthUnauthenticated or AuthError, and check is complete)
         debugPrint('Status: User NOT authenticated (check complete).');
         // If on a sign-in or sign-up page, allow.
         if (isSignInPath || isSignUpPath) {

@@ -1,8 +1,10 @@
+// lib/features/profile/presentation/pages/profile_page.dart (UPDATED)
+
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 // You might need a ProfileBloc or FriendsBloc for Follow/Unfollow logic
 // import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 // import 'package:dadadu_app/features/friends/presentation/bloc/friends_bloc.dart';
@@ -36,10 +38,7 @@ class ProfilePage extends StatelessWidget {
             tooltip: 'Settings / Preferences',
             onPressed: () {
               // Navigate to settings or preferences page
-              // context.push('/settings'); // Example navigation
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Settings button pressed!')),
-              );
+              context.push('/settings'); // <--- Updated to push to /settings
             },
           ),
           const SizedBox(width: 8),
@@ -261,27 +260,8 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  // Sign Out Button (Only for current user's profile)
-                  if (isCurrentUserProfile)
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        icon: const Icon(Icons.logout_rounded),
-                        label: const Text('Sign Out'),
-                        onPressed: () {
-                          context.read<AuthBloc>().add(AuthSignOutRequested());
-                        },
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.error,
-                          foregroundColor: Theme.of(context).colorScheme.onError,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                      ),
-                    ),
-                  const SizedBox(height: 32), // Add spacing even if button is not there
+                  // Sign Out Button removed from here!
+                  // const SizedBox(height: 32), // Keep spacing if needed, but likely not if Sign Out is gone
 
                   // My Uploaded Videos Section
                   Align(
@@ -371,7 +351,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Please sign in to view this profile.', // Changed message
+                      'Please sign in to view this profile.',
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
