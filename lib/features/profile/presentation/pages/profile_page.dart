@@ -3,35 +3,45 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
-// Ensure your AuthState is correctly defined, likely in auth_bloc.dart itself
-// import 'package:dadadu_app/features/auth/presentation/bloc/auth_state.dart';
+// You might need a ProfileBloc or FriendsBloc for Follow/Unfollow logic
+// import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
+// import 'package:dadadu_app/features/friends/presentation/bloc/friends_bloc.dart';
 
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  // This user will be null if viewing the current authenticated user's profile (from AuthBloc).
+  // It will be provided if navigating to another user's profile.
+  final UserEntity? viewedUser;
+
+  const ProfilePage({
+    super.key,
+    this.viewedUser, // Accepts an optional UserEntity
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Scaffold provides the basic visual structure, allowing for a page-specific AppBar.
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'My Profile',
+          viewedUser != null ? '${viewedUser!.username}\'s Profile' : 'My Profile', // Dynamic title
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.onSurface,
           ),
         ),
-        centerTitle: true, // Center the app bar title for a cleaner look
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.edit, color: Theme.of(context).colorScheme.primary),
-            tooltip: 'Edit Profile',
+            icon: Icon(Icons.settings_rounded, color: Theme.of(context).colorScheme.primary), // Changed to settings icon
+            tooltip: 'Settings / Preferences',
             onPressed: () {
-              context.push('/editProfile'); // Navigate to edit profile page
+              // Navigate to settings or preferences page
+              // context.push('/settings'); // Example navigation
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Settings button pressed!')),
+              );
             },
           ),
-          // Adding a small gap to the edge for better visual balance
           const SizedBox(width: 8),
         ],
       ),
@@ -47,7 +57,6 @@ class ProfilePage extends StatelessWidget {
                 backgroundColor: Theme.of(context).colorScheme.errorContainer,
               ),
             );
-            // The GoRouter redirect in app_router.dart should handle navigation to signIn page.
           }
         },
         builder: (context, state) {
@@ -56,12 +65,18 @@ class ProfilePage extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           } else if (state is AuthAuthenticated) {
-            final UserEntity user = state.user;
+            // Determine which user's profile to display:
+            // If viewedUser is provided, use that. Otherwise, use the current authenticated user.
+            final UserEntity currentUser = state.user;
+            final UserEntity userToDisplay = viewedUser ?? currentUser;
 
-            // Dummy data for uploaded videos to ensure scrollability and visual demo
+            // Check if this is the current authenticated user's profile
+            final bool isCurrentUserProfile = (viewedUser == null || viewedUser?.uid == currentUser.uid);
+
+            // Dummy data for uploaded videos
             final List<String> dummyVideoUrls = List.generate(
-              20, // Generate 20 dummy video entries
-                  (index) => 'https://example.com/video_$index.mp4', // Dummy URL
+              20,
+                  (index) => 'https://example.com/video_$index.mp4',
             );
 
             return SingleChildScrollView(
@@ -71,14 +86,14 @@ class ProfilePage extends StatelessWidget {
                 children: [
                   // Profile Photo
                   CircleAvatar(
-                    radius: 70, // Slightly larger avatar
+                    radius: 70,
                     backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                    backgroundImage: user.profilePhotoUrl != null && user.profilePhotoUrl!.isNotEmpty
-                        ? NetworkImage(user.profilePhotoUrl!)
+                    backgroundImage: userToDisplay.profilePhotoUrl != null && userToDisplay.profilePhotoUrl!.isNotEmpty
+                        ? NetworkImage(userToDisplay.profilePhotoUrl!)
                         : null,
-                    child: user.profilePhotoUrl == null || user.profilePhotoUrl!.isEmpty
+                    child: userToDisplay.profilePhotoUrl == null || userToDisplay.profilePhotoUrl!.isEmpty
                         ? Icon(
-                      Icons.person_rounded, // Rounded person icon
+                      Icons.person_rounded,
                       size: 70,
                       color: Theme.of(context).colorScheme.onPrimaryContainer,
                     )
@@ -88,8 +103,8 @@ class ProfilePage extends StatelessWidget {
 
                   // User Names
                   Text(
-                    '${user.firstName ?? ''} ${user.lastName ?? ''}',
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith( // Larger, more prominent name
+                    '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
+                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -97,32 +112,99 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '@${user.username ?? 'No Username'}',
+                    '@${userToDisplay.username ?? 'No Username'}',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    user.email ?? 'No Email',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  const SizedBox(height: 16), // Increased spacing after username
+
+                  // Dynamic Action Button (Edit Profile or Follow/Unfollow)
+                  if (isCurrentUserProfile)
+                    SizedBox(
+                      width: 200, // Fixed width for the button
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.edit_rounded),
+                        label: const Text('Edit Profile'),
+                        onPressed: () {
+                          context.push('/editProfile');
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.primary,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24), // More rounded corners
+                          ),
+                        ),
+                      ),
+                    )
+                  else
+                  // This section assumes you have a way to determine if you are already following
+                  // For now, it's a simple toggle placeholder.
+                  // You'd typically need to check `currentUser.following.contains(userToDisplay.uid)`
+                  // and dispatch events to a `FriendsBloc` or `ProfileBloc`
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 150, // Example width
+                          child: FilledButton.icon(
+                            icon: const Icon(Icons.person_add_rounded),
+                            label: const Text('Follow'),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Following ${userToDisplay.username}')),
+                              );
+                              // context.read<FriendsBloc>().add(FollowUser(userToDisplay.uid));
+                            },
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Theme.of(context).colorScheme.primary,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        SizedBox(
+                          width: 150, // Example width
+                          child: OutlinedButton.icon(
+                            icon: const Icon(Icons.person_remove_rounded),
+                            label: const Text('Unfollow'),
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Unfollowing ${userToDisplay.username}')),
+                              );
+                              // context.read<FriendsBloc>().add(UnfollowUser(userToDisplay.uid));
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Theme.of(context).colorScheme.outline,
+                              side: BorderSide(color: Theme.of(context).colorScheme.outline),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(24),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24), // Increased spacing after the action button
 
                   // User Mode/Rank as a Chip
                   Chip(
                     avatar: Icon(
-                      Icons.star, // Example icon for rank/mode
+                      Icons.star,
                       color: Theme.of(context).colorScheme.onSecondaryContainer,
                       size: 18,
                     ),
                     label: Text(
-                      '${user.userModeEmoji ?? '😊'} ${user.rank ?? 'Newbie'}',
+                      '${userToDisplay.userModeEmoji ?? '😊'} ${userToDisplay.rank ?? 'Newbie'}',
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: Theme.of(context).colorScheme.onSecondaryContainer,
                         fontWeight: FontWeight.w600,
@@ -140,9 +222,9 @@ class ProfilePage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _buildStatColumn(context, Icons.people_alt_rounded, '${user.followersCount}', 'Followers'),
-                      _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${user.followingCount}', 'Following'),
-                      _buildStatColumn(context, Icons.videocam_rounded, '${user.uploadedVideoUrls?.length ?? dummyVideoUrls.length}', 'Videos'),
+                      _buildStatColumn(context, Icons.people_alt_rounded, '${userToDisplay.followersCount}', 'Followers'),
+                      _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${userToDisplay.followingCount}', 'Following'),
+                      _buildStatColumn(context, Icons.videocam_rounded, '${userToDisplay.uploadedVideoUrls?.length ?? dummyVideoUrls.length}', 'Videos'),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -160,15 +242,15 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Card(
-                    elevation: 1, // Subtle elevation for the card
-                    color: Theme.of(context).colorScheme.surfaceContainerLow, // Material 3 surface color
-                    margin: EdgeInsets.zero, // Remove default card margin
+                    elevation: 1,
+                    color: Theme.of(context).colorScheme.surfaceContainerLow,
+                    margin: EdgeInsets.zero,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: SizedBox(
-                        width: double.infinity, // Expand to fill width
+                        width: double.infinity,
                         child: Text(
-                          user.displayName ?? 'No bio provided. Click edit profile to add one!',
+                          userToDisplay.displayName ?? (isCurrentUserProfile ? 'No bio provided. Click "Edit Profile" to add one!' : 'This user has not provided a bio.'),
                           style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                             color: Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
@@ -179,32 +261,33 @@ class ProfilePage extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  // Sign Out Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon( // Using FilledButton for more prominence
-                      icon: const Icon(Icons.logout_rounded),
-                      label: const Text('Sign Out'),
-                      onPressed: () {
-                        context.read<AuthBloc>().add(AuthSignOutRequested());
-                      },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Theme.of(context).colorScheme.error, // Error color for sign out
-                        foregroundColor: Theme.of(context).colorScheme.onError,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  // Sign Out Button (Only for current user's profile)
+                  if (isCurrentUserProfile)
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        icon: const Icon(Icons.logout_rounded),
+                        label: const Text('Sign Out'),
+                        onPressed: () {
+                          context.read<AuthBloc>().add(AuthSignOutRequested());
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          foregroundColor: Theme.of(context).colorScheme.onError,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 32), // Add spacing even if button is not there
 
                   // My Uploaded Videos Section
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'My Uploaded Videos (${dummyVideoUrls.length})', // Display count based on dummy data for demo
+                      '${userToDisplay.username ?? 'User'}\'s Uploaded Videos (${dummyVideoUrls.length})', // Dynamic title
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
@@ -216,7 +299,7 @@ class ProfilePage extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        'No videos uploaded yet. Start sharing your moments!',
+                        isCurrentUserProfile ? 'You haven\'t uploaded any videos yet. Start sharing your moments!' : 'This user has no videos uploaded yet.',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
@@ -224,37 +307,35 @@ class ProfilePage extends StatelessWidget {
                       ),
                     )
                   else
-                  // GridView for displaying uploaded videos
                     GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 3,
-                        crossAxisSpacing: 10, // Increased spacing
-                        mainAxisSpacing: 10, // Increased spacing
-                        childAspectRatio: 0.7, // Adjust aspect ratio of each video thumbnail
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 0.7,
                       ),
                       itemCount: dummyVideoUrls.length,
                       itemBuilder: (context, index) {
-                        return Card( // Use Card for each video thumbnail
-                          clipBehavior: Clip.antiAlias, // For rounded corners on image/content
+                        return Card(
+                          clipBehavior: Clip.antiAlias,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
                           elevation: 2,
                           color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                          child: InkWell( // Make the card tappable
+                          child: InkWell(
                             onTap: () {
-                              // Handle video tap, e.g., navigate to video player
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Tapped video ${index + 1}')),
+                                SnackBar(content: Text('Tapped video ${index + 1} from ${userToDisplay.username}')),
                               );
                             },
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
-                                  Icons.play_circle_filled_rounded, // Play icon
+                                  Icons.play_circle_filled_rounded,
                                   color: Theme.of(context).colorScheme.primary,
                                   size: 48,
                                 ),
@@ -276,7 +357,6 @@ class ProfilePage extends StatelessWidget {
               ),
             );
           }
-          // Fallback for unauthenticated or error state (though redirects should handle auth status)
           else if (state is AuthUnauthenticated || state is AuthError) {
             return Center(
               child: Padding(
@@ -291,7 +371,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 24),
                     Text(
-                      'Please sign in to view your profile.',
+                      'Please sign in to view this profile.', // Changed message
                       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                         fontWeight: FontWeight.bold,
@@ -300,7 +380,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     FilledButton.icon(
-                      onPressed: () => context.go('/signIn'), // Use go for full redirect
+                      onPressed: () => context.go('/signIn'),
                       icon: const Icon(Icons.login_rounded),
                       label: const Text('Go to Sign In'),
                       style: FilledButton.styleFrom(
@@ -315,29 +395,27 @@ class ProfilePage extends StatelessWidget {
               ),
             );
           }
-          // Generic fallback
           return const Center(child: Text('An unexpected error occurred.'));
         },
       ),
     );
   }
 
-  // Helper function to build stat columns (Followers, Following, Videos) with an icon
   Widget _buildStatColumn(BuildContext context, IconData icon, String count, String label) {
     return Column(
       children: [
-        Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary), // Added icon
+        Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
         const SizedBox(height: 4),
         Text(
           count,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith( // Slightly larger count
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith( // Smaller label
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
             color: Theme.of(context).colorScheme.onSurfaceVariant,
             fontWeight: FontWeight.w500,
           ),
