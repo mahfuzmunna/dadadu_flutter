@@ -80,7 +80,7 @@ class FirebaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             'followersCount': 0,
             'followingCount': 0,
                   'postCount': 0,
-                  'rank': 'Newbie',
+                  'rank': 'Leaf',
                   'uploadedVideoUrls': const [],
                   'createdAt': FieldValue.serverTimestamp(),
             'updatedAt': FieldValue.serverTimestamp(),
@@ -130,7 +130,7 @@ class FirebaseAuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           followersCount: 0,
           followingCount: 0,
           postCount: 0,
-          rank: 'Newbie',
+          rank: 'Leaf',
           uploadedVideoUrls: const [], // Empty list for new user
         );
 

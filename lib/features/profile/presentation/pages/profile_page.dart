@@ -176,23 +176,51 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // User Names
-                  Text(
-                    '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          // Reduced from displaySmall
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
+                          style: Theme.of(context)
+                              .textTheme
+                              .headlineMedium
+                              ?.copyWith(
+                                // Reduced from displaySmall
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSurface,
+                              ),
+                          textAlign: TextAlign.center,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                    textAlign: TextAlign.center,
+                      ),
+                      if (userToDisplay.rank != null &&
+                          userToDisplay.rank!.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Chip(
+                            avatar: Icon(Icons.star_rounded,
+                                color: Theme.of(context).colorScheme.onSecondaryContainer, size: 18),
+                            label: Text(
+                              userToDisplay.rank!,
+                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                                color: Theme.of(context).colorScheme.onSecondaryContainer
+                              )
+                            ),
+                            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '@${userToDisplay.username ?? 'No Username'}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          // Reduced from titleLarge
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith( // Reduced from titleLarge
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w500),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(
@@ -345,18 +373,14 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 24),
                   // --- End of New Mood Switch and Badges Section ---
 
-                  // Stats (Followers, Following, Rank) - Adjusted to remove 'Rank' if now handled by badges
+                  // Stats (Followers, Following) - Rank is now shown next to display name
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _buildStatColumn(context, Icons.people_alt_rounded,
                           '${userToDisplay.followersCount}', 'Followers'),
-                      _buildStatColumn(context, Icons.person_add_alt_1_rounded,
-                          '${userToDisplay.followingCount}', 'Following'),
-                      // If 'Rank' is separate, you might keep it, otherwise remove or adapt.
-                      // For now, keeping it here as a generic stat, but you could add a 'Badges Earned' stat.
-                      _buildStatColumn(context, Icons.star_rate_rounded,
-                          '${userToDisplay.rank ?? 'N/A'}', 'Rank'),
+                      _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${userToDisplay.followingCount}', 'Following'),
+                      // Rank is now displayed next to the name, but you could add 'Badges' or other stats here
                     ],
                   ),
                   const SizedBox(height: 32),
