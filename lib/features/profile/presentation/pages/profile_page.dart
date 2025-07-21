@@ -28,7 +28,7 @@ class ProfilePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           viewedUser != null ? '${viewedUser!.username}\'s Profile' : 'My Profile', // Dynamic title
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineSmall
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.onSurface,
           ),
@@ -153,8 +153,8 @@ class ProfilePage extends StatelessWidget {
                               // Use the user's emoji or a default
                               style: Theme.of(context)
                                   .textTheme
-                                  .headlineSmall
-                                  ?.copyWith(fontSize: 20), // Adjust font size
+                                  .titleMedium
+                                  ?.copyWith(fontSize: 20), // Adjust font size for consistency
                             ),
                           ),
                         ),
@@ -166,7 +166,7 @@ class ProfilePage extends StatelessWidget {
                   // User Names
                   Text(
                     '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
-                    style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith( // Reduced from displaySmall
                       fontWeight: FontWeight.bold,
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
@@ -175,7 +175,7 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     '@${userToDisplay.username ?? 'No Username'}',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith( // Reduced from titleLarge
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontWeight: FontWeight.w500,
                     ),
@@ -310,7 +310,7 @@ class ProfilePage extends StatelessWidget {
                               'Invite Friends & Earn Diamonds!',
                               style: Theme.of(context)
                                   .textTheme
-                                  .titleMedium
+                                  .titleMedium // Kept as titleMedium, good for card titles
                                   ?.copyWith(
                                 fontWeight: FontWeight.bold,
                                 color:
@@ -322,7 +322,7 @@ class ProfilePage extends StatelessWidget {
                               'Share your unique referral link and earn 100 💎 for every friend who signs up using your link!',
                               style: Theme.of(context)
                                   .textTheme
-                                  .bodyMedium
+                                  .bodyMedium // Kept as bodyMedium
                                   ?.copyWith(
                                 color: Theme.of(context)
                                     .colorScheme
@@ -348,7 +348,7 @@ class ProfilePage extends StatelessWidget {
                                 referralLink,
                                 style: Theme.of(context)
                                     .textTheme
-                                    .bodyLarge
+                                    .bodyLarge // Kept as bodyLarge
                                     ?.copyWith(
                                   color:
                                   Theme.of(context).colorScheme.primary,
@@ -432,7 +432,7 @@ class ProfilePage extends StatelessWidget {
                       children: [
                         Text(
                           'Match History',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineSmall
                             fontWeight: FontWeight.bold,
                             color: Theme.of(context).colorScheme.onSurface,
                           ),
@@ -460,7 +460,7 @@ class ProfilePage extends StatelessWidget {
                                   const SizedBox(height: 12),
                                   Text(
                                     'No match history yet.',
-                                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                    style: Theme.of(context).textTheme.titleMedium?.copyWith( // Reduced from titleMedium for better hierarchy
                                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                     textAlign: TextAlign.center,
@@ -468,7 +468,7 @@ class ProfilePage extends StatelessWidget {
                                   const SizedBox(height: 4),
                                   Text(
                                     'Play some games to see your results here!',
-                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    style: Theme.of(context).textTheme.bodyMedium?.copyWith( // Kept bodyMedium
                                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                                     ),
                                     textAlign: TextAlign.center,
@@ -487,7 +487,7 @@ class ProfilePage extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       '${userToDisplay.username ?? 'User'}\'s Uploaded Videos (${dummyVideoUrls.length})', // Dynamic title
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineSmall
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
@@ -499,7 +499,7 @@ class ProfilePage extends StatelessWidget {
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
                         isCurrentUserProfile ? 'You haven\'t uploaded any videos yet. Start sharing your moments!' : 'This user has no videos uploaded yet.',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith( // Kept bodyMedium
                           color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         textAlign: TextAlign.center,
@@ -541,7 +541,7 @@ class ProfilePage extends StatelessWidget {
                                 const SizedBox(height: 8),
                                 Text(
                                   'Video ${index + 1}',
-                                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                  style: Theme.of(context).textTheme.labelMedium?.copyWith( // Adjusted from labelMedium
                                     color: Theme.of(context).colorScheme.onSurface,
                                     fontWeight: FontWeight.w600,
                                   ),
@@ -607,7 +607,7 @@ class ProfilePage extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           count,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+          style: Theme.of(context).textTheme.titleLarge?.copyWith( // Reduced from headlineMedium
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
           ),

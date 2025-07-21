@@ -1,6 +1,7 @@
 // lib/core/theme/app_theme.dart
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'; // Import google_fonts package
 
 class AppTheme {
   // Define a single seed color for your app's primary palette
@@ -18,8 +19,30 @@ class AppTheme {
     brightness: Brightness.dark,
   );
 
+  // Helper function to build a text theme with Montserrat
+  static TextTheme _buildMontserratTextTheme(TextTheme base) {
+    return base.copyWith(
+      displayLarge: GoogleFonts.nunito(textStyle: base.displayLarge),
+      displayMedium: GoogleFonts.nunito(textStyle: base.displayMedium),
+      displaySmall: GoogleFonts.nunito(textStyle: base.displaySmall),
+      headlineLarge: GoogleFonts.nunito(textStyle: base.headlineLarge),
+      headlineMedium: GoogleFonts.nunito(textStyle: base.headlineMedium),
+      headlineSmall: GoogleFonts.nunito(textStyle: base.headlineSmall),
+      titleLarge: GoogleFonts.nunito(textStyle: base.titleLarge),
+      titleMedium: GoogleFonts.nunito(textStyle: base.titleMedium),
+      titleSmall: GoogleFonts.nunito(textStyle: base.titleSmall),
+      bodyLarge: GoogleFonts.nunito(textStyle: base.bodyLarge),
+      bodyMedium: GoogleFonts.nunito(textStyle: base.bodyMedium),
+      bodySmall: GoogleFonts.nunito(textStyle: base.bodySmall),
+      labelLarge: GoogleFonts.nunito(textStyle: base.labelLarge),
+      labelMedium: GoogleFonts.nunito(textStyle: base.labelMedium),
+      labelSmall: GoogleFonts.nunito(textStyle: base.labelSmall),
+    );
+  }
+
   // Light Theme Data
   static ThemeData get lightTheme {
+    final ThemeData baseTheme = ThemeData.light(); // Get the default light theme
     return ThemeData(
       colorScheme: _lightColorScheme,
       useMaterial3: true, // Crucial for Material 3
@@ -28,13 +51,13 @@ class AppTheme {
         foregroundColor: _lightColorScheme.onPrimaryContainer,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(
+        titleTextStyle: _buildMontserratTextTheme(baseTheme.textTheme).titleLarge?.copyWith( // Apply Montserrat via helper
           color: _lightColorScheme.onPrimaryContainer,
-          fontSize: 20,
+          // fontSize: 20, // Let the textTheme define the size unless specific override is needed
           fontWeight: FontWeight.bold,
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardThemeData( // Use CardTheme, not CardThemeData
         color: _lightColorScheme.surfaceContainerHigh,
         elevation: 1,
         shape: RoundedRectangleBorder(
@@ -64,8 +87,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: _lightColorScheme.error, width: 2.0),
         ),
-        labelStyle: TextStyle(color: _lightColorScheme.onSurfaceVariant),
-        hintStyle: TextStyle(color: _lightColorScheme.onSurfaceVariant.withOpacity(0.6)),
+        labelStyle: _buildMontserratTextTheme(baseTheme.textTheme).bodyLarge?.copyWith(color: _lightColorScheme.onSurfaceVariant), // Apply Montserrat
+        hintStyle: _buildMontserratTextTheme(baseTheme.textTheme).bodyLarge?.copyWith(color: _lightColorScheme.onSurfaceVariant.withOpacity(0.6)), // Apply Montserrat
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -75,10 +98,10 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16, // Let the textTheme define the size
             fontWeight: FontWeight.bold,
-            color: _lightColorScheme.onPrimary,
+            color: _lightColorScheme.onPrimary, // This color will be overridden by foregroundColor
           ),
         ),
       ),
@@ -90,10 +113,10 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: _lightColorScheme.onPrimary,
+            color: _lightColorScheme.onPrimary, // This color will be overridden by foregroundColor
           ),
         ),
       ),
@@ -105,10 +128,10 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: _lightColorScheme.primary,
+            color: _lightColorScheme.primary, // This color will be overridden by foregroundColor
           ),
         ),
       ),
@@ -119,10 +142,10 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16,
             fontWeight: FontWeight.w500,
-            color: _lightColorScheme.primary,
+            color: _lightColorScheme.primary, // This color will be overridden by foregroundColor
           ),
         ),
       ),
@@ -130,21 +153,14 @@ class AppTheme {
         backgroundColor: _lightColorScheme.tertiaryContainer,
         foregroundColor: _lightColorScheme.onTertiaryContainer,
       ),
-      // Add more component themes as needed (e.g., BottomNavigationBarTheme, TabBarTheme)
-      // Custom TextTheme if you want to override default Material 3 typography
-      textTheme: const TextTheme(
-        // Example: If you want to customize headlineLarge
-        headlineLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
-        // Add more text styles as needed
-      ),
+      // Apply the Montserrat text theme to the entire app
+      textTheme: _buildMontserratTextTheme(baseTheme.textTheme),
     );
   }
 
   // Dark Theme Data
   static ThemeData get darkTheme {
+    final ThemeData baseTheme = ThemeData.dark(); // Get the default dark theme
     return ThemeData(
       colorScheme: _darkColorScheme,
       useMaterial3: true, // Crucial for Material 3
@@ -153,13 +169,13 @@ class AppTheme {
         foregroundColor: _darkColorScheme.onPrimaryContainer,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(
+        titleTextStyle: _buildMontserratTextTheme(baseTheme.textTheme).titleLarge?.copyWith( // Apply Montserrat via helper
           color: _darkColorScheme.onPrimaryContainer,
-          fontSize: 20,
+          // fontSize: 20,
           fontWeight: FontWeight.bold,
         ),
       ),
-      cardTheme: CardThemeData(
+      cardTheme: CardThemeData( // Use CardTheme, not CardThemeData
         color: _darkColorScheme.surfaceContainerHigh,
         elevation: 1,
         shape: RoundedRectangleBorder(
@@ -189,8 +205,8 @@ class AppTheme {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: _darkColorScheme.error, width: 2.0),
         ),
-        labelStyle: TextStyle(color: _darkColorScheme.onSurfaceVariant),
-        hintStyle: TextStyle(color: _darkColorScheme.onSurfaceVariant.withOpacity(0.6)),
+        labelStyle: _buildMontserratTextTheme(baseTheme.textTheme).bodyLarge?.copyWith(color: _darkColorScheme.onSurfaceVariant), // Apply Montserrat
+        hintStyle: _buildMontserratTextTheme(baseTheme.textTheme).bodyLarge?.copyWith(color: _darkColorScheme.onSurfaceVariant.withOpacity(0.6)), // Apply Montserrat
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -200,8 +216,8 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16,
             fontWeight: FontWeight.bold,
             color: _darkColorScheme.onPrimary,
           ),
@@ -215,8 +231,8 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16,
             fontWeight: FontWeight.bold,
             color: _darkColorScheme.onPrimary,
           ),
@@ -230,8 +246,8 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16,
             fontWeight: FontWeight.bold,
             color: _darkColorScheme.primary,
           ),
@@ -244,8 +260,8 @@ class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          textStyle: TextStyle(
-            fontSize: 16,
+          textStyle: _buildMontserratTextTheme(baseTheme.textTheme).labelLarge?.copyWith( // Apply Montserrat
+            // fontSize: 16,
             fontWeight: FontWeight.w500,
             color: _darkColorScheme.primary,
           ),
@@ -255,12 +271,8 @@ class AppTheme {
         backgroundColor: _darkColorScheme.tertiaryContainer,
         foregroundColor: _darkColorScheme.onTertiaryContainer,
       ),
-      textTheme: const TextTheme(
-        headlineLarge: TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
+      // Apply the Montserrat text theme to the entire app
+      textTheme: _buildMontserratTextTheme(baseTheme.textTheme),
     );
   }
 }

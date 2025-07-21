@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'core/theme/app_theme.dart';
 import 'features/home/presentation/bloc/home_feed_bloc.dart';
 
 void main() async {
@@ -105,10 +106,8 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false, // Set to false for production
         title: 'Dadadu App',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-          useMaterial3: true,
-        ),
+        theme: AppTheme.lightTheme,
+        darkTheme: AppTheme.darkTheme,
         routerConfig: _router, // Use the configured GoRouter instance
       ),
     );
