@@ -176,53 +176,53 @@ class ProfilePage extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // User Names
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(
-                                // Reduced from displaySmall
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSurface,
-                              ),
-                          textAlign: TextAlign.center,
-                          overflow: TextOverflow.ellipsis,
+                  // Display Name
+                  Text(
+                    '${userToDisplay.firstName ?? ''} ${userToDisplay.lastName ?? ''}',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          // Reduced from displaySmall
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
-                      ),
-                      if (userToDisplay.rank != null &&
-                          userToDisplay.rank!.isNotEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Chip(
-                            avatar: Icon(Icons.star_rounded,
-                                color: Theme.of(context).colorScheme.onSecondaryContainer, size: 18),
-                            label: Text(
-                              userToDisplay.rank!,
-                              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).colorScheme.onSecondaryContainer
-                              )
-                            ),
-                            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          ),
-                        ),
-                    ],
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
+                  // Username
                   Text(
                     '@${userToDisplay.username ?? 'No Username'}',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith( // Reduced from titleLarge
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        // Reduced from titleLarge
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w500),
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 8),
+                  // Spacing after username
+
+                  // Rank Chip (moved below username)
+                  if (userToDisplay.rank != null &&
+                      userToDisplay.rank!.isNotEmpty)
+                    Chip(
+                      avatar: Icon(Icons.star_rounded,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSecondaryContainer,
+                          size: 18),
+                      label: Text(userToDisplay.rank!,
+                          style: Theme.of(context)
+                              .textTheme
+                              .labelMedium
+                              ?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSecondaryContainer)),
+                      backgroundColor:
+                          Theme.of(context).colorScheme.secondaryContainer,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 5), // Adjusted padding
+                    ),
                   const SizedBox(
                       height: 16), // Increased spacing after username
 
