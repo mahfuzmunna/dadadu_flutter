@@ -24,17 +24,30 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Access AuthBloc to get current user details for the AppBar title
+    final authState = context.watch<AuthBloc>().state;
+    String appBarTitle = 'My Profile'; // Default title
+
+    if (viewedUser != null) {
+      // Viewing another user's profile
+      appBarTitle =
+          '${viewedUser!.displayName ?? viewedUser!.username}\'s Profile';
+    } else if (authState is AuthAuthenticated) {
+      // Viewing current authenticated user's profile
+      appBarTitle =
+          '${authState.user.displayName ?? authState.user.username}\'s Profile';
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          viewedUser != null
-              ? '${viewedUser!.username}\'s Profile'
-              : 'My Profile', // Dynamic title
+          appBarTitle,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                // Reduced from headlineSmall
                 fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         ),
         centerTitle: true,
         actions: [
