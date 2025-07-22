@@ -17,9 +17,10 @@ abstract class Failure extends Equatable {
 
 class ServerFailure extends Failure {
   final String message;
+  final String code;
   // Removed 'const' from the constructor here.
   // Now, 'message' can be a runtime value, and it can be passed to super.
-  ServerFailure(this.message) : super([message]);
+  ServerFailure(this.message, {this.code = ""}) : super([message]);
 }
 
 class CacheFailure extends Failure {

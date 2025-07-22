@@ -14,7 +14,7 @@ class SignInUseCase implements UseCase<UserEntity, SignInParams> {
 
   @override
   Future<Either<Failure, UserEntity>> call(SignInParams params) async {
-    return await repository.signInWithEmailAndPassword(
+    return await repository.signIn(
       email: params.email,
       password: params.password,
     );

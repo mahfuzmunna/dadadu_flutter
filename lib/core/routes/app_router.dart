@@ -21,6 +21,7 @@ import 'package:dadadu_app/features/upload/presentation/pages/upload_page_t.dart
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/auth/presentation/pages/sign_up_page.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 
 class AppRouter {
@@ -47,11 +48,11 @@ class AppRouter {
         ),
         // Removed explicit /signUp route if LoginPage handles both.
         // If you still have a separate SignUpPage, keep its route here.
-        // GoRoute(
-        //   path: '/signUp',
-        //   builder: (BuildContext context, GoRouterState state) =>
-        //       const SignUpPage(),
-        // ),
+        GoRoute(
+          path: '/signUp',
+          builder: (BuildContext context, GoRouterState state) =>
+              const SignUpPage(),
+        ),
         GoRoute(
           path: '/forgot-password', // Route for password reset
           builder: (BuildContext context, GoRouterState state) =>

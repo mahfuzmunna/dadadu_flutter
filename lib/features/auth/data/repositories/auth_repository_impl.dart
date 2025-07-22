@@ -1,4 +1,7 @@
 // lib/features/auth/data/repositories/auth_repository_impl.dart
+
+import 'dart:io'; // NEW: for File
+
 import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -14,95 +17,108 @@ class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, UserEntity>> signInWithEmailAndPassword({
+  Future<Either<Failure, UserEntity>> signUp({
+    required String email,
+    required String password,
+    String? fullName, // NEW
+    String? username, // NEW
+    String? bio, // NEW
+    File? profilePhotoFile, // NEW
+  }) async {
+    try {
+      // Pass all signup data to the remote data source
+      final user = await remoteDataSource.signUpWithEmailAndPassword(
+        email: email,
+        password: password,
+        fullName: fullName,
+        username: username,
+        bio: bio,
+        profilePhotoFile: profilePhotoFile,
+      );
+      return Right(user);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(
+          ServerFailure('An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signIn({
     required String email,
     required String password,
   }) async {
     try {
       final user = await remoteDataSource.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+          email: email, password: password);
       return Right(user);
     } on ServerException catch (e) {
-      return Left(AuthFailure(e.message, code: e.code));
+      return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
+      return Left(
+          ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Either<Failure, UserEntity>> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
+  Future<Either<Failure, Unit>> signOut() async {
     try {
-      final user = await remoteDataSource.signUpWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      return Right(user);
+      await remoteDataSource.signOut();
+      return const Right(unit);
     } on ServerException catch (e) {
-      return Left(AuthFailure(e.message, code: e.code));
+      return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
+      return Left(
+          ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Either<Failure, UserEntity>> signInWithOAuth({
+  Future<Either<Failure, Unit>> signInWithOAuth({
     required OAuthProvider provider,
   }) async {
     try {
-      final user = await remoteDataSource.signInWithOAuth(provider: provider);
-      return Right(user);
+      await remoteDataSource.signInWithOAuth(provider: provider);
+      return const Right(unit);
     } on ServerException catch (e) {
-      return Left(AuthFailure(e.message, code: e.code));
+      return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
+      return Left(
+          ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> signOut() async {
-    try {
-      await remoteDataSource.signOut();
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(AuthFailure(e.message, code: e.code));
-    } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> resetPasswordForEmail({
+  Future<Either<Failure, Unit>> resetPassword({
     required String email,
   }) async {
     try {
-      await remoteDataSource.resetPasswordForEmail(email: email);
-      return const Right(null);
+      await remoteDataSource.resetPassword(email: email);
+      return const Right(unit);
     } on ServerException catch (e) {
-      return Left(AuthFailure(e.message, code: e.code));
+      return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
+      return Left(
+          ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
   @override
-  Future<Either<Failure, UserEntity?>> getCurrentUser() async {
+  Future<Either<Failure, UserEntity>> getCurrentUser() async {
     try {
-      final user = remoteDataSource.getCurrentUser();
+      final user = await remoteDataSource.getCurrentUser();
       return Right(user);
     } on ServerException catch (e) {
-      return Left(AuthFailure(e.message, code: e.code));
+      return Left(ServerFailure(e.message, code: e.code));
     } catch (e) {
-      return Left(ServerFailure('An unexpected error occurred: $e'));
+      return Left(
+          ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
   @override
   Stream<UserEntity?> onAuthStateChange() {
-    return remoteDataSource.onAuthStateChange();
+    return remoteDataSource.onAuthStateChange().map((userModel) => userModel);
   }
 }

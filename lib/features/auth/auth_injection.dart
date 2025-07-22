@@ -42,7 +42,7 @@ Future<void> authInjection() async {
 
   // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(sl()),
+    () => AuthRemoteDataSourceImpl(supabaseClient: sl()),
   );
 
   //! External

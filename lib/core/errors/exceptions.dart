@@ -23,6 +23,7 @@ class CacheException implements Exception {
 class AuthException implements Exception {
   // Add this if not present
   final String message;
+  final String? statusCode = null;
 
   const AuthException({this.message = 'An authentication error occurred.'});
 }

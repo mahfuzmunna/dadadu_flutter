@@ -1,31 +1,131 @@
 // lib/features/auth/data/datasources/auth_remote_data_source_impl.dart
-import 'package:supabase_flutter/supabase_flutter.dart'; // Define your own exception class if needed
-import '../../domain/entities/user_entity.dart';
+
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:path/path.dart' as p; // Helps with path manipulation
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
+
+import '../../../../core/errors/exceptions.dart';
+import '../models/user_model.dart';
 import 'auth_remote_data_source.dart';
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final SupabaseClient supabaseClient;
 
-  AuthRemoteDataSourceImpl(this.supabaseClient);
+  AuthRemoteDataSourceImpl({required this.supabaseClient});
 
-  // Helper to convert Supabase User to UserEntity
-  UserEntity _toUserEntity(User? user) {
-    if (user == null) {
-      // This should ideally not be called with null if auth operations succeed
-      // Or handle it as a specific error in domain layer
-      throw ServerException('Authenticated user is null unexpectedly.');
-    }
-    return UserEntity(
-      uid: user.id,
-      email: user.email,
-      phoneNumber: user.phone,
-      isEmailConfirmed: user.emailConfirmedAt != null,
-      createdAt: user.createdAt,
-    );
+  // Helper to construct public URL for Supabase storage
+  String _getPublicUrl(String bucketName, String path) {
+    return supabaseClient.storage.from(bucketName).getPublicUrl(path);
   }
 
   @override
-  Future<UserEntity> signInWithEmailAndPassword({
+  Future<UserModel> signUpWithEmailAndPassword({
+    required String email,
+    required String password,
+    String? fullName,
+    String? username,
+    String? bio,
+    File? profilePhotoFile, // This is the file from the UI
+  }) async {
+    try {
+      // 1. Sign up with Supabase Auth (email and password)
+      final AuthResponse authResponse = await supabaseClient.auth.signUp(
+        email: email,
+        password: password,
+        // Optionally provide user metadata, but typically profile data goes to a separate table
+        data: {
+          'full_name': fullName,
+          // These might be useful for initial auth.users metadata
+          'username': username,
+        },
+      );
+
+      final User? supabaseUser = authResponse.user;
+
+      if (supabaseUser == null) {
+        throw ServerException(
+            'User is null after sign up. Email verification might be required.',
+            code: 'EMAIL_CONFIRMATION_REQUIRED'); // Custom error code
+      }
+
+      String? profilePhotoUrl;
+      // 2. Upload profile photo if provided
+      if (profilePhotoFile != null) {
+        final String fileExtension = p.extension(profilePhotoFile.path);
+        final String fileName =
+            '${supabaseUser.id}-${DateTime.now().microsecondsSinceEpoch}$fileExtension';
+        final String path = 'avatars/$fileName'; // Example bucket: 'avatars'
+
+        final storageResponse = await supabaseClient.storage
+            .from('avatars') // Replace with your actual bucket name
+            .upload(path, profilePhotoFile,
+                fileOptions: const FileOptions(
+                  cacheControl: '3600',
+                  upsert: false,
+                ));
+
+        // Get public URL of the uploaded image
+        profilePhotoUrl = _getPublicUrl('avatars', path);
+      }
+
+      // 3. Insert/Update user profile into the 'profiles' table
+      // IMPORTANT: Your 'profiles' table should have an 'id' column
+      // that is a UUID and defaults to the auth.users.id
+      // (or you explicitly set it with the user's ID here).
+      // Also, ensure RLS policies allow inserts for authenticated users.
+
+      final Map<String, dynamic> userProfileData = {
+        'id': supabaseUser.id, // Link to auth.users table
+        'email': supabaseUser.email,
+        'full_name': fullName,
+        'username': username,
+        'bio': bio,
+        'profile_photo_url': profilePhotoUrl,
+        // Add other fields from UserModel that are relevant for initial signup
+        // e.g., 'created_at': DateTime.now().toIso8601String(),
+        // For counts, rank etc., they often default or are managed by triggers
+        'followers_count': 0, // Default values
+        'following_count': 0,
+        'post_count': 0,
+      };
+
+      final List<Map<String, dynamic>> response = await supabaseClient
+          .from('profiles') // Replace with your actual profiles table name
+          .insert(userProfileData)
+          .select(); // Use .select() to get the inserted data back
+
+      if (response.isEmpty) {
+        throw ServerException('Failed to create user profile.',
+            code: 'PROFILE_CREATION_FAILED');
+      }
+
+      // Return a UserModel created from the inserted profile data
+      return UserModel.fromMap(response.first);
+    } on AuthException catch (e) {
+      debugPrint(
+          'Supabase Auth Exception during signup: ${e.message} (code: ${e.statusCode})');
+      if (e.statusCode == '400' && e.message.contains('Email not confirmed')) {
+        throw ServerException('Email confirmation required',
+            code: 'EMAIL_CONFIRMATION_REQUIRED');
+      }
+      throw ServerException(e.message, code: e.statusCode ?? 'AUTH_ERROR');
+    } on PostgrestException catch (e) {
+      debugPrint(
+          'Supabase DB Exception during signup: ${e.message} (code: ${e.code})');
+      throw ServerException(e.message, code: e.code ?? 'DB_ERROR');
+    } on StorageException catch (e) {
+      debugPrint('Supabase Storage Exception during signup: ${e.message}');
+      throw ServerException(e.message, code: e.statusCode ?? 'STORAGE_ERROR');
+    } catch (e) {
+      debugPrint('Unknown error during signup: ${e.toString()}');
+      throw ServerException('An unexpected error occurred: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<UserModel> signInWithEmailAndPassword({
     required String email,
     required String password,
   }) async {
@@ -36,72 +136,25 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         password: password,
       );
       if (response.user == null) {
-        throw ServerException('Sign in failed: No user in response.');
-      }
-      return _toUserEntity(response.user);
-    } on AuthException catch (e) {
-      throw ServerException(e.message, code: e.statusCode);
-    } catch (e) {
-      throw ServerException('An unexpected error occurred during sign in: $e');
-    }
-  }
-
-  @override
-  Future<UserEntity> signUpWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      final AuthResponse response = await supabaseClient.auth.signUp(
-        email: email,
-        password: password,
-        // You might add redirectTo options here if handling email confirmation/reset via deep link
-        // options: AuthOptions(
-        //   redirectTo: 'your-app-scheme://login-callback',
-        // ),
-      );
-      if (response.user == null && supabaseClient.auth.currentUser == null) {
-        // This typically means email confirmation is required and user not signed in yet
         throw ServerException(
-            'Sign up successful, but email confirmation required. User not yet signed in.',
-            code: 'EMAIL_CONFIRMATION_REQUIRED');
+            'Sign In failed: User not found or invalid credentials.');
       }
-      return _toUserEntity(response.user ?? supabaseClient.auth.currentUser!);
-    } on AuthException catch (e) {
-      throw ServerException(e.message, code: e.statusCode);
-    } catch (e) {
-      throw ServerException('An unexpected error occurred during sign up: $e');
-    }
-  }
+      // Fetch user profile from your 'profiles' table after successful auth sign-in
+      final List<Map<String, dynamic>> profileData = await supabaseClient
+          .from('profiles')
+          .select()
+          .eq('id', response.user!.id)
+          .limit(1);
 
-  @override
-  Future<UserEntity> signInWithOAuth({required OAuthProvider provider}) async {
-    try {
-      await supabaseClient.auth.signInWithOAuth(
-        provider,
-        redirectTo:
-            'your-app-scheme://login-callback', // Crucial for app deep linking
-        // authScreenLaunchMode: LaunchMode.platformExternalBrowser, // Or .inAppWebView
-      );
-      // Supabase handles the redirection. The session will be picked up by the auth listener.
-      // This method returns *before* the user is fully authenticated via callback.
-      // The actual UserEntity will be emitted by the onAuthStateChange stream.
-      // For immediate return, we might need a different pattern or expect the listener to update.
-      // For simplicity, we'll return the current user (which might be null initially)
-      // and rely on the stream for the actual authenticated user.
-      // A better pattern for OAuth is often just to *trigger* the sign-in and
-      // let the BLoC's listener react to the state change.
-      final User? currentUser = supabaseClient.auth.currentUser;
-      if (currentUser == null) {
-        throw ServerException(
-            'OAuth flow initiated, but no immediate user found. Waiting for callback.');
+      if (profileData.isEmpty) {
+        throw ServerException('User profile not found.');
       }
-      return _toUserEntity(currentUser);
+
+      return UserModel.fromMap(profileData.first);
     } on AuthException catch (e) {
-      throw ServerException(e.message, code: e.statusCode);
+      throw ServerException(e.message, code: e.statusCode ?? 'AUTH_ERROR');
     } catch (e) {
-      throw ServerException(
-          'An unexpected error occurred during OAuth sign in: $e');
+      throw ServerException('An unexpected error occurred: ${e.toString()}');
     }
   }
 
@@ -110,54 +163,117 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       await supabaseClient.auth.signOut();
     } on AuthException catch (e) {
-      throw ServerException(e.message, code: e.statusCode);
+      throw ServerException(e.message, code: e.statusCode ?? 'AUTH_ERROR');
     } catch (e) {
-      throw ServerException('An unexpected error occurred during sign out: $e');
+      throw ServerException('An unexpected error occurred: ${e.toString()}');
     }
   }
 
   @override
-  Future<void> resetPasswordForEmail({required String email}) async {
+  Future<void> signInWithOAuth({required OAuthProvider provider}) async {
     try {
-      await supabaseClient.auth.resetPasswordForEmail(
-        email,
-        // options: AuthOptions(
-        //   redirectTo: 'your-app-scheme://reset-password-callback',
-        // ),
+      await supabaseClient.auth.signInWithOAuth(
+        provider,
+        redirectTo: kIsWeb
+            ? null
+            : 'io.supabase.dadaduapp://login-callback/', // Your deep link scheme
+        // You might need to set up a `context` for mobile platforms
+        // context: context, // Pass BuildContext if you want to use in-app browser
       );
     } on AuthException catch (e) {
-      throw ServerException(e.message, code: e.statusCode);
+      throw ServerException(e.message, code: e.statusCode ?? 'AUTH_ERROR');
     } catch (e) {
-      throw ServerException(
-          'An unexpected error occurred during password reset: $e');
+      throw ServerException('An unexpected error occurred: ${e.toString()}');
     }
   }
 
   @override
-  UserEntity? getCurrentUser() {
-    final user = supabaseClient.auth.currentUser;
-    return user != null ? _toUserEntity(user) : null;
+  Future<void> resetPassword({required String email}) async {
+    try {
+      await supabaseClient.auth.resetPasswordForEmail(email);
+    } on AuthException catch (e) {
+      throw ServerException(e.message, code: e.statusCode ?? 'AUTH_ERROR');
+    } catch (e) {
+      throw ServerException('An unexpected error occurred: ${e.toString()}');
+    }
   }
 
   @override
-  Stream<UserEntity?> onAuthStateChange() {
-    return supabaseClient.auth.onAuthStateChange.map((data) {
-      final Session? session = data.session;
-      if (session != null && session.user != null) {
-        return _toUserEntity(session.user);
+  Future<UserModel> getCurrentUser() async {
+    try {
+      final User? currentUser = supabaseClient.auth.currentUser;
+      if (currentUser == null) {
+        throw ServerException('No current user', code: 'NO_USER');
       }
-      return null; // User signed out or no session
+
+      // Fetch user profile from your 'profiles' table
+      final List<Map<String, dynamic>> profileData = await supabaseClient
+          .from('profiles')
+          .select()
+          .eq('id', currentUser.id)
+          .limit(1);
+
+      if (profileData.isEmpty) {
+        // If profile data is missing, create a basic UserModel from auth user
+        // This might happen if user only signed up via auth but profile wasn't fully created
+        return UserModel(
+          uid: currentUser.id,
+          email: currentUser.email,
+          displayName: currentUser.userMetadata?['full_name'] as String?,
+          // Or username, if you store it there
+          username: currentUser.userMetadata?['username'] as String?,
+        );
+      }
+
+      return UserModel.fromMap(profileData.first);
+    } on ServerException {
+      rethrow; // Re-throw custom server exceptions
+    } on AuthException catch (e) {
+      throw ServerException(e.message, code: e.statusCode ?? 'AUTH_ERROR');
+    } catch (e) {
+      throw ServerException('An unexpected error occurred: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<UserModel?> onAuthStateChange() {
+    return supabaseClient.auth.onAuthStateChange.asyncMap((data) async {
+      if (data.event == AuthChangeEvent.signedIn ||
+          data.event == AuthChangeEvent.initialSession) {
+        final User? currentUser = data.session?.user;
+        if (currentUser != null) {
+          // Attempt to fetch full profile data
+          try {
+            final List<Map<String, dynamic>> profileData = await supabaseClient
+                .from('profiles')
+                .select()
+                .eq('id', currentUser.id)
+                .limit(1);
+
+            if (profileData.isNotEmpty) {
+              return UserModel.fromMap(profileData.first);
+            } else {
+              // If profile not found, return a basic UserModel from auth user
+              return UserModel(
+                uid: currentUser.id,
+                email: currentUser.email,
+                displayName: currentUser.userMetadata?['full_name'] as String?,
+                username: currentUser.userMetadata?['username'] as String?,
+              );
+            }
+          } catch (e) {
+            debugPrint('Error fetching user profile in AuthStateChange: $e');
+            // Fallback: return basic user if profile fetch fails
+            return UserModel(
+              uid: currentUser.id,
+              email: currentUser.email,
+              displayName: currentUser.userMetadata?['full_name'] as String?,
+              username: currentUser.userMetadata?['username'] as String?,
+            );
+          }
+        }
+      }
+      return null; // For signedOut, tokenExpired, userDeleted, etc.
     });
   }
-}
-
-// Define a simple ServerException class (in lib/core/errors/exceptions.dart)
-class ServerException implements Exception {
-  final String message;
-  final String? code;
-
-  const ServerException(this.message, {this.code});
-
-  @override
-  String toString() => 'ServerException: $message (Code: ${code ?? 'N/A'})';
 }
