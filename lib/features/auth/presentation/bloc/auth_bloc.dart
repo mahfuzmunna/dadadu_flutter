@@ -1,5 +1,7 @@
 // lib/features/auth/presentation/bloc/auth_bloc.dart
 import 'dart:async';
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -35,12 +37,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.resetPasswordUseCase,
     required this.getCurrentUserUseCase,
   }) : super(AuthInitial()) {
-    on<AuthCheckRequested>(_onAuthCheckRequested);
+    on<AuthInitialCheckRequested>(_onAuthCheckRequested);
     on<AuthSignInRequested>(_onAuthSignInRequested);
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
     on<AuthSignInWithOAuthRequested>(_onAuthSignInWithOAuthRequested);
     on<AuthSignOutRequested>(_onAuthSignOutRequested);
-    on<AuthResetPasswordRequested>(_onAuthResetPasswordRequested);
+    on<AuthPasswordResetRequested>(_onAuthResetPasswordRequested);
     on<AuthUserChanged>(_onAuthUserChanged);
 
     // Listen to Supabase's auth state changes and dispatch AuthUserChanged
@@ -50,8 +52,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
   }
 
-  Future<void> _onAuthCheckRequested(
-      AuthCheckRequested event, Emitter<AuthState> emit) async {
+  Future<void> _onAuthCheckRequested(AuthInitialCheckRequested event,
+      Emitter<AuthState> emit) async {
     emit(AuthLoading());
     final result = await getCurrentUserUseCase(NoParams());
     result.fold(
@@ -125,8 +127,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
-  Future<void> _onAuthResetPasswordRequested(
-      AuthResetPasswordRequested event, Emitter<AuthState> emit) async {
+  Future<void> _onAuthResetPasswordRequested(AuthPasswordResetRequested event,
+      Emitter<AuthState> emit) async {
     emit(AuthLoading());
     final result =
         await resetPasswordUseCase(ResetPasswordParams(email: event.email));

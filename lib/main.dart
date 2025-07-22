@@ -87,7 +87,7 @@ class _MyAppState extends State<MyApp> {
     _router = AppRouter.router(authBloc: _authBloc);
     debugPrint('MyApp: GoRouter initialized with AuthBloc.');
 
-    _authBloc.add(AuthCheckRequested());
+    _authBloc.add(AuthInitialCheckRequested());
   }
 
   @override

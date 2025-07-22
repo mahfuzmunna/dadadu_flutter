@@ -16,7 +16,7 @@ class _SplashPageState extends State<SplashPage> {
   void initState() {
     super.initState();
     // Dispatch an event to check auth status when the splash page loads
-    context.read<AuthBloc>().add(AuthCheckRequested());
+    context.read<AuthBloc>().add(AuthInitialCheckRequested());
   }
 
   @override

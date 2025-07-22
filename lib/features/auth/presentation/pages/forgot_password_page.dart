@@ -1,6 +1,7 @@
 // lib/features/auth/presentation/pages/forgot_password_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../bloc/auth_bloc.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -61,7 +62,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   else
                     ElevatedButton(
                       onPressed: () {
-                        context.read<AuthBloc>().add(AuthResetPasswordRequested(
+                        context.read<AuthBloc>().add(AuthPasswordResetRequested(
                             email: _emailController.text.trim()));
                       },
                       child: const Text('Send Reset Link'),
