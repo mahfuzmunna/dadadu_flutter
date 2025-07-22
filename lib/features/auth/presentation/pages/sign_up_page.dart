@@ -1,9 +1,12 @@
 // lib/features/auth/presentation/pages/sign_up_page.dart
 
+import 'dart:io'; // NEW: Import for File
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart'; // NEW: Import for image selection
 
-import '../bloc/auth_bloc.dart'; // Make sure auth_event.dart is part of auth_bloc.dart
+import '../bloc/auth_bloc.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -15,16 +18,18 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _fullNameController =
-      TextEditingController(); // NEW: Full Name Controller
+  final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
+
+  File? _pickedImage; // NEW: State variable to hold the selected image file
+  final ImagePicker _picker = ImagePicker(); // NEW: ImagePicker instance
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _fullNameController.dispose(); // Dispose new controller
+    _fullNameController.dispose();
     _usernameController.dispose();
     _bioController.dispose();
     super.dispose();
@@ -35,6 +40,17 @@ class _SignUpPageState extends State<SignUpPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(message)),
       );
+    }
+  }
+
+  // NEW: Method to pick an image from gallery or camera
+  Future<void> _pickImage() async {
+    final XFile? pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+    if (pickedFile != null) {
+      setState(() {
+        _pickedImage = File(pickedFile.path);
+      });
     }
   }
 
@@ -70,12 +86,34 @@ class _SignUpPageState extends State<SignUpPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // App Logo at the top
-                  Image.asset(
-                    'assets/icons/logo_v2.png',
-                    height: 120,
+                  // NEW: Circular Image Picker
+                  GestureDetector(
+                    onTap: isLoading ? null : _pickImage,
+                    // Disable picking while loading
+                    child: CircleAvatar(
+                      radius: 60,
+                      backgroundColor: colorScheme.primaryContainer,
+                      backgroundImage: _pickedImage != null
+                          ? FileImage(_pickedImage!)
+                          : null,
+                      child: _pickedImage == null
+                          ? Icon(
+                              Icons.camera_alt,
+                              size: 50,
+                              color: colorScheme.onPrimaryContainer,
+                            )
+                          : null,
+                    ),
                   ),
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 16),
+                  Text(
+                    _pickedImage == null ? 'Add Profile Photo' : 'Change Photo',
+                    style: TextStyle(
+                      color: colorScheme.onSurfaceVariant,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(height: 48), // Adjusted spacing
 
                   TextFormField(
                     controller: _emailController,
@@ -100,7 +138,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     obscureText: true,
                     enabled: !isLoading,
                   ),
-                  const SizedBox(height: 16), // NEW Field for Full Name
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _fullNameController,
                     decoration: InputDecoration(
@@ -111,7 +149,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     enabled: !isLoading,
                   ),
-                  const SizedBox(height: 16), // Username field remains
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _usernameController,
                     decoration: InputDecoration(
@@ -122,7 +160,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     enabled: !isLoading,
                   ),
-                  const SizedBox(height: 16), // Bio field remains
+                  const SizedBox(height: 16),
                   TextFormField(
                     controller: _bioController,
                     decoration: InputDecoration(
@@ -153,7 +191,6 @@ class _SignUpPageState extends State<SignUpPage> {
                                         _fullNameController.text.trim().isEmpty
                                             ? null
                                             : _fullNameController.text.trim(),
-                                    // Pass new field
                                     username:
                                         _usernameController.text.trim().isEmpty
                                             ? null
@@ -161,6 +198,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                     bio: _bioController.text.trim().isEmpty
                                         ? null
                                         : _bioController.text.trim(),
+                                    profilePhotoFile:
+                                        _pickedImage, // Pass the picked image file
                                   ));
                             },
                             style: FilledButton.styleFrom(
@@ -182,8 +221,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                     color: colorScheme.onSurfaceVariant)),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context)
-                                    .pop(); // Go back to SignInPage
+                                Navigator.of(context).pop();
                               },
                               child: const Text('Sign In'),
                             ),
