@@ -33,18 +33,29 @@ class _HomePageState extends State<HomePage> {
       createdAt: DateTime.now(),
       diamonds: 10,
       comments: 3,
+      location: 'New York',
+      tag: 'abstract',
+      isDisabled: false,
+      visibilityLevel: 0,
+      views: 0,
     ),
     PostEntity(
-      id: 'post_2_id',
-      userId: 'user_b_id',
+      id: 'post_1_id',
+      userId: 'user_a_id',
       videoUrl:
-          'https://cdn.videvo.net/videvo_files/video/premium/getty_146/large_preview/NorthernLights2_741757876_WM.mp4',
-      description: 'Stunning Northern Lights!',
+          'https://dadadu.b-cdn.net/user_videos/a6a13d27-8ad1-4ea9-8bc6-72f0e01b193e/1753185415382.mp4',
+      description: 'Beautiful abstract particles.',
       thumbnailUrl: '',
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      diamonds: 50,
-      comments: 15,
+      createdAt: DateTime.now(),
+      diamonds: 10,
+      comments: 3,
+      location: 'New York',
+      tag: 'abstract',
+      isDisabled: false,
+      visibilityLevel: 0,
+      views: 0,
     ),
+
     // Add more dummy posts or fetch real ones
   ];
 

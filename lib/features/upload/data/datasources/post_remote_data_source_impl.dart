@@ -8,7 +8,6 @@ import 'package:path/path.dart' as p; // For path manipulation
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/exceptions.dart';
-import '../../domain/entities/post_entity.dart';
 import '../models/post_model.dart'; // Assumed from the first snippet
 import 'post_remote_data_source.dart';
 
@@ -113,62 +112,47 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
-  Future<PostEntity> createPostInDatabase({
+  Future<PostModel> createPostInDatabase({
     required String userId,
-    required String videoUrl, // This `videoUrl` will now be the BunnyCDN URL
-    required String thumbnailUrl, // NEW: Required thumbnail URL
-    String? description, // Remains nullable
+    required String videoUrl,
+    required String thumbnailUrl,
+    required String description,
+    required String tag,
+    String? location,
   }) async {
     try {
-      final postMap = await supabaseClient
+      final postData = {
+        'user_id': userId,
+        'video_url': videoUrl,
+        'thumbnail_url': thumbnailUrl,
+        'description': description,
+        'tag': tag,
+        'location': location,
+        // The database should handle defaults for 'id', 'created_at',
+        // 'diamonds', 'comments', 'views', 'disabled', 'visibility_level'
+        // using 'now()' or default values (e.g., 0) in your table schema.
+      };
+
+      final newPostMap = await supabaseClient
           .from('posts')
-          .insert(
-            {
-              'user_id': userId,
-              'video_url': videoUrl,
-              // Save the BunnyCDN URL here
-              'thumbnail_url': thumbnailUrl,
-              // NEW: Save the BunnyCDN thumbnail URL here
-              'description': description,
-              // Pass nullable description
-              'created_at': DateTime.now().toIso8601String(),
-              // Ensure this matches your DB column name
-            },
-          )
-          .select()
-          .single(); // .single() to get the inserted row back
+          .insert(postData)
+          .select(
+              '*, users(*)') // Fetch the full post and nested author data after insert
+          .single();
 
-      if (postMap == null) {
-        // This case is unlikely for a successful insert().select().single()
-        // as Supabase usually throws a PostgrestException if no data is returned
-        // or if an error occurs.
-        throw ServerException(
-            'Failed to create post: No data returned from insert.',
-            code: 'NO_DATA_ON_INSERT');
-      }
-
-      // Ensure that the keys match your Supabase table column names exactly
-      return PostEntity(
-        id: postMap['id'] as String,
-        userId: postMap['user_id'] as String,
-        videoUrl: postMap['video_url'] as String,
-        thumbnailUrl: postMap['thumbnail_url'] as String,
-        // Correctly cast as non-nullable String
-        description: postMap['description'] as String,
-        // FIX: Cast as nullable String to match PostEntity
-        createdAt: postMap['createdAt'] as DateTime, // Cast as String
-      );
+      // Convert the raw map from Supabase back to a PostModel
+      return PostModel.fromMap(newPostMap);
     } on PostgrestException catch (e) {
       // Catch specific Supabase database errors
       throw ServerException(
         'Failed to create post in database: ${e.message}',
-        code: e.code as String,
       );
     } catch (e) {
-      // General catch for any other unexpected errors during database operation
+      // General catch for any other unexpected errors
       throw ServerException(
-          'An unexpected error occurred during post creation in Supabase: $e',
-          code: 'UNKNOWN_DB_ERROR');
+        'An unexpected error occurred during post creation: $e',
+        code: 'UNKNOWN_DB_ERROR',
+      );
     }
   }
 

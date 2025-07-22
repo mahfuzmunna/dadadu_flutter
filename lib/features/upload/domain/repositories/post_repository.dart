@@ -13,10 +13,14 @@ abstract class PostRepository {
   Future<Either<Failure, PostEntity>> getPostById(String postId);
 
   Stream<PostEntity> subscribeToPostChanges(String postId); // NEW
-  Future<Either<Failure, PostEntity>> uploadPost({
+  Future<Either<Failure, PostEntity>> createPost({
+    required String userId,
+    required String videoUrl,
+    required String thumbnailUrl,
+    required String description,
+    required String tag,
+    String? location,
     required File videoFile,
     required File thumbnailFile,
-    required String userId,
-    String? description,
   });
 }

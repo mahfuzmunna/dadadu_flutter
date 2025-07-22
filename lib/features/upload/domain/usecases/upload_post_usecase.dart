@@ -19,11 +19,15 @@ class UploadPostUseCase implements UseCase<PostEntity, UploadPostParams> {
   @override
   Future<Either<Failure, PostEntity>> call(UploadPostParams params) async {
     // Delegates the actual upload and post creation logic to the repository.
-    return await repository.uploadPost(
+    return await repository.createPost(
       videoFile: params.videoFile,
-      thumbnailFile: params.thumbnailFile, // Pass the thumbnail file
+      thumbnailFile: params.thumbnailFile,
+      // Pass the thumbnail file
       userId: params.userId,
       description: params.description,
+      videoUrl: '',
+      thumbnailUrl: '',
+      tag: '',
     );
   }
 }
@@ -32,18 +36,35 @@ class UploadPostUseCase implements UseCase<PostEntity, UploadPostParams> {
 /// This class encapsulates all necessary data for uploading a post,
 /// making the use case's `call` method cleaner.
 class UploadPostParams extends Equatable {
-  final File videoFile;
-  final File thumbnailFile; // REQUIRED: The file for the video's thumbnail
   final String userId;
-  final String? description; // Optional description for the post
+  final String videoUrl;
+  final String thumbnailUrl;
+  final String description;
+  final String tag;
+  final String? location;
+  final File videoFile;
+  final File thumbnailFile;
 
   const UploadPostParams({
+    required this.userId,
+    required this.videoUrl,
+    required this.thumbnailUrl,
+    required this.description,
+    required this.tag,
+    required this.location,
     required this.videoFile,
     required this.thumbnailFile,
-    required this.userId,
-    this.description,
   });
 
   @override
-  List<Object?> get props => [videoFile, thumbnailFile, userId, description];
+  List<Object?> get props => [
+        userId,
+        videoUrl,
+        thumbnailUrl,
+        description,
+        tag,
+        location,
+        videoFile,
+        thumbnailFile
+      ];
 }

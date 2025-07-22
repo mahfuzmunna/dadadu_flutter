@@ -70,6 +70,10 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
         thumbnailFile: event.thumbnailFile, // Pass the thumbnail file
         userId: userId,
         description: event.description,
+        videoUrl: '',
+        thumbnailUrl: '',
+        tag: '',
+        location: '',
       ),
     );
 

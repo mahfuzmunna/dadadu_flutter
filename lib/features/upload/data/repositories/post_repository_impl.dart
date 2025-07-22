@@ -15,11 +15,15 @@ class PostRepositoryImpl implements PostRepository {
   PostRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, PostEntity>> uploadPost({
+  Future<Either<Failure, PostEntity>> createPost({
+    required String userId,
+    required String videoUrl,
+    required String thumbnailUrl,
+    required String description,
+    required String tag,
+    String? location,
     required File videoFile,
     required File thumbnailFile, // Expecting thumbnail file
-    required String userId,
-    String? description,
   }) async {
     try {
       // Step 1: Upload video file to external storage (Wasabi/CDN)
@@ -42,7 +46,8 @@ class PostRepositoryImpl implements PostRepository {
         videoUrl: videoUrl,
         thumbnailUrl: thumbnailUrl, // Pass the obtained thumbnail URL
         description: description,
-      );
+          tag: tag,
+          location: location);
 
       // If all steps succeed, return the PostEntity wrapped in a Right
       return Right(post);

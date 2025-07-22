@@ -42,6 +42,13 @@ class _VideoPostItemState extends State<VideoPostItem>
     videoUrl: '',
     description: '',
     thumbnailUrl: '',
+    diamonds: 0,
+    comments: 0,
+    location: '',
+    tag: '',
+    isDisabled: false,
+    visibilityLevel: 0,
+    views: 0,
     createdAt: DateTime.now(), // Placeholder or provide a default
   );
 
