@@ -6,7 +6,6 @@ import 'package:dadadu_app/features/home/data/repositories/home_repository_impl.
 import 'package:dadadu_app/features/home/domain/repositories/home_repository.dart';
 import 'package:dadadu_app/features/home/domain/usecases/get_posts_usecase.dart';
 import 'package:dadadu_app/features/home/domain/usecases/get_user_info_usecase.dart';
-import 'package:dadadu_app/features/home/presentation/bloc/home_feed_bloc.dart';
 import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart';
 import 'package:get_it/get_it.dart';
 
@@ -23,10 +22,7 @@ final sl = GetIt.instance;
 Future<void> homeInjection() async {
   // Bloc
   sl.registerFactory(
-        () => HomeFeedBloc(
-      getPostsUseCase: sl(),
-      getUserInfoUseCase: sl(),
-    ),
+    () => PostBloc(postRepository: sl()),
   );
 
   // Use cases

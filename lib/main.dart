@@ -4,6 +4,7 @@ import 'dart:async';
 
 import 'package:dadadu_app/core/routes/app_router.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
 import 'package:dadadu_app/firebase_options.dart';
@@ -15,7 +16,6 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/theme/app_theme.dart';
-import 'features/home/presentation/bloc/home_feed_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
   // Stream subscription for deep links
   StreamSubscription? _sub;
   late final AuthBloc _authBloc;
-  late final HomeFeedBloc _homeFeedBloc;
+  late final PostBloc _postBloc;
   late final ProfileBloc _profileBloc;
 
   late final GoRouter _router;
@@ -77,7 +77,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
     _setupAuthListener();
     _authBloc = di.sl<AuthBloc>();
-    _homeFeedBloc = di.sl<HomeFeedBloc>();
+    _postBloc = di.sl<PostBloc>();
     _profileBloc = di.sl<ProfileBloc>();
 
     debugPrint('MyApp: AuthBloc instance retrieved from DI.');
@@ -94,7 +94,7 @@ class _MyAppState extends State<MyApp> {
   void dispose() {
     _sub?.cancel();
     _authBloc.close();
-    _homeFeedBloc.close();
+    _postBloc.close();
     _profileBloc.close();
     debugPrint('MyApp: AuthBloc disposed.');
     debugPrint('MyApp: AuthBloc, HomeFeedBloc and ProfileBloc disposed.');
@@ -110,8 +110,8 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<AuthBloc>.value(
           value: _authBloc,
         ),
-        BlocProvider<HomeFeedBloc>.value(
-          value: _homeFeedBloc,
+        BlocProvider<PostBloc>.value(
+          value: _postBloc,
         ),
         BlocProvider<ProfileBloc>.value(
           value: _profileBloc,
