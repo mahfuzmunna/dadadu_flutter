@@ -25,7 +25,7 @@ class PostModel extends PostEntity {
       thumbnailUrl: data['thumbnailUrl'] as String,
       description: data['description'] as String? ?? '',
       tag: data['tag'] as String? ?? 'Entertainment',
-      timestamp: (data['timestamp'] as Timestamp).toDate(),
+      timestamp: (data['timestamp'] as String),
       likes: data['likes'] as int? ?? 0,
       comments: data['comments'] as int? ?? 0,
     );
@@ -37,7 +37,7 @@ class PostModel extends PostEntity {
       'videoUrl': videoUrl,
       'description': description,
       'tag': tag,
-      'timestamp': Timestamp.fromDate(timestamp), // Convert DateTime to Firestore Timestamp
+      'timestamp': timestamp, // Convert DateTime to Firestore Timestamp
       'likes': likes,
       'comments': comments,
     };

@@ -70,7 +70,8 @@ class UploadPostBloc extends Bloc<UploadPostEvent, UploadPostState> {
         thumbnailUrl: event.thumbnailUrl,
         description: event.description,
         tag: event.tag,
-        timestamp: DateTime.now(), // Use current time for post timestamp
+        timestamp:
+            DateTime.now().toString(), // Use current time for post timestamp
       );
 
       final createPostResult = await createPostInFirestoreUseCase(

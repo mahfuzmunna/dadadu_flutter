@@ -57,6 +57,10 @@ dependencies:
   # Supabase
   supabase_flutter: ^2.0.0
 
+  # S3
+  minio: ^3.5.7
+  mime: ^1.0.4
+
 
 
   # Utils

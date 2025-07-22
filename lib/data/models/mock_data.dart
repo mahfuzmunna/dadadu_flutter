@@ -108,7 +108,8 @@ final List<PostEntity> mockPosts = [
     description: 'Beautiful butterfly in slow motion!',
     likes: 1234,
     comments: 56,
-    timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+    timestamp:
+        DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
   ),
   PostEntity(
     id: 'post2',
@@ -119,7 +120,8 @@ final List<PostEntity> mockPosts = [
     description: 'A buzzing bee hard at work in the garden.',
     likes: 876,
     comments: 23,
-    timestamp: DateTime.now().subtract(const Duration(hours: 3)),
+    timestamp:
+        DateTime.now().subtract(const Duration(hours: 3)).toIso8601String(),
   ),
   PostEntity(
     id: 'post3',
@@ -131,7 +133,8 @@ final List<PostEntity> mockPosts = [
     description: 'Exploring the flavors of local street food!',
     likes: 2500,
     comments: 120,
-    timestamp: DateTime.now().subtract(const Duration(days: 1)),
+    timestamp:
+        DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
   ),
   PostEntity(
     id: 'post4',
@@ -143,7 +146,8 @@ final List<PostEntity> mockPosts = [
     description: 'Abstract art installation, truly captivating.',
     likes: 999,
     comments: 45,
-    timestamp: DateTime.now().subtract(const Duration(days: 2)),
+    timestamp:
+        DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
   ),
   PostEntity(
     id: 'post5',
@@ -154,7 +158,8 @@ final List<PostEntity> mockPosts = [
     description: 'Peaceful hike through the mountains.',
     likes: 3100,
     comments: 180,
-    timestamp: DateTime.now().subtract(const Duration(days: 3)),
+    timestamp:
+        DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
   ),
   // Add more posts for a richer feed
   PostEntity(
@@ -166,7 +171,8 @@ final List<PostEntity> mockPosts = [
     description: 'Another beautiful day for an adventure!',
     likes: 700,
     comments: 30,
-    timestamp: DateTime.now().subtract(const Duration(days: 4)),
+    timestamp:
+        DateTime.now().subtract(const Duration(days: 4)).toIso8601String(),
   ),
   PostEntity(
     id: 'post7',
@@ -177,7 +183,8 @@ final List<PostEntity> mockPosts = [
     description: 'Solving complex algorithms, one line at a time.',
     likes: 1500,
     comments: 70,
-    timestamp: DateTime.now().subtract(const Duration(days: 5)),
+    timestamp:
+        DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
   ),
   PostEntity(
     id: 'post8',
@@ -188,7 +195,8 @@ final List<PostEntity> mockPosts = [
     description: 'A culinary journey, from farm to table.',
     likes: 2100,
     comments: 90,
-    timestamp: DateTime.now().subtract(const Duration(days: 6)),
+    timestamp:
+        DateTime.now().subtract(const Duration(days: 6)).toIso8601String(),
   ),
 ];
 

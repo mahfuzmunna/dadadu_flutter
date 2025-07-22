@@ -7,6 +7,8 @@ import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // E
 import 'package:dadadu_app/core/pages/splash_page.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart'; // Needed for ProfilePage viewedUser
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
+// If you have a ForgotPasswordPage, make sure to import it too
+import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
 // Feature-specific page imports
 import 'package:dadadu_app/features/auth/presentation/pages/login_page.dart'; // Using LoginPage for unified login/signup
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart'; // No longer explicitly needed if LoginPage handles signup
@@ -16,15 +18,11 @@ import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
-import 'package:dadadu_app/features/upload/presentation/pages/create_post_page.dart'; // If you're using this
-import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
+import 'package:dadadu_app/features/upload/presentation/pages/upload_page_t.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/upload/presentation/pages/camera_screen.dart';
-
-// If you have a ForgotPasswordPage, make sure to import it too
-import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
 
 class AppRouter {
   static GoRouter router({required AuthBloc authBloc}) {

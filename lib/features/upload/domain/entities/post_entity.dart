@@ -9,7 +9,7 @@ class PostEntity extends Equatable {
   final String thumbnailUrl; // NEW: Thumbnail URL for the video
   final String description;
   final String tag; // e.g., 'Love', 'Business', 'Entertainment'
-  final DateTime timestamp;
+  final String timestamp;
   final int likes;
   final int comments;
 
@@ -45,7 +45,7 @@ class PostEntity extends Equatable {
     String? thumbnailUrl, // NEW: Add to copyWith
     String? description,
     String? tag,
-    DateTime? timestamp,
+    String? timestamp,
     int? likes,
     int? comments,
   }) {

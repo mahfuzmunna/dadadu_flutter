@@ -8,13 +8,7 @@ import 'features/auth/auth_injection.dart'; // Import feature-specific injection
 // import 'features/home/domain/usecases/get_feed_posts_usecase.dart';
 import 'features/home/home_injection.dart';
 import 'features/profile/profile_injection.dart';
-import 'features/upload/data/datasources/upload_post_remote_data_source.dart';
-import 'features/upload/data/repositories/upload_post_repository_impl.dart';
-import 'features/upload/domain/repositories/upload_post_repository.dart';
-import 'features/upload/domain/usecases/create_post_in_firestore_usecase.dart';
-import 'features/upload/domain/usecases/update_user_uploaded_videos_usecase.dart';
-import 'features/upload/domain/usecases/upload_video_to_storage_usecase.dart';
-import 'features/upload/presentation/bloc/upload_post_bloc.dart';
+import 'features/upload/upload_injection.dart';
 
 final sl = GetIt.instance;
 
@@ -57,7 +51,7 @@ Future<void> discoverInjection() async {
   // sl.registerFactory(() => DiscoverBloc(...));
   // sl.registerLazySingleton(() => DiscoverRepository(...));
 }
-Future<void> uploadInjection() async {
+/*Future<void> uploadInjection() async {
   // Bloc
   sl.registerFactory(
         () => UploadPostBloc(
@@ -81,7 +75,7 @@ Future<void> uploadInjection() async {
   sl.registerLazySingleton<UploadPostRemoteDataSource>(
         () => UploadPostRemoteDataSourceImpl(sl(), sl()), // Pass FirebaseStorage and FirebaseFirestore
   );
-}
+}*/
 Future<void> friendsInjection() async {
   // sl.registerFactory(() => FriendsBloc(...));
 }
