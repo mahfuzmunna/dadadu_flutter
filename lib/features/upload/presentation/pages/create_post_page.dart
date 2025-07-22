@@ -67,7 +67,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
           description: _descriptionController.text.trim(),
           tag: _selectedTag,
           userId: authState.user.uid, // Get current user ID from AuthBloc
-        ),
+              thumbnailUrl: '', // Placeholder for thumbnail URL
+            ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

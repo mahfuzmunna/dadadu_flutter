@@ -2,15 +2,16 @@
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
-import 'package:uuid/uuid.dart'; // For generating unique IDs
 import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/features/upload/domain/usecases/create_post_in_firestore_usecase.dart';
-import 'package:dadadu_app/features/upload/domain/usecases/upload_video_to_storage_usecase.dart';
 import 'package:dadadu_app/features/upload/domain/usecases/update_user_uploaded_videos_usecase.dart';
+import 'package:dadadu_app/features/upload/domain/usecases/upload_video_to_storage_usecase.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:uuid/uuid.dart'; // For generating unique IDs
 
 part 'upload_post_event.dart';
 part 'upload_post_state.dart';
@@ -66,6 +67,7 @@ class UploadPostBloc extends Bloc<UploadPostEvent, UploadPostState> {
         id: postId,
         userId: event.userId,
         videoUrl: videoUrl,
+        thumbnailUrl: event.thumbnailUrl,
         description: event.description,
         tag: event.tag,
         timestamp: DateTime.now(), // Use current time for post timestamp

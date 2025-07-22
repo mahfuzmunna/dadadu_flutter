@@ -400,7 +400,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           '${userToDisplay.followersCount}', 'Followers'),
                       _buildStatColumn(context, Icons.person_add_alt_1_rounded, '${userToDisplay.followingCount}', 'Following'),
                       _buildStatColumn(context, Icons.ondemand_video_rounded,
-                          '${dummyVideoUrls.length}', 'Videos'), // Videos count moved to the right
+                          '${userToDisplay.postCount}', 'Videos'),
                       // Rank is now displayed next to the name, but you could add 'Badges' or other stats here
                     ],
                   ),
@@ -620,7 +620,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      '${userToDisplay.username ?? 'User'}\'s Uploaded Videos (${dummyVideoUrls.length})', // Dynamic title
+                      '${userToDisplay.username ?? 'User'}\'s Uploaded Videos (${userToDisplay.postCount})', // Dynamic title
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                             // Reduced from headlineSmall
                             fontWeight: FontWeight.bold,
@@ -629,7 +629,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  if (dummyVideoUrls.isEmpty)
+                  if (userToDisplay.postCount == 0) // Updated to use videoCount
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
@@ -657,6 +657,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         childAspectRatio: 0.7,
                       ),
                       itemCount: dummyVideoUrls.length,
+                      // Keep dummy data for now, replace with actual video data
                       itemBuilder: (context, index) {
                         return Card(
                           clipBehavior: Clip.antiAlias,

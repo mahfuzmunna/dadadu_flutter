@@ -6,6 +6,7 @@ class PostEntity extends Equatable {
   final String id;
   final String userId;
   final String videoUrl;
+  final String thumbnailUrl; // NEW: Thumbnail URL for the video
   final String description;
   final String tag; // e.g., 'Love', 'Business', 'Entertainment'
   final DateTime timestamp;
@@ -16,6 +17,7 @@ class PostEntity extends Equatable {
     required this.id,
     required this.userId,
     required this.videoUrl,
+    required this.thumbnailUrl, // NEW: Make it required in constructor
     this.description = '',
     this.tag = 'Entertainment', // Default tag
     required this.timestamp,
@@ -28,7 +30,8 @@ class PostEntity extends Equatable {
     id,
     userId,
     videoUrl,
-    description,
+        thumbnailUrl, // NEW: Add to props
+        description,
     tag,
     timestamp,
     likes,
@@ -39,6 +42,7 @@ class PostEntity extends Equatable {
     String? id,
     String? userId,
     String? videoUrl,
+    String? thumbnailUrl, // NEW: Add to copyWith
     String? description,
     String? tag,
     DateTime? timestamp,
@@ -49,6 +53,8 @@ class PostEntity extends Equatable {
       id: id ?? this.id,
       userId: userId ?? this.userId,
       videoUrl: videoUrl ?? this.videoUrl,
+      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
+      // NEW: Assign in copyWith
       description: description ?? this.description,
       tag: tag ?? this.tag,
       timestamp: timestamp ?? this.timestamp,

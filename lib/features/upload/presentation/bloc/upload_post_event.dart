@@ -15,12 +15,14 @@ class UploadVideoAndPost extends UploadPostEvent {
   final String description;
   final String tag;
   final String userId; // Current authenticated user ID
+  final String thumbnailUrl; // URL of the thumbnail image
 
   const UploadVideoAndPost({
     required this.videoFile,
     required this.description,
     required this.tag,
     required this.userId,
+    required this.thumbnailUrl,
   });
 
   @override
