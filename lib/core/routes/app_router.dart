@@ -9,8 +9,7 @@ import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart'; // N
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
 // If you have a ForgotPasswordPage, make sure to import it too
 import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
-// Feature-specific page imports
-import 'package:dadadu_app/features/auth/presentation/pages/login_page.dart'; // Using LoginPage for unified login/signup
+import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
@@ -44,7 +43,7 @@ class AppRouter {
         GoRoute(
           path: '/login', // Changed from /signIn to /login for consistency
           builder: (BuildContext context, GoRouterState state) =>
-              const LoginPage(),
+              const SignInPage(),
         ),
         // Removed explicit /signUp route if LoginPage handles both.
         // If you still have a separate SignUpPage, keep its route here.

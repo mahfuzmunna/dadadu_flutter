@@ -1,18 +1,22 @@
-// lib/features/auth/presentation/pages/sign_up_page.dart
+// lib/features/auth/presentation/pages/sign_in_page.dart
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'
+    hide AuthState; // Hide AuthState to avoid conflict with bloc
 
 import '../bloc/auth_bloc.dart';
+import 'forgot_password_page.dart';
+import 'sign_up_page.dart'; // NEW: Import for navigation
 
-class SignUpPage extends StatefulWidget {
-  const SignUpPage({super.key});
+class SignInPage extends StatefulWidget {
+  const SignInPage({super.key});
 
   @override
-  State<SignUpPage> createState() => _SignUpPageState();
+  State<SignInPage> createState() => _SignInPageState();
 }
 
-class _SignUpPageState extends State<SignUpPage> {
+class _SignInPageState extends State<SignInPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -37,22 +41,18 @@ class _SignUpPageState extends State<SignUpPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign Up'),
+        title: const Text('Sign In'),
         centerTitle: true,
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            _showSnackBar('Sign up successful! You are now logged in.');
-            // This might happen if auto-login occurs after signup
+            _showSnackBar('Logged in successfully!');
             // Navigation handled by SplashPage listener or root router
-          } else if (state is AuthEmailVerificationRequired) {
-            _showSnackBar(
-                'Sign up successful! Check your email for verification. You can now log in after verifying.');
-            // Optionally navigate back to sign-in after successful signup requiring verification
-            Navigator.of(context).pop();
           } else if (state is AuthError) {
-            _showSnackBar('Sign up failed: ${state.message}');
+            _showSnackBar('Login failed: ${state.message}');
+          } else if (state is AuthUnauthenticated && state.message != null) {
+            _showSnackBar(state.message!);
           }
         },
         builder: (context, state) {
@@ -60,6 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
           return Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
+              // More padding for Material 3 look
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -77,7 +78,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       labelText: 'Email',
                       hintText: 'your@example.com',
                       prefixIcon: const Icon(Icons.email_outlined),
-                      border: const OutlineInputBorder(),
+                      border:
+                          const OutlineInputBorder(), // Material 3 uses OutlineInputBorder by default
                     ),
                     keyboardType: TextInputType.emailAddress,
                     enabled: !isLoading,
@@ -87,7 +89,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     controller: _passwordController,
                     decoration: InputDecoration(
                       labelText: 'Password',
-                      hintText: 'Create a password',
+                      hintText: 'Enter your password',
                       prefixIcon: const Icon(Icons.lock_outline),
                       border: const OutlineInputBorder(),
                     ),
@@ -102,10 +104,11 @@ class _SignUpPageState extends State<SignUpPage> {
                     Column(
                       children: [
                         SizedBox(
-                          width: double.infinity,
+                          width: double.infinity, // Full width button
                           child: FilledButton(
+                            // Material 3 FilledButton
                             onPressed: () {
-                              context.read<AuthBloc>().add(AuthSignUpRequested(
+                              context.read<AuthBloc>().add(AuthSignInRequested(
                                     email: _emailController.text.trim(),
                                     password: _passwordController.text.trim(),
                                   ));
@@ -116,24 +119,71 @@ class _SignUpPageState extends State<SignUpPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text('Sign Up'),
+                            child: const Text('Sign In'),
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => const ForgotPasswordPage()));
+                          },
+                          child: const Text('Forgot Password?'),
+                        ),
+                        const SizedBox(height: 20),
+
+                        Divider(
+                          height: 40,
+                          thickness: 1,
+                          color: colorScheme.outlineVariant,
+                          indent: 20,
+                          endIndent: 20,
+                        ),
+                        Text('OR',
+                            style:
+                                TextStyle(color: colorScheme.onSurfaceVariant)),
+                        const SizedBox(height: 20),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            // OutlinedButton for social login
+                            onPressed: () {
+                              context
+                                  .read<AuthBloc>()
+                                  .add(const AuthSignInWithOAuthRequested(
+                                    provider: OAuthProvider.google,
+                                  ));
+                            },
+                            icon: Image.asset('assets/google_logo.png',
+                                height: 24),
+                            label: const Text('Sign In with Google'),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              foregroundColor: colorScheme.onSurface,
+                              side: BorderSide(color: colorScheme.outline),
+                            ),
+                          ),
+                        ),
+                        // Add other social login buttons here (e.g., Apple, Facebook)
                         const SizedBox(height: 32),
 
-                        // Link back to Sign In Page
+                        // Link to Sign Up Page
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text("Already have an account?",
+                            Text("Don't have an account?",
                                 style: TextStyle(
                                     color: colorScheme.onSurfaceVariant)),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context)
-                                    .pop(); // Go back to SignInPage
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (_) => const SignUpPage()));
                               },
-                              child: const Text('Sign In'),
+                              child: const Text('Sign Up'),
                             ),
                           ],
                         ),
