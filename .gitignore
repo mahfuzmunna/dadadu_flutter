@@ -78,3 +78,8 @@ coverage/
 .env
 .env.*
 firebase_app_id_file.json
+
+# Supabase
+supabase/.env
+supabase/.temp/
+supabase/.output/

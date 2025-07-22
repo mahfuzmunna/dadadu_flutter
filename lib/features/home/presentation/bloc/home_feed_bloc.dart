@@ -1,29 +1,29 @@
 // lib/features/home/presentation/bloc/home_feed_bloc.dart
 
 import 'dart:async';
+
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// Removed: import 'package:cloud_firestore/cloud_firestore.dart'; // No longer needed for DocumentSnapshot
 
 import 'package:dadadu_app/core/errors/failures.dart';
-import 'package:dadadu_app/features/home/domain/repositories/home_repository.dart';
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/home/domain/usecases/get_posts_usecase.dart';
 import 'package:dadadu_app/features/home/domain/usecases/get_user_info_usecase.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 
-// THESE TWO LINES ARE CRUCIAL
 part 'home_feed_event.dart';
 part 'home_feed_state.dart';
 
 const int _postLimit = 5;
 
-class HomeFeedBloc extends Bloc<HomeFeedEvent, HomeFeedState> { // <--- Error points here
+class HomeFeedBloc extends Bloc<HomeFeedEvent, HomeFeedState> {
   final GetPostsUseCase getPostsUseCase;
   final GetUserInfoUseCase getUserInfoUseCase;
 
-  DocumentSnapshot? _lastDocument;
+  // Changed from DocumentSnapshot? to String? for timestamp-based pagination
+  String? _lastTimestamp;
   List<PostEntity> _allLoadedPosts = [];
   Map<String, UserEntity> _userCache = {};
   bool _hasMore = true;
@@ -41,7 +41,7 @@ class HomeFeedBloc extends Bloc<HomeFeedEvent, HomeFeedState> { // <--- Error po
     if (event.isInitialFetch) {
       _allLoadedPosts = [];
       _userCache = {};
-      _lastDocument = null;
+      _lastTimestamp = null; // Reset timestamp for initial fetch
       _hasMore = true;
       emit(const HomeFeedLoading([], isFirstFetch: true));
     } else if (!_hasMore) {
@@ -52,7 +52,7 @@ class HomeFeedBloc extends Bloc<HomeFeedEvent, HomeFeedState> { // <--- Error po
 
     final postsResult = await getPostsUseCase(GetPostsParams(
       limit: _postLimit,
-      startAfterDocument: _lastDocument,
+      startAfterTimestamp: _lastTimestamp, // Use the timestamp for pagination
     ));
 
     await postsResult.fold(
@@ -62,12 +62,14 @@ class HomeFeedBloc extends Bloc<HomeFeedEvent, HomeFeedState> { // <--- Error po
           (paginationResult) async {
         final newPosts = paginationResult.posts;
         _hasMore = paginationResult.hasMore;
-        _lastDocument = paginationResult.lastDocument;
+        // Update _lastTimestamp from the paginationResult
+        _lastTimestamp = paginationResult.lastTimestamp;
 
         if (newPosts.isNotEmpty) {
           _allLoadedPosts.addAll(newPosts);
         }
 
+        // Fetch user info for new posts if not already in cache
         for (final post in newPosts) {
           if (!_userCache.containsKey(post.userId)) {
             final userResult = await getUserInfoUseCase(GetUserInfoParams(uid: post.userId));

@@ -1,8 +1,15 @@
 class ServerException implements Exception {
   final String message;
   final String code;
+  final dynamic details;
+  final dynamic hint;
 
-  ServerException(this.message, {required this.code});
+  ServerException(
+    this.message, {
+    this.code = 'SERVER_ERROR',
+    this.details = 'DETAILS',
+    this.hint = 'HINT',
+  });
 }
 
 // lib/core/errors/exceptions.dart

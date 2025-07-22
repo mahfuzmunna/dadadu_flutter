@@ -2,13 +2,14 @@
 
 import 'package:get_it/get_it.dart';
 
+import '../../config/app_config.dart'; // Import your AppConfig
 // Profile Feature Data Layer
 import 'data/datasources/profile_remote_data_source.dart';
 import 'data/repositories/profile_repository_impl.dart';
 // Profile Feature Domain Layer
 import 'domain/repositories/profile_repository.dart';
 import 'domain/usecases/delete_profile_image_usecase.dart';
-import 'domain/usecases/get_posts_usecase.dart'; // Ensure this is imported
+import 'domain/usecases/get_posts_usecase.dart';
 import 'domain/usecases/get_user_profile_usecase.dart';
 import 'domain/usecases/update_profile_usecase.dart';
 import 'domain/usecases/upload_profile_image_usecase.dart';
@@ -24,7 +25,7 @@ Future<void> profileInjection() async {
         updateProfileUseCase: sl(),
         getPostsUseCase: sl(),
         getCurrentUserUseCase: sl(),
-        // From Auth feature
+        // From Auth feature, ensure it's registered
         uploadProfileImageUseCase: sl(),
         deleteProfileImageUseCase: sl(),
       ));
@@ -44,9 +45,23 @@ Future<void> profileInjection() async {
   // Profile Feature - Data Layer (Data Sources)
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(
-      firestore: sl(),
-      firebaseStorage: sl(),
+      supabaseClient: sl(),
+      // Inject SupabaseClient
       uuid: sl(),
+      // Inject Uuid
+      // NEW: Wasabi/BunnyCDN details for profile image storage
+      wasabiAccessKey: AppConfig.wasabiAccessKey,
+      wasabiSecretKey: AppConfig.wasabiSecretKey,
+      wasabiEndpoint: AppConfig.wasabiEndpoint,
+      wasabiBucketName: AppConfig.wasabiBucketName,
+      // Use a specific bucket for profile images
+      bunnyCdnHostname: AppConfig
+          .bunnyCdnHostname, // Or a specific one if profile images use a different CDN hostname
     ),
   );
+
+  // Ensure these external dependencies are registered once, typically in main injection
+  // If you register them elsewhere globally, you can remove these lines
+  // sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
+  // sl.registerLazySingleton<Uuid>(() => Uuid());
 }
