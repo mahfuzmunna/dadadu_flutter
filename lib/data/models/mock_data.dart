@@ -42,7 +42,7 @@ class PostEntity {
   final String videoUrl;
   final String thumbnailUrl; // For grid views
   final String description;
-  final int likes;
+  final int diamonds;
   final int comments;
   final DateTime timestamp;
   // Add other post fields as needed (e.g., location, tags)
@@ -53,7 +53,7 @@ class PostEntity {
     required this.videoUrl,
     required this.thumbnailUrl,
     required this.description,
-    required this.likes,
+    required this.diamonds,
     required this.comments,
     required this.timestamp,
   });
@@ -106,7 +106,7 @@ final List<PostEntity> mockPosts = [
     thumbnailUrl: 'https://picsum.photos/id/10/200/300',
     // Example thumbnail for the grid
     description: 'Beautiful butterfly in slow motion!',
-    likes: 1234,
+    diamonds: 1234,
     comments: 56,
     timestamp:
         DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
@@ -118,7 +118,7 @@ final List<PostEntity> mockPosts = [
         'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
     thumbnailUrl: 'https://picsum.photos/id/20/200/300',
     description: 'A buzzing bee hard at work in the garden.',
-    likes: 876,
+    diamonds: 876,
     comments: 23,
     timestamp:
         DateTime.now().subtract(const Duration(hours: 3)).toIso8601String(),
@@ -131,7 +131,7 @@ final List<PostEntity> mockPosts = [
     // Another sample video
     thumbnailUrl: 'https://picsum.photos/id/30/200/300',
     description: 'Exploring the flavors of local street food!',
-    likes: 2500,
+    diamonds: 2500,
     comments: 120,
     timestamp:
         DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
@@ -144,7 +144,7 @@ final List<PostEntity> mockPosts = [
     // Reusing for variety
     thumbnailUrl: 'https://picsum.photos/id/40/200/300',
     description: 'Abstract art installation, truly captivating.',
-    likes: 999,
+    diamonds: 999,
     comments: 45,
     timestamp:
         DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
@@ -156,7 +156,7 @@ final List<PostEntity> mockPosts = [
         'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
     thumbnailUrl: 'https://picsum.photos/id/50/200/300',
     description: 'Peaceful hike through the mountains.',
-    likes: 3100,
+    diamonds: 3100,
     comments: 180,
     timestamp:
         DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
@@ -169,7 +169,7 @@ final List<PostEntity> mockPosts = [
         'https://flutter.github.io/assets-for-api-docs/assets/videos/bee.mp4',
     thumbnailUrl: 'https://picsum.photos/id/60/200/300',
     description: 'Another beautiful day for an adventure!',
-    likes: 700,
+    diamonds: 700,
     comments: 30,
     timestamp:
         DateTime.now().subtract(const Duration(days: 4)).toIso8601String(),
@@ -181,7 +181,7 @@ final List<PostEntity> mockPosts = [
         'https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4',
     thumbnailUrl: 'https://picsum.photos/id/70/200/300',
     description: 'Solving complex algorithms, one line at a time.',
-    likes: 1500,
+    diamonds: 1500,
     comments: 70,
     timestamp:
         DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
@@ -193,7 +193,7 @@ final List<PostEntity> mockPosts = [
         'https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4',
     thumbnailUrl: 'https://picsum.photos/id/80/200/300',
     description: 'A culinary journey, from farm to table.',
-    likes: 2100,
+    diamonds: 2100,
     comments: 90,
     timestamp:
         DateTime.now().subtract(const Duration(days: 6)).toIso8601String(),

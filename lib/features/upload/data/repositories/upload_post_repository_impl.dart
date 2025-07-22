@@ -38,7 +38,7 @@ class UploadPostRepositoryImpl implements UploadPostRepository {
         description: post.description,
         tag: post.tag,
         timestamp: post.timestamp,
-        likes: post.likes,
+        diamonds: post.diamonds,
         comments: post.comments,
       );
       await remoteDataSource.createPostInDatabase(

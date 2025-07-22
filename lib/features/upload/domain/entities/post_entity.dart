@@ -10,7 +10,7 @@ class PostEntity extends Equatable {
   final String description;
   final String tag; // e.g., 'Love', 'Business', 'Entertainment'
   final String timestamp;
-  final int likes;
+  final int diamonds;
   final int comments;
 
   const PostEntity({
@@ -21,7 +21,7 @@ class PostEntity extends Equatable {
     this.description = '',
     this.tag = 'Entertainment', // Default tag
     required this.timestamp,
-    this.likes = 0,
+    this.diamonds = 0,
     this.comments = 0,
   });
 
@@ -34,7 +34,7 @@ class PostEntity extends Equatable {
         description,
         tag,
         timestamp,
-        likes,
+        diamonds,
         comments,
       ];
 
@@ -46,7 +46,7 @@ class PostEntity extends Equatable {
     String? description,
     String? tag,
     String? timestamp,
-    int? likes,
+    int? diamonds,
     int? comments,
   }) {
     return PostEntity(
@@ -58,7 +58,7 @@ class PostEntity extends Equatable {
       description: description ?? this.description,
       tag: tag ?? this.tag,
       timestamp: timestamp ?? this.timestamp,
-      likes: likes ?? this.likes,
+      diamonds: diamonds ?? this.diamonds,
       comments: comments ?? this.comments,
     );
   }

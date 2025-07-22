@@ -14,7 +14,7 @@ class PostModel extends PostEntity {
     super.description,
     super.tag,
     required super.timestamp,
-    super.likes,
+    super.diamonds,
     super.comments,
   });
 
@@ -33,7 +33,7 @@ class PostModel extends PostEntity {
       // Default if null
       // Supabase typically returns timestamps as ISO 8601 strings
       timestamp: map['timestamp'] as String,
-      likes: map['likes'] as int? ?? 0,
+      diamonds: map['diamonds'] as int? ?? 0,
       // Default to 0 if null
       comments: map['comments'] as int? ?? 0, // Default to 0 if null
     );
@@ -52,7 +52,7 @@ class PostModel extends PostEntity {
       'tag': tag,
       'timestamp': timestamp,
       // Send as ISO 8601 string
-      'likes': likes,
+      'diamonds': diamonds,
       'comments': comments,
       // 'created_at' and 'updated_at' often managed by Supabase defaults/triggers.
       // If you manually manage 'timestamp', ensure your DB column type matches.
@@ -68,7 +68,7 @@ class PostModel extends PostEntity {
     String? description,
     String? tag,
     String? timestamp,
-    int? likes,
+    int? diamonds,
     int? comments,
   }) {
     return PostModel(
@@ -79,7 +79,7 @@ class PostModel extends PostEntity {
       description: description ?? this.description,
       tag: tag ?? this.tag,
       timestamp: timestamp ?? this.timestamp,
-      likes: likes ?? this.likes,
+      diamonds: diamonds ?? this.diamonds,
       comments: comments ?? this.comments,
     );
   }

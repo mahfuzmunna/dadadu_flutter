@@ -521,8 +521,8 @@ class _VideoPostItemState extends State<VideoPostItem>
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      _buildActionButton(Icons.favorite, '${widget.post.likes}',
-                          () {
+                      _buildActionButton(
+                          Icons.favorite, '${widget.post.diamonds}', () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Like button tapped!')),
                         );
