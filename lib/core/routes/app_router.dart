@@ -13,7 +13,7 @@ import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
-import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
+import 'package:dadadu_app/features/home/presentation/pages/home_page_s.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
@@ -157,7 +157,6 @@ class AppRouter {
                           // Use 'id' for consistency with UserEntity
                           email: 'user$userId@example.com',
                           isEmailConfirmed: true,
-                          createdAt: DateTime.now().toString(),
                           // Add other properties as needed by your UserEntity
                           // e.g., username, profilePhotoUrl if they are part of UserEntity
                         );

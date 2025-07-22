@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import '../../domain/entities/post_entity.dart';
+import '../models/post_model.dart';
 
 /// Abstract interface for a remote data source handling post-related operations.
 abstract class PostRemoteDataSource {
@@ -25,4 +26,8 @@ abstract class PostRemoteDataSource {
     required String thumbnailUrl,
     String? description,
   });
+
+  Future<PostModel> getPostById(String postId);
+
+  Stream<PostModel> subscribeToPostChanges(String postId); // NEW
 }

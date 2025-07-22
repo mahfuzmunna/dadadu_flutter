@@ -24,7 +24,7 @@ class HomeRepositoryImpl implements HomeRepository {
 
       // Determine the last timestamp for the next pagination call
       final String? lastTimestamp =
-          posts.isNotEmpty ? posts.last.timestamp : null;
+          posts.isNotEmpty ? posts.last.createdAt.toIso8601String() : null;
 
       // Determine if there might be more posts. If the number of fetched posts
       // is exactly equal to the limit, it's likely there are more.

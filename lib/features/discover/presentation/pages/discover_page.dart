@@ -1,9 +1,6 @@
 // lib/features/home/presentation/pages/discover_page.dart
-import 'package:dadadu_app/data/models/mock_data.dart';
-import 'package:dadadu_app/features/home/presentation/widgets/video_post_item.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:geolocator/geolocator.dart'; // Import geolocator
 
 enum LocationPermissionStatus {
@@ -277,13 +274,13 @@ class _DiscoverPageState extends State<DiscoverPage>
     return TabBarView(
       controller: _tabController,
       children: [
-        _buildVideoFeed(),
-        _buildExploreGrid(),
+        // _buildVideoFeed(),
+        // _buildExploreGrid(),
       ],
     );
   }
 
-  Widget _buildVideoFeed() {
+/*Widget _buildVideoFeed() {
     final filteredPosts = mockPosts;
     return PageView.builder(
       controller: _videoPageController,
@@ -303,10 +300,10 @@ class _DiscoverPageState extends State<DiscoverPage>
         );
       },
     );
-  }
+  }*/
 
   // UPDATED: _buildExploreGrid to use StaggeredGrid.count
-  Widget _buildExploreGrid() {
+/* Widget _buildExploreGrid() {
     final filteredPosts = mockPosts; // Or filter based on _selectedVibe
 
     // Manually create the list of StaggeredGridTile children
@@ -350,5 +347,5 @@ class _DiscoverPageState extends State<DiscoverPage>
         ),
       ),
     );
-  }
+  }*/
 }

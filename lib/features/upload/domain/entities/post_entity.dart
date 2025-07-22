@@ -1,28 +1,31 @@
 // lib/features/upload/domain/entities/post_entity.dart
-
 import 'package:equatable/equatable.dart';
 
 class PostEntity extends Equatable {
   final String id;
   final String userId;
   final String videoUrl;
-  final String thumbnailUrl; // NEW: Thumbnail URL for the video
   final String description;
-  final String tag; // e.g., 'Love', 'Business', 'Entertainment'
-  final String timestamp;
-  final int diamonds;
+  final String thumbnailUrl;
+  final int diamonds; // Changed from likes
   final int comments;
+  final int views;
+  final DateTime createdAt;
+  final String? hashtags; // Or List<String>
+  final String? location;
 
   const PostEntity({
     required this.id,
     required this.userId,
     required this.videoUrl,
-    required this.thumbnailUrl, // NEW: Make it required in constructor
-    this.description = '',
-    this.tag = 'Entertainment', // Default tag
-    required this.timestamp,
-    this.diamonds = 0,
-    this.comments = 0,
+    required this.description,
+    required this.thumbnailUrl,
+    this.diamonds = 0, // Default to 0
+    this.comments = 0, // Default to 0
+    this.views = 0, // Default to 0
+    required this.createdAt,
+    this.hashtags,
+    this.location,
   });
 
   @override
@@ -30,36 +33,13 @@ class PostEntity extends Equatable {
         id,
         userId,
         videoUrl,
-        thumbnailUrl, // NEW: Add to props
         description,
-        tag,
-        timestamp,
+        thumbnailUrl,
         diamonds,
         comments,
+        views,
+        createdAt,
+        hashtags,
+        location,
       ];
-
-  PostEntity copyWith({
-    String? id,
-    String? userId,
-    String? videoUrl,
-    String? thumbnailUrl, // NEW: Add to copyWith
-    String? description,
-    String? tag,
-    String? timestamp,
-    int? diamonds,
-    int? comments,
-  }) {
-    return PostEntity(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      videoUrl: videoUrl ?? this.videoUrl,
-      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
-      // NEW: Assign in copyWith
-      description: description ?? this.description,
-      tag: tag ?? this.tag,
-      timestamp: timestamp ?? this.timestamp,
-      diamonds: diamonds ?? this.diamonds,
-      comments: comments ?? this.comments,
-    );
-  }
 }

@@ -1,3 +1,4 @@
+// lib/features/auth/domain/entities/user_entity.dart
 import 'dart:io';
 
 import 'package:equatable/equatable.dart';
@@ -5,23 +6,21 @@ import 'package:equatable/equatable.dart';
 class UserEntity extends Equatable {
   final String uid;
   final String? email;
-  final String? displayName; // Can still be used as a fallback
+  final String? displayName; // This might be 'full_name' from DB
   final String? firstName;
   final String? lastName;
   final String? username;
-  final String? phoneNumber;
   final String? bio;
   final String? profilePhotoUrl;
-  final String? userModeEmoji; // New: For the emoji status
-  final int followersCount; // New
-  final int followingCount; // New
-  final int? postCount; // New
-  final String? rank; // New
-  final List<String> uploadedVideoUrls; // New: Assuming video URLs
-  final String? createdAt;
+  final String? userModeEmoji;
+  final int followersCount;
+  final int followingCount;
+  final int? postCount;
+  final String? rank;
+  final List<String> uploadedVideoUrls;
+  final File?
+      profilePhotoFile; // Used for local selection, not persisted directly as URL
   final bool isEmailConfirmed;
-
-  final File? profilePhotoFile; // New: For profile image
 
   const UserEntity({
     required this.uid,
@@ -30,17 +29,15 @@ class UserEntity extends Equatable {
     this.firstName,
     this.lastName,
     this.username,
-    this.phoneNumber,
     this.bio,
     this.profilePhotoUrl,
     this.userModeEmoji,
-    this.followersCount = 0, // Default to 0
-    this.followingCount = 0, // Default to 0
-    this.postCount, // New
+    this.followersCount = 0,
+    this.followingCount = 0,
+    this.postCount,
     this.rank,
-    this.uploadedVideoUrls = const [], // Default to empty list
-    this.profilePhotoFile, // New: For profile image
-    this.createdAt,
+    this.uploadedVideoUrls = const [],
+    this.profilePhotoFile,
     this.isEmailConfirmed = false,
   });
 
@@ -52,7 +49,6 @@ class UserEntity extends Equatable {
         firstName,
         lastName,
         username,
-        phoneNumber,
         bio,
         profilePhotoUrl,
         userModeEmoji,
@@ -62,50 +58,13 @@ class UserEntity extends Equatable {
         rank,
         uploadedVideoUrls,
         profilePhotoFile,
-        createdAt,
         isEmailConfirmed,
       ];
 
-  // Helper to create a copy with updated values
-  UserEntity copyWith({
-    String? uid,
-    String? email,
-    String? displayName,
-    String? firstName,
-    String? lastName,
-    String? username,
-    String? phoneNumber,
-    String? bio,
-    String? profilePhotoUrl,
-    String? userModeEmoji,
-    int? followersCount,
-    int? followingCount,
-    int? postCount,
-    String? rank,
-    List<String>? uploadedVideoUrls,
-    File? profilePhotoFile,
-    String? createdAt,
-    bool? isEmailConfirmed,
-  }) {
-    return UserEntity(
-      uid: uid ?? this.uid,
-      email: email ?? this.email,
-      displayName: displayName ?? this.displayName,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      username: username ?? this.username,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
-      bio: bio ?? this.bio,
-      profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
-      userModeEmoji: userModeEmoji ?? this.userModeEmoji,
-      followersCount: followersCount ?? this.followersCount,
-      followingCount: followingCount ?? this.followingCount,
-      postCount: postCount ?? this.postCount,
-      rank: rank ?? this.rank,
-      uploadedVideoUrls: uploadedVideoUrls ?? this.uploadedVideoUrls,
-      profilePhotoFile: profilePhotoFile ?? this.profilePhotoFile,
-      createdAt: createdAt ?? this.createdAt,
-      isEmailConfirmed: isEmailConfirmed ?? this.isEmailConfirmed,
-    );
-  }
+  copyWith(
+      {required String username,
+      required String firstName,
+      required String lastName,
+      required String bio,
+      File? profilePhotoFile}) {}
 }

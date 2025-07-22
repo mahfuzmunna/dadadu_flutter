@@ -9,6 +9,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../domain/entities/post_entity.dart';
+import '../models/post_model.dart'; // Assumed from the first snippet
 import 'post_remote_data_source.dart';
 
 // Optional: import minio_new/exceptions.dart for specific exception handling
@@ -27,8 +28,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   // Minio client instance (initialized in constructor or lazily)
   late final Minio _minioClient;
 
-  PostRemoteDataSourceImpl(
-    this.supabaseClient, {
+  PostRemoteDataSourceImpl(this.supabaseClient, {
     required this.wasabiAccessKey,
     required this.wasabiSecretKey,
     required this.wasabiEndpoint, // Changed to endpoint URL
@@ -131,7 +131,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
               // NEW: Save the BunnyCDN thumbnail URL here
               'description': description,
               // Pass nullable description
-              'timestamp': DateTime.now().toIso8601String(),
+              'created_at': DateTime.now().toIso8601String(),
               // Ensure this matches your DB column name
             },
           )
@@ -156,7 +156,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         // Correctly cast as non-nullable String
         description: postMap['description'] as String,
         // FIX: Cast as nullable String to match PostEntity
-        timestamp: postMap['timestamp'] as String, // Cast as String
+        createdAt: postMap['createdAt'] as DateTime, // Cast as String
       );
     } on PostgrestException catch (e) {
       // Catch specific Supabase database errors
@@ -170,5 +170,41 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           'An unexpected error occurred during post creation in Supabase: $e',
           code: 'UNKNOWN_DB_ERROR');
     }
+  }
+
+  @override
+  Future<PostModel> getPostById(String postId) async {
+    try {
+      final response = await supabaseClient
+          .from('posts') // Your posts table name
+          .select()
+          .eq('id', postId)
+          .single(); // Use single() if you expect one result
+
+      return PostModel.fromMap(response);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message, code: e.code as String);
+    } catch (e) {
+      throw ServerException('Failed to get post: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<PostModel> subscribeToPostChanges(String postId) {
+    // Use Realtime to listen for updates to a specific post by its ID
+    return supabaseClient
+        .from('posts')
+        .stream(primaryKey: ['id']) // 'id' is your primary key
+        .eq('id', postId) // Filter for the specific post
+        .map((event) {
+          // The event is a List<Map<String, dynamic>>
+          if (event.isNotEmpty) {
+            return PostModel.fromMap(event.first);
+          }
+          // If the event list is empty (e.g., due to deletion),
+          // you might want to handle it differently, e.g., throw an error
+          // or return a special state. For simplicity, we'll throw here.
+          throw ServerException('Post data not found in realtime update.');
+        });
   }
 }

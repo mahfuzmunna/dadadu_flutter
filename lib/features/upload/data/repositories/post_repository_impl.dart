@@ -55,4 +55,23 @@ class PostRepositoryImpl implements PostRepository {
           ServerFailure('An unexpected error occurred during post upload: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, PostEntity>> getPostById(String postId) async {
+    try {
+      final postModel = await remoteDataSource.getPostById(postId);
+      return Right(postModel);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(
+          ServerFailure('An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Stream<PostEntity> subscribeToPostChanges(String postId) {
+    // Map PostModel stream to PostEntity stream
+    return remoteDataSource.subscribeToPostChanges(postId);
+  }
 }
