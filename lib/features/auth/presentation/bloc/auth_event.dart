@@ -1,5 +1,4 @@
 // lib/features/auth/presentation/bloc/auth_event.dart
-
 part of 'auth_bloc.dart';
 
 @immutable
@@ -7,12 +6,11 @@ abstract class AuthEvent extends Equatable {
   const AuthEvent();
 
   @override
-  List<Object> get props => [];
+  // FIX: Changed to List<Object?> to allow for nullable properties
+  List<Object?> get props => [];
 }
 
-class AuthCheckRequested extends AuthEvent {
-  const AuthCheckRequested();
-}
+class AuthCheckRequested extends AuthEvent {}
 
 class AuthSignInRequested extends AuthEvent {
   final String email;
@@ -21,31 +19,29 @@ class AuthSignInRequested extends AuthEvent {
   const AuthSignInRequested({required this.email, required this.password});
 
   @override
-  List<Object> get props => [email, password];
+  List<Object> get props => [email, password]; // These are non-nullable
 }
 
 class AuthSignUpRequested extends AuthEvent {
   final String email;
   final String password;
-  final String username;
-  final String firstName;
-  final String lastName;
 
-  const AuthSignUpRequested({
-    required this.email,
-    required this.password,
-    required this.username,
-    required this.firstName,
-    required this.lastName,
-  });
+  const AuthSignUpRequested({required this.email, required this.password});
 
   @override
-  List<Object> get props => [email, password, username, firstName, lastName];
+  List<Object> get props => [email, password]; // These are non-nullable
 }
 
-class AuthSignOutRequested extends AuthEvent {
-  const AuthSignOutRequested();
+class AuthSignInWithOAuthRequested extends AuthEvent {
+  final OAuthProvider provider;
+
+  const AuthSignInWithOAuthRequested({required this.provider});
+
+  @override
+  List<Object> get props => [provider]; // These are non-nullable
 }
+
+class AuthSignOutRequested extends AuthEvent {}
 
 class AuthResetPasswordRequested extends AuthEvent {
   final String email;
@@ -53,10 +49,19 @@ class AuthResetPasswordRequested extends AuthEvent {
   const AuthResetPasswordRequested({required this.email});
 
   @override
-  List<Object> get props => [email];
+  List<Object> get props => [email]; // This is non-nullable
 }
 
-// NEW: Event to refresh current user data (e.g., after profile update)
+// Event triggered by the underlying Supabase auth listener
+class AuthUserChanged extends AuthEvent {
+  final UserEntity? user;
+
+  const AuthUserChanged(this.user);
+
+  @override
+  List<Object?> get props => [user]; // This correctly returns List<Object?>
+}
+
 class AuthRefreshCurrentUser extends AuthEvent {
-  const AuthRefreshCurrentUser();
+  const AuthRefreshCurrentUser(); // No need for props, it's just a signal
 }

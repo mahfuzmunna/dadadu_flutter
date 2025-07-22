@@ -1,63 +1,60 @@
 // lib/features/auth/presentation/bloc/auth_state.dart
-
 part of 'auth_bloc.dart';
 
 @immutable
 abstract class AuthState extends Equatable {
   const AuthState();
 
-  // Change return type to List<Object?> to allow nullable properties in derived states
   @override
   List<Object?> get props => [];
 }
 
-class AuthInitial extends AuthState {
-  const AuthInitial();
-}
+class AuthInitial extends AuthState {}
 
-class AuthLoading extends AuthState {
-  const AuthLoading();
-}
+class AuthLoading extends AuthState {}
 
 class AuthAuthenticated extends AuthState {
   final UserEntity user;
-  final bool isLoading;
 
-  const AuthAuthenticated({
-    required this.user,
-    this.isLoading = false,
-  });
-
-  AuthAuthenticated copyWith({
-    UserEntity? user,
-    bool? isLoading,
-  }) {
-    return AuthAuthenticated(
-      user: user ?? this.user,
-      isLoading: isLoading ?? this.isLoading,
-    );
-  }
+  const AuthAuthenticated({required this.user});
 
   @override
-  List<Object> get props =>
-      [user, isLoading]; // No nullable items here, so List<Object> is fine
+  List<Object?> get props => [user];
 }
 
 class AuthUnauthenticated extends AuthState {
-  const AuthUnauthenticated();
+  final String?
+      message; // Optional message for sign up success (e.g., check email)
+
+  const AuthUnauthenticated({this.message});
+
+  @override
+  List<Object?> get props => [message];
 }
 
 class AuthError extends AuthState {
   final String message;
-  final UserEntity? user; // This is the nullable field causing the issue
 
-  const AuthError({required this.message, this.user});
+  const AuthError({required this.message});
 
   @override
-  // Now this override is valid because AuthState.props returns List<Object?>
-  List<Object?> get props => [message, user];
+  List<Object?> get props => [message];
+}
+
+class AuthEmailVerificationRequired extends AuthState {
+  final String email;
+
+  const AuthEmailVerificationRequired({required this.email});
+
+  @override
+  List<Object?> get props => [email];
 }
 
 class AuthPasswordResetEmailSent extends AuthState {
-  const AuthPasswordResetEmailSent();
+  final String email;
+
+  const AuthPasswordResetEmailSent({required this.email});
+
+  @override
+  List<Object?> get props => [email];
 }

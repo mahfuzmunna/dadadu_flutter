@@ -21,7 +21,7 @@ class UploadPostRepositoryImpl implements UploadPostRepository {
       final String downloadUrl = await remoteDataSource.uploadVideoToStorage(videoFile, userId, postId);
       return Right(downloadUrl);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     }
   }
 
@@ -43,7 +43,7 @@ class UploadPostRepositoryImpl implements UploadPostRepository {
       await remoteDataSource.createPostInFirestore(postModel);
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     }
   }
 
@@ -53,7 +53,7 @@ class UploadPostRepositoryImpl implements UploadPostRepository {
       await remoteDataSource.updateUserUploadedVideosList(userId, videoUrl);
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     }
   }
 }

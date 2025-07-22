@@ -9,6 +9,7 @@ class UserEntity extends Equatable {
   final String? firstName;
   final String? lastName;
   final String? username;
+  final String? phoneNumber;
   final String? bio;
   final String? profilePhotoUrl;
   final String? userModeEmoji; // New: For the emoji status
@@ -17,6 +18,8 @@ class UserEntity extends Equatable {
   final int? postCount; // New
   final String? rank; // New
   final List<String> uploadedVideoUrls; // New: Assuming video URLs
+  final String? createdAt;
+  final bool isEmailConfirmed;
 
   final File? profilePhotoFile; // New: For profile image
 
@@ -27,6 +30,7 @@ class UserEntity extends Equatable {
     this.firstName,
     this.lastName,
     this.username,
+    this.phoneNumber,
     this.bio,
     this.profilePhotoUrl,
     this.userModeEmoji,
@@ -36,25 +40,30 @@ class UserEntity extends Equatable {
     this.rank,
     this.uploadedVideoUrls = const [], // Default to empty list
     this.profilePhotoFile, // New: For profile image
+    this.createdAt,
+    this.isEmailConfirmed = false,
   });
 
   @override
   List<Object?> get props => [
-    uid,
-    email,
-    displayName,
-    firstName,
-    lastName,
-    username,
+        uid,
+        email,
+        displayName,
+        firstName,
+        lastName,
+        username,
+        phoneNumber,
         bio,
         profilePhotoUrl,
-    userModeEmoji,
-    followersCount,
-    followingCount,
+        userModeEmoji,
+        followersCount,
+        followingCount,
         postCount,
         rank,
-    uploadedVideoUrls,
-        profilePhotoFile
+        uploadedVideoUrls,
+        profilePhotoFile,
+        createdAt,
+        isEmailConfirmed,
       ];
 
   // Helper to create a copy with updated values
@@ -65,6 +74,7 @@ class UserEntity extends Equatable {
     String? firstName,
     String? lastName,
     String? username,
+    String? phoneNumber,
     String? bio,
     String? profilePhotoUrl,
     String? userModeEmoji,
@@ -74,6 +84,8 @@ class UserEntity extends Equatable {
     String? rank,
     List<String>? uploadedVideoUrls,
     File? profilePhotoFile,
+    String? createdAt,
+    bool? isEmailConfirmed,
   }) {
     return UserEntity(
       uid: uid ?? this.uid,
@@ -82,6 +94,7 @@ class UserEntity extends Equatable {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       username: username ?? this.username,
+      phoneNumber: phoneNumber ?? this.phoneNumber,
       bio: bio ?? this.bio,
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
       userModeEmoji: userModeEmoji ?? this.userModeEmoji,
@@ -91,6 +104,8 @@ class UserEntity extends Equatable {
       rank: rank ?? this.rank,
       uploadedVideoUrls: uploadedVideoUrls ?? this.uploadedVideoUrls,
       profilePhotoFile: profilePhotoFile ?? this.profilePhotoFile,
+      createdAt: createdAt ?? this.createdAt,
+      isEmailConfirmed: isEmailConfirmed ?? this.isEmailConfirmed,
     );
   }
 }

@@ -43,6 +43,22 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <data android:scheme="http" />
+                <data android:scheme="https" />
+
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:scheme="your-app-scheme"
+                    android:host="login-callback" />
+                <data
+                    android:scheme="your-app-scheme"
+                    android:host="reset-password-callback" />
+            </intent-filter>
         </activity>
         <meta-data
             android:name="flutterEmbedding"

@@ -21,13 +21,12 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final userModel = await remoteDataSource.getUserProfile(userId);
       return Right(userModel);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     } on CacheException catch (e) {
       // If you later add local cache
       return Left(CacheFailure(message: e.message));
     } catch (e) {
-      return Left(ServerFailure(
-          message: 'An unexpected error occurred: ${e.toString()}'));
+      return Left(ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
@@ -54,10 +53,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
       await remoteDataSource.updateUserProfile(userModel);
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure(
-          message: 'An unexpected error occurred: ${e.toString()}'));
+      return Left(ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
@@ -68,10 +66,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // Assuming PostModel extends PostEntity or has a toEntity method
       return Right(postModels.map((model) => model as PostEntity).toList());
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     } catch (e) {
-      return Left(ServerFailure(
-          message: 'An unexpected error occurred: ${e.toString()}'));
+      return Left(ServerFailure('An unexpected error occurred: ${e.toString()}'));
     }
   }
 
@@ -83,11 +80,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
           await remoteDataSource.uploadProfileImage(userId, imagePath);
       return Right(imageUrl);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(ServerFailure(
-          message:
-              'An unexpected error occurred during image upload: ${e.toString()}'));
+          'An unexpected error occurred during image upload: ${e.toString()}'));
     }
   }
 
@@ -97,11 +93,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
       await remoteDataSource.deleteProfileImage(userId);
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     } catch (e) {
       return Left(ServerFailure(
-          message:
-              'An unexpected error occurred during image deletion: ${e.toString()}'));
+          'An unexpected error occurred during image deletion: ${e.toString()}'));
     }
   }
 }

@@ -41,6 +41,7 @@ dependencies:
 
   # Deep Link
   url_launcher: ^6.3.2
+  #  uni_links: ^0.1
 
   # Firebase (versions compatibles)
   firebase_core: ^3.14.0
@@ -52,6 +53,10 @@ dependencies:
   visibility_detector: ^0.4.0+2
   adaptive_theme: ^3.7.0
   video_trimmer: ^5.0.0
+
+  # Supabase
+  supabase_flutter: ^2.0.0
+
 
 
   # Utils
@@ -104,6 +109,7 @@ flutter:
     - assets/animations/globe.json
     - assets/images/space_background.jpg
     - assets/images/space_background_2.jpg
+    - assets/google_logo.png
 
 flutter_icons:
   android: true

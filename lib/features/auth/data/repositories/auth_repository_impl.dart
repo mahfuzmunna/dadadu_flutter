@@ -1,48 +1,65 @@
-import 'package:dadadu_app/core/errors/exceptions.dart';
-import 'package:dadadu_app/core/errors/failures.dart';
-import 'package:dadadu_app/features/auth/data/datasources/auth_remote_data_source.dart';
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/auth/domain/repositories/auth_repository.dart';
+// lib/features/auth/data/repositories/auth_repository_impl.dart
 import 'package:dartz/dartz.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth; // Import for Stream type
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+import '../../../../core/errors/exceptions.dart';
+import '../../../../core/errors/failures.dart';
+import '../../domain/entities/user_entity.dart';
+import '../../domain/repositories/auth_repository.dart';
+import '../datasources/auth_remote_data_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
 
   AuthRepositoryImpl({required this.remoteDataSource});
 
-  // Implement the new getter:
   @override
-  Stream<firebase_auth.User?> get authStateChanges => remoteDataSource.authStateChanges();
-
-  @override
-  Future<Either<Failure, UserEntity>> signInWithEmailPassword(
-      String email, String password) async {
+  Future<Either<Failure, UserEntity>> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
     try {
-      final userModel = await remoteDataSource.signInWithEmailPassword(
-        email,
-        password,
+      final user = await remoteDataSource.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      return Right(userModel);
+      return Right(user);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(AuthFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, UserEntity>> signUpWithEmailPassword(
-      String email, String password, String firstName, String lastName, String username) async {
+  Future<Either<Failure, UserEntity>> signUpWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
     try {
-      final userModel = await remoteDataSource.signUpWithEmailPassword(
-        email,
-        password,
-        firstName,
-        lastName,
-        username,
+      final user = await remoteDataSource.signUpWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      return Right(userModel);
+      return Right(user);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(AuthFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithOAuth({
+    required OAuthProvider provider,
+  }) async {
+    try {
+      final user = await remoteDataSource.signInWithOAuth(provider: provider);
+      return Right(user);
+    } on ServerException catch (e) {
+      return Left(AuthFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
     }
   }
 
@@ -52,27 +69,40 @@ class AuthRepositoryImpl implements AuthRepository {
       await remoteDataSource.signOut();
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(AuthFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPasswordForEmail({
+    required String email,
+  }) async {
+    try {
+      await remoteDataSource.resetPasswordForEmail(email: email);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(AuthFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
     }
   }
 
   @override
   Future<Either<Failure, UserEntity?>> getCurrentUser() async {
     try {
-      final userModel = await remoteDataSource.getCurrentUser();
-      return Right(userModel);
+      final user = remoteDataSource.getCurrentUser();
+      return Right(user);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(AuthFailure(e.message, code: e.code));
+    } catch (e) {
+      return Left(ServerFailure('An unexpected error occurred: $e'));
     }
   }
 
   @override
-  Future<Either<Failure, void>> sendPasswordResetEmail(String email) async {
-    try {
-      await remoteDataSource.sendPasswordResetEmail(email);
-      return const Right(null);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
-    }
+  Stream<UserEntity?> onAuthStateChange() {
+    return remoteDataSource.onAuthStateChange();
   }
 }

@@ -27,16 +27,16 @@ class PostEntity extends Equatable {
 
   @override
   List<Object?> get props => [
-    id,
-    userId,
-    videoUrl,
+        id,
+        userId,
+        videoUrl,
         thumbnailUrl, // NEW: Add to props
         description,
-    tag,
-    timestamp,
-    likes,
-    comments,
-  ];
+        tag,
+        timestamp,
+        likes,
+        comments,
+      ];
 
   PostEntity copyWith({
     String? id,

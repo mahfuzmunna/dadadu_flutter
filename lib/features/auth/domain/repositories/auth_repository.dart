@@ -1,15 +1,33 @@
+// lib/features/auth/domain/repositories/auth_repository.dart
 import 'package:dartz/dartz.dart';
-import 'package:dadadu_app/core/errors/failures.dart';
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth; // Import for Stream type
+import 'package:supabase_flutter/supabase_flutter.dart'; // For Provider enum
+import '../../../../core/errors/failures.dart';
+import '../entities/user_entity.dart';
 
+/// Abstract interface for authentication operations.
+/// This defines the contract that the data layer must fulfill.
 abstract class AuthRepository {
-  Future<Either<Failure, UserEntity>> signInWithEmailPassword(String email, String password);
-  Future<Either<Failure, UserEntity>> signUpWithEmailPassword(
-      String email, String password, String firstName, String lastName, String username);
+  Future<Either<Failure, UserEntity>> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  });
+
+  Future<Either<Failure, UserEntity>> signUpWithEmailAndPassword({
+    required String email,
+    required String password,
+  });
+
+  Future<Either<Failure, UserEntity>> signInWithOAuth({
+    required OAuthProvider provider,
+  });
+
   Future<Either<Failure, void>> signOut();
+
+  Future<Either<Failure, void>> resetPasswordForEmail({
+    required String email,
+  });
+
   Future<Either<Failure, UserEntity?>> getCurrentUser();
-  Future<Either<Failure, void>> sendPasswordResetEmail(String email);
-  // Add this new method
-  Stream<firebase_auth.User?> get authStateChanges; // Expose stream through repository
+
+  Stream<UserEntity?> onAuthStateChange(); // Stream for auth state changes
 }

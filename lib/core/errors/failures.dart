@@ -9,13 +9,17 @@ abstract class Failure extends Equatable {
 
   @override
   List<Object?> get props => properties;
+
+  get message => null;
+
+  get code => null;
 }
 
 class ServerFailure extends Failure {
   final String message;
   // Removed 'const' from the constructor here.
   // Now, 'message' can be a runtime value, and it can be passed to super.
-  ServerFailure({required this.message}) : super([message]);
+  ServerFailure(this.message) : super([message]);
 }
 
 class CacheFailure extends Failure {
@@ -28,37 +32,38 @@ class CacheFailure extends Failure {
 
 // Specific Authentication Failures
 class InvalidCredentialsFailure extends ServerFailure {
-  InvalidCredentialsFailure({required String message}) : super(message: message);
+  InvalidCredentialsFailure({required String message}) : super(message);
 }
 
 class WeakPasswordFailure extends ServerFailure {
-  WeakPasswordFailure({required String message}) : super(message: message);
+  WeakPasswordFailure({required String message}) : super(message);
 }
 
 class EmailAlreadyInUseFailure extends ServerFailure {
-  EmailAlreadyInUseFailure({required String message}) : super(message: message);
+  EmailAlreadyInUseFailure({required String message}) : super(message);
 }
 
 class UserNotFoundFailure extends ServerFailure {
-  UserNotFoundFailure({required String message}) : super(message: message);
+  UserNotFoundFailure({required String message}) : super(message);
 }
 
 class WrongPasswordFailure extends ServerFailure {
-  WrongPasswordFailure({required String message}) : super(message: message);
+  WrongPasswordFailure({required String message}) : super(message);
 }
 
 class UnknownAuthFailure extends ServerFailure {
-  UnknownAuthFailure({required String message}) : super(message: message);
+  UnknownAuthFailure({required String message}) : super(message);
 }
 // NEW: Storage specific failure
 class StorageFailure extends ServerFailure {
-  StorageFailure({required super.message});
+  StorageFailure(super.message);
 }
 
 class AuthFailure extends Failure {
   final String message;
+  final String code;
 
   // Removed 'const' from the constructor here.
   // Now, 'message' can be a runtime value, and it can be passed to super.
-  AuthFailure({required this.message}) : super([message]);
+  AuthFailure(this.message, {required this.code}) : super([message]);
 }

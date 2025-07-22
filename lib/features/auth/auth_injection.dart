@@ -1,50 +1,50 @@
-// lib/features/auth/auth_injection.dart
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import 'package:get_it/get_it.dart';
-
-// Auth Data
+import '../../injection_container.dart';
 import 'data/datasources/auth_remote_data_source.dart';
+import 'data/datasources/auth_remote_data_source_impl.dart';
 import 'data/repositories/auth_repository_impl.dart';
-// Auth Domain
 import 'domain/repositories/auth_repository.dart';
 import 'domain/usecases/get_current_user_usecase.dart';
-import 'domain/usecases/send_password_reset_email_usecase.dart';
+import 'domain/usecases/reset_password_usecase.dart';
 import 'domain/usecases/sign_in_usecase.dart';
+import 'domain/usecases/sign_in_with_oauth_usecase.dart';
 import 'domain/usecases/sign_out_usecase.dart';
 import 'domain/usecases/sign_up_usecase.dart';
-// Auth Presentation
-import 'presentation/bloc/auth_bloc.dart';
-
-final sl = GetIt.instance; // Re-use the same GetIt instance
 
 Future<void> authInjection() async {
+  //! Features - Auth
   // Bloc
-  sl.registerFactory(() => AuthBloc(
-        authRepository: sl(),
-        getCurrentUserUseCase: sl(),
-        signInUseCase: sl(),
-        signUpUseCase: sl(),
-        signOutUseCase: sl(),
-        sendPasswordResetEmailUseCase: sl(),
-      ));
+  sl.registerFactory(
+    () => AuthBloc(
+      signInUseCase: sl(),
+      signUpUseCase: sl(),
+      signInWithOAuthUseCase: sl(),
+      signOutUseCase: sl(),
+      resetPasswordUseCase: sl(),
+      getCurrentUserUseCase: sl(),
+    ),
+  );
 
-  // Use Cases
-  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
+  // Use cases
   sl.registerLazySingleton(() => SignInUseCase(sl()));
   sl.registerLazySingleton(() => SignUpUseCase(sl()));
+  sl.registerLazySingleton(() => SignInWithOAuthUseCase(sl()));
   sl.registerLazySingleton(() => SignOutUseCase(sl()));
-  sl.registerLazySingleton(() => SendPasswordResetEmailUseCase(sl()));
+  sl.registerLazySingleton(() => ResetPasswordUseCase(sl()));
+  sl.registerLazySingleton(() => GetCurrentUserUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: sl()),
   );
 
-  // Data Sources
+  // Data sources
   sl.registerLazySingleton<AuthRemoteDataSource>(
-    () => FirebaseAuthRemoteDataSourceImpl(
-      sl(), // Get the FirebaseAuth instance from global sl
-      sl(), // Get the FirebaseFirestore instance from global sl
-    ),
+    () => AuthRemoteDataSourceImpl(sl()),
   );
+
+  //! External
+  sl.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 }

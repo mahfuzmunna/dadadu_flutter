@@ -40,15 +40,15 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       final doc = await _firestore.collection('users').doc(userId).get();
       if (!doc.exists || doc.data() == null) {
-        throw ServerException(message: 'User profile not found.');
+        throw ServerException('User profile not found.', code: '');
       }
       return UserModel.fromFirestore(doc);
     } on FirebaseException catch (e) {
-      throw ServerException(
-          message: e.message ?? 'Firestore error fetching profile.');
+      throw ServerException(e.message ?? 'Firestore error fetching profile.',
+          code: '');
     } catch (e) {
-      throw ServerException(
-          message: 'An unexpected error occurred: ${e.toString()}');
+      throw ServerException('An unexpected error occurred: ${e.toString()}',
+          code: '');
     }
   }
 
@@ -60,11 +60,11 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           .doc(user.uid)
           .update(user.toMap()..['updatedAt'] = FieldValue.serverTimestamp());
     } on FirebaseException catch (e) {
-      throw ServerException(
-          message: e.message ?? 'Firestore error updating profile.');
+      throw ServerException(e.message ?? 'Firestore error updating profile.',
+          code: '');
     } catch (e) {
-      throw ServerException(
-          message: 'An unexpected error occurred: ${e.toString()}');
+      throw ServerException('An unexpected error occurred: ${e.toString()}',
+          code: '');
     }
   }
 
@@ -82,11 +82,11 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           .map((doc) => PostModel.fromFirestore(doc))
           .toList();
     } on FirebaseException catch (e) {
-      throw ServerException(
-          message: e.message ?? 'Firestore error fetching user posts.');
+      throw ServerException(e.message ?? 'Firestore error fetching user posts.',
+          code: '');
     } catch (e) {
-      throw ServerException(
-          message: 'An unexpected error occurred: ${e.toString()}');
+      throw ServerException('An unexpected error occurred: ${e.toString()}',
+          code: '');
     }
   }
 
@@ -113,11 +113,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return downloadUrl;
     } on FirebaseException catch (e) {
       throw ServerException(
-          message: e.message ?? 'Firebase Storage error uploading image.');
+          e.message ?? 'Firebase Storage error uploading image.',
+          code: '');
     } catch (e) {
       throw ServerException(
-          message:
-              'An unexpected error occurred during image upload: ${e.toString()}');
+          'An unexpected error occurred during image upload: ${e.toString()}',
+          code: '');
     }
   }
 
@@ -140,11 +141,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       }
     } on FirebaseException catch (e) {
       throw ServerException(
-          message: e.message ?? 'Firebase Storage error deleting image.');
+          e.message ?? 'Firebase Storage error deleting image.',
+          code: '');
     } catch (e) {
       throw ServerException(
-          message:
-              'An unexpected error occurred during image deletion: ${e.toString()}');
+          'An unexpected error occurred during image deletion: ${e.toString()}',
+          code: '');
     }
   }
 }

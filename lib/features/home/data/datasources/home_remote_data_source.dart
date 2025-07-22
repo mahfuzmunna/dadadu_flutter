@@ -30,9 +30,11 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
       return await query.limit(limit).get(); // Return the raw QuerySnapshot
     } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firestore Error fetching posts: ${e.message}');
+      throw ServerException('Firestore Error fetching posts: ${e.message}',
+          code: '');
     } catch (e) {
-      throw ServerException(message: 'Unexpected error fetching posts: ${e.toString()}');
+      throw ServerException('Unexpected error fetching posts: ${e.toString()}',
+          code: '');
     }
   }
 
@@ -41,13 +43,17 @@ class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
     try {
       final DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
       if (!doc.exists) {
-        throw ServerException(message: 'User not found for UID: $uid');
+        throw ServerException('User not found for UID: $uid', code: '');
       }
       return UserModel.fromFirestore(doc);
     } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firestore Error fetching user info for $uid: ${e.message}');
+      throw ServerException(
+          'Firestore Error fetching user info for $uid: ${e.message}',
+          code: '');
     } catch (e) {
-      throw ServerException(message: 'Unexpected error fetching user info for $uid: ${e.toString()}');
+      throw ServerException(
+          'Unexpected error fetching user info for $uid: ${e.toString()}',
+          code: '');
     }
   }
 }

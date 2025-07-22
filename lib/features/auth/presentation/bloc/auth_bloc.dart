@@ -1,16 +1,16 @@
 // lib/features/auth/presentation/bloc/auth_bloc.dart
-
+import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart'; // For @immutable
+import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart'; // For NoParams
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
-import '../../domain/usecases/send_password_reset_email_usecase.dart';
+import '../../domain/usecases/reset_password_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
+import '../../domain/usecases/sign_in_with_oauth_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
 import '../../domain/usecases/sign_up_usecase.dart';
 
@@ -18,55 +18,57 @@ part 'auth_event.dart';
 part 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  final AuthRepository authRepository;
-  final GetCurrentUserUseCase getCurrentUserUseCase;
   final SignInUseCase signInUseCase;
   final SignUpUseCase signUpUseCase;
+  final SignInWithOAuthUseCase signInWithOAuthUseCase;
   final SignOutUseCase signOutUseCase;
-  final SendPasswordResetEmailUseCase sendPasswordResetEmailUseCase;
+  final ResetPasswordUseCase resetPasswordUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
+
+  StreamSubscription<UserEntity?>? _authStateSubscription;
 
   AuthBloc({
-    required this.authRepository,
-    required this.getCurrentUserUseCase,
     required this.signInUseCase,
     required this.signUpUseCase,
+    required this.signInWithOAuthUseCase,
     required this.signOutUseCase,
-    required this.sendPasswordResetEmailUseCase,
+    required this.resetPasswordUseCase,
+    required this.getCurrentUserUseCase,
   }) : super(AuthInitial()) {
     on<AuthCheckRequested>(_onAuthCheckRequested);
     on<AuthSignInRequested>(_onAuthSignInRequested);
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
+    on<AuthSignInWithOAuthRequested>(_onAuthSignInWithOAuthRequested);
     on<AuthSignOutRequested>(_onAuthSignOutRequested);
     on<AuthResetPasswordRequested>(_onAuthResetPasswordRequested);
-    on<AuthRefreshCurrentUser>(_onAuthRefreshCurrentUser); // NEW HANDLER
+    on<AuthUserChanged>(_onAuthUserChanged);
+
+    // Listen to Supabase's auth state changes and dispatch AuthUserChanged
+    _authStateSubscription =
+        (signInUseCase.repository.onAuthStateChange()).listen((user) {
+      add(AuthUserChanged(user));
+    });
   }
 
   Future<void> _onAuthCheckRequested(
       AuthCheckRequested event, Emitter<AuthState> emit) async {
-    emit(const AuthLoading());
+    emit(AuthLoading());
     final result = await getCurrentUserUseCase(NoParams());
     result.fold(
-      (_) => emit(const AuthUnauthenticated()),
-      // Failure means unauthenticated
-      (user) {
-        if (user != null) {
-          emit(AuthAuthenticated(user: user));
-        } else {
-          emit(const AuthUnauthenticated());
-        }
-      },
+      (failure) => emit(AuthUnauthenticated(message: failure.message)),
+      (user) => user != null
+          ? emit(AuthAuthenticated(user: user))
+          : emit(const AuthUnauthenticated()),
     );
   }
 
   Future<void> _onAuthSignInRequested(
       AuthSignInRequested event, Emitter<AuthState> emit) async {
-    emit(const AuthLoading());
-    final result = await signInUseCase(SignInParams(
-      email: event.email,
-      password: event.password,
-    ));
+    emit(AuthLoading());
+    final result = await signInUseCase(
+        SignInParams(email: event.email, password: event.password));
     result.fold(
-      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
+      (failure) => emit(AuthError(message: failure.message)),
       (user) => emit(AuthAuthenticated(user: user)),
     );
   }
@@ -74,79 +76,78 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onAuthSignUpRequested(
       AuthSignUpRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final result = await signUpUseCase(SignUpParams(
-      email: event.email,
-      password: event.password,
-      username: event.username,
-      firstName: event.firstName,
-      lastName: event.lastName,
-    ));
+    final result = await signUpUseCase(
+        SignUpParams(email: event.email, password: event.password));
     result.fold(
-      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
+      (failure) {
+        if (failure.code == 'EMAIL_CONFIRMATION_REQUIRED') {
+          emit(AuthEmailVerificationRequired(email: event.email));
+        } else {
+          emit(AuthError(message: failure.message));
+        }
+      },
       (user) => emit(AuthAuthenticated(user: user)),
+    );
+  }
+
+  Future<void> _onAuthSignInWithOAuthRequested(
+      AuthSignInWithOAuthRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    // OAuth typically doesn't return the user immediately.
+    // The BLoC listener will catch the subsequent session update.
+    final result = await signInWithOAuthUseCase(
+        SignInWithOAuthParams(provider: event.provider));
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) {
+        // If user is returned immediately, it means they are signed in.
+        // If not, it means the browser flow has started and we wait for the deep link.
+        // For Supabase, the user is null immediately, and the deep link will trigger AuthUserChanged.
+        // We emit AuthLoading and let AuthUserChanged handle final state.
+        // Or emit a more specific state like OAuthInProgress.
+        if (user != null) {
+          emit(AuthAuthenticated(user: user));
+        } else {
+          // This state can be used to show a message like "Opening browser..."
+          emit(AuthLoading());
+        }
+      },
     );
   }
 
   Future<void> _onAuthSignOutRequested(
       AuthSignOutRequested event, Emitter<AuthState> emit) async {
-    emit(const AuthLoading());
+    emit(AuthLoading());
     final result = await signOutUseCase(NoParams());
     result.fold(
-      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
+      (failure) => emit(AuthError(message: failure.message)),
       (_) => emit(const AuthUnauthenticated()),
     );
   }
 
   Future<void> _onAuthResetPasswordRequested(
       AuthResetPasswordRequested event, Emitter<AuthState> emit) async {
-    emit(const AuthLoading());
-    final result = await sendPasswordResetEmailUseCase(
-        SendPasswordResetEmailParams(email: event.email));
+    emit(AuthLoading());
+    final result =
+        await resetPasswordUseCase(ResetPasswordParams(email: event.email));
     result.fold(
-      (failure) => emit(AuthError(message: _mapFailureToMessage(failure))),
-      (_) => emit(const AuthPasswordResetEmailSent()),
+      (failure) => emit(AuthError(message: failure.message)),
+      (_) => emit(AuthPasswordResetEmailSent(email: event.email)),
     );
   }
 
-  // NEW: Handler for refreshing current user data
-  Future<void> _onAuthRefreshCurrentUser(
-      AuthRefreshCurrentUser event, Emitter<AuthState> emit) async {
-    // Keep existing state but indicate loading if current state is Authenticated
-    if (state is AuthAuthenticated) {
-      emit(AuthAuthenticated(
-          user: (state as AuthAuthenticated).user, isLoading: true));
+  Future<void> _onAuthUserChanged(
+      AuthUserChanged event, Emitter<AuthState> emit) async {
+    if (event.user != null) {
+      emit(AuthAuthenticated(user: event.user!));
     } else {
-      emit(const AuthLoading());
+      emit(const AuthUnauthenticated());
     }
-
-    final result = await getCurrentUserUseCase(NoParams());
-    result.fold(
-      (failure) => emit(AuthError(
-        message:
-            'Failed to refresh user data: ${_mapFailureToMessage(failure)}',
-        user: (state is AuthAuthenticated)
-            ? (state as AuthAuthenticated).user
-            : null, // Keep old user if available
-      )),
-      (user) {
-        if (user != null) {
-          emit(AuthAuthenticated(user: user));
-        } else {
-          // If for some reason user is null after refresh (e.g., signed out externally)
-          emit(const AuthUnauthenticated());
-        }
-      },
-    );
   }
 
-  String _mapFailureToMessage(Failure failure) {
-    if (failure is ServerFailure) {
-      return failure.message;
-    } else if (failure is CacheFailure) {
-      return 'Cache Error';
-    } else if (failure is CacheFailure) {
-      return failure.message;
-    }
-    return 'Unexpected Error';
+  @override
+  Future<void> close() {
+    _authStateSubscription?.cancel();
+    return super.close();
   }
 }

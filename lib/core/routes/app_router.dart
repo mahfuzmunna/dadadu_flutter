@@ -8,19 +8,23 @@ import 'package:dadadu_app/core/pages/splash_page.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart'; // Needed for ProfilePage viewedUser
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
 // Feature-specific page imports
-import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
-import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart';
+import 'package:dadadu_app/features/auth/presentation/pages/login_page.dart'; // Using LoginPage for unified login/signup
+// import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
-import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart'; // <--- NEW IMPORT for SettingsPage
-import 'package:dadadu_app/features/upload/presentation/pages/create_post_page.dart';
+import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
+import 'package:dadadu_app/features/upload/presentation/pages/create_post_page.dart'; // If you're using this
+import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/upload/presentation/pages/camera_screen.dart';
+
+// If you have a ForgotPasswordPage, make sure to import it too
+import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
 
 class AppRouter {
   static GoRouter router({required AuthBloc authBloc}) {
@@ -38,15 +42,23 @@ class AppRouter {
           builder: (BuildContext context, GoRouterState state) =>
               const SplashPage(),
         ),
+        // Unified login/signup page route
         GoRoute(
-          path: '/signIn',
+          path: '/login', // Changed from /signIn to /login for consistency
           builder: (BuildContext context, GoRouterState state) =>
-              const SignInPage(),
+              const LoginPage(),
         ),
+        // Removed explicit /signUp route if LoginPage handles both.
+        // If you still have a separate SignUpPage, keep its route here.
+        // GoRoute(
+        //   path: '/signUp',
+        //   builder: (BuildContext context, GoRouterState state) =>
+        //       const SignUpPage(),
+        // ),
         GoRoute(
-          path: '/signUp',
+          path: '/forgot-password', // Route for password reset
           builder: (BuildContext context, GoRouterState state) =>
-              const SignUpPage(),
+              const ForgotPasswordPage(),
         ),
         GoRoute(
           path: '/camera',
@@ -56,14 +68,13 @@ class AppRouter {
         GoRoute(
           path: '/createPost',
           builder: (BuildContext context, GoRouterState state) {
-            // Ensure extra is not null and is of expected type before casting
             final String? videoPath = state.extra as String?;
             if (videoPath == null) {
-              // Handle error: perhaps redirect to camera or show an error page
               return const Center(
                   child: Text('Error: No video path provided!'));
             }
-            return CreatePostPage(videoPath: videoPath);
+            // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
+            return const UploadPage(); // Or UploadPage, depending on your flow
           },
         ),
         GoRoute(
@@ -72,14 +83,15 @@ class AppRouter {
               const EditProfilePage(),
         ),
         GoRoute(
-          path: '/settings', // <--- NEW SETTINGS ROUTE HERE
+          path: '/settings',
           builder: (BuildContext context, GoRouterState state) =>
               const SettingsPage(),
         ),
 
         // --- ShellRoute for the main app content with a bottom navigation bar ---
         StatefulShellRoute.indexedStack(
-          builder: (BuildContext context, GoRouterState state, StatefulNavigationShell navigationShell) {
+          builder: (BuildContext context, GoRouterState state,
+              StatefulNavigationShell navigationShell) {
             return ScaffoldWithNavBar(navigationShell: navigationShell);
           },
           branches: <StatefulShellBranch>[
@@ -109,7 +121,8 @@ class AppRouter {
                 GoRoute(
                   path: '/upload',
                   // This builder is effectively never reached due to the redirect
-                  builder: (BuildContext context, GoRouterState state) => const Center(child: Text('Initiating Upload...')),
+                  builder: (BuildContext context, GoRouterState state) =>
+                      const Center(child: Text('Initiating Upload...')),
                   // Redirect from '/upload' (tab tap) directly to '/camera'
                   redirect: (context, state) => '/camera',
                 ),
@@ -140,21 +153,15 @@ class AppRouter {
                         final String userId = state.pathParameters['userId']!;
                         // TODO: Implement actual user fetching logic here based on userId.
                         // This is a placeholder for fetching another user's profile data.
+                        // Ensure your UserEntity matches what you expect
                         final UserEntity dummyOtherUser = UserEntity(
                           uid: userId,
-                          username: 'User_$userId',
-                          firstName: 'Other',
-                          lastName: 'User',
-                          profilePhotoUrl:
-                              'https://via.placeholder.com/150/CCCCCC/000000?text=$userId',
+                          // Use 'id' for consistency with UserEntity
                           email: 'user$userId@example.com',
-                          followersCount: 100,
-                          followingCount: 50,
-                          uploadedVideoUrls: List.generate(5, (i) => 'url_$i'),
-                          displayName:
-                              'This is a dummy bio for user $userId. They love Flutter!',
-                          userModeEmoji: '😎',
-                          rank: 'Pro',
+                          isEmailConfirmed: true,
+                          createdAt: DateTime.now().toString(),
+                          // Add other properties as needed by your UserEntity
+                          // e.g., username, profilePhotoUrl if they are part of UserEntity
                         );
                         return ProfilePage(
                             viewedUser:
@@ -173,19 +180,24 @@ class AppRouter {
       redirect: (BuildContext context, GoRouterState state) {
         final AuthState authState = authBloc.state;
         final bool loggedIn = authState is AuthAuthenticated;
-        final bool isAuthStatusChecking = authState is AuthInitial || authState is AuthLoading;
+        final bool isAuthStatusChecking =
+            authState is AuthInitial || authState is AuthLoading;
 
         final String currentPath = state.uri.path;
         final bool isSplashPath = currentPath == '/';
-        final bool isSignInPath = currentPath == '/signIn';
-        final bool isSignUpPath = currentPath == '/signUp';
+        final bool isLoginPagePath = currentPath == '/login'; // Use /login
+        final bool isForgotPasswordPath =
+            currentPath == '/forgot-password'; // Check for forgot password path
 
         // Define public paths that do NOT require authentication
-        const List<String> publicPaths = ['/', '/signIn', '/signUp'];
+        const List<String> publicPaths = [
+          '/',
+          '/login',
+          '/forgot-password'
+        ]; // Include /forgot-password
         final bool isCurrentPathPublic = publicPaths.contains(currentPath);
 
         // Define paths that require authentication (any path not public)
-        // This implicitly includes all shell routes and other direct protected routes
         final bool isCurrentPathProtected = !isCurrentPathPublic;
 
         // --- Debugging Prints (helpful during development) ---
@@ -211,7 +223,7 @@ class AppRouter {
         // Rule 2: User IS Authenticated (AuthAuthenticated)
         if (loggedIn) {
           debugPrint('Status: User authenticated.');
-          // If on a public path (splash, sign-in, sign-up), redirect to home (default app start).
+          // If on a public path (splash, login, forgot password), redirect to home (default app start).
           if (isCurrentPathPublic) {
             debugPrint(
                 'Result: Logged in, on public path. Redirecting to /home.');
@@ -224,15 +236,15 @@ class AppRouter {
 
         // Rule 3: User is NOT Authenticated (AuthUnauthenticated or AuthError, and check is complete)
         debugPrint('Status: User NOT authenticated (check complete).');
-        // If on a sign-in or sign-up page, allow.
-        if (isSignInPath || isSignUpPath) {
+        // If on a login or forgot password page, allow.
+        if (isLoginPagePath || isForgotPasswordPath) {
           debugPrint('Result: Not logged in, on auth path. Allow access.');
           return null;
         }
-        // If on splash screen or any protected route, redirect to sign-in.
+        // If on splash screen or any protected route, redirect to login.
         debugPrint(
-            'Result: Not logged in, on splash or protected path. Redirecting to /signIn.');
-        return '/signIn';
+            'Result: Not logged in, on splash or protected path. Redirecting to /login.');
+        return '/login';
       },
 
       // Error builder for 404 pages (route not found)

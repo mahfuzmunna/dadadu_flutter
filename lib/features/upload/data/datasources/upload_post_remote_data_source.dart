@@ -1,11 +1,11 @@
 // lib/features/upload/data/datasources/upload_post_remote_data_source.dart
 
 import 'dart:io';
-import 'package:firebase_storage/firebase_storage.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dadadu_app/core/errors/exceptions.dart';
 import 'package:dadadu_app/features/upload/data/models/post_model.dart';
-import 'package:dadadu_app/features/auth/data/models/user_model.dart'; // To update user profile
+import 'package:firebase_storage/firebase_storage.dart';
 
 abstract class UploadPostRemoteDataSource {
   Future<String> uploadVideoToStorage(File videoFile, String userId, String postId);
@@ -31,12 +31,15 @@ class UploadPostRemoteDataSourceImpl implements UploadPostRemoteDataSource {
         final String downloadUrl = await ref.getDownloadURL();
         return downloadUrl;
       } else {
-        throw ServerException(message: 'Video upload failed: ${snapshot.state}');
+        throw ServerException('Video upload failed: ${snapshot.state}',
+            code: snapshot.state.toString());
       }
     } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase Storage Error: ${e.message}');
+      throw ServerException('Firebase Storage Error: ${e.message}',
+          code: e.code);
     } catch (e) {
-      throw ServerException(message: 'Unexpected video upload error: ${e.toString()}');
+      throw ServerException('Unexpected video upload error: ${e.toString()}',
+          code: 'UNKNOWN_VIDEO_UPLOAD_ERROR');
     }
   }
 
@@ -45,9 +48,10 @@ class UploadPostRemoteDataSourceImpl implements UploadPostRemoteDataSource {
     try {
       await _firestore.collection('posts').doc(post.id).set(post.toMap());
     } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firestore Error: ${e.message}');
+      throw ServerException('Firestore Error: ${e.message}', code: e.code);
     } catch (e) {
-      throw ServerException(message: 'Unexpected post creation error: ${e.toString()}');
+      throw ServerException('Unexpected post creation error: ${e.toString()}',
+          code: 'UNKNOWN_POST_CREATION_ERROR');
     }
   }
 
@@ -60,9 +64,13 @@ class UploadPostRemoteDataSourceImpl implements UploadPostRemoteDataSource {
         'updatedAt': FieldValue.serverTimestamp(),
       });
     } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firestore Error updating user videos: ${e.message}');
+      throw ServerException(
+          'Firestore Error updating user videos: ${e.message}',
+          code: e.code);
     } catch (e) {
-      throw ServerException(message: 'Unexpected error updating user videos: ${e.toString()}');
+      throw ServerException(
+          'Unexpected error updating user videos: ${e.toString()}',
+          code: 'UNKNOWN_USER_VIDEO_UPDATE_ERROR');
     }
   }
 }

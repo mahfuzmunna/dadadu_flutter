@@ -1,5 +1,7 @@
 // lib/main.dart
 
+import 'dart:async';
+
 import 'package:dadadu_app/core/routes/app_router.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -10,6 +12,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/theme/app_theme.dart';
 import 'features/home/presentation/bloc/home_feed_bloc.dart';
@@ -22,6 +25,13 @@ void main() async {
 
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
+    );
+
+    await Supabase.initialize(
+      url: 'https://sqdqbmnqosfzhmrpbvqe.supabase.co',
+      anonKey:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxZHFibW5xb3NmemhtcnBidnFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0NDUyODQsImV4cCI6MjA2ODAyMTI4NH0.O4SHLpBxaxKTXjyPiysYR4I57JXPS5LaBaktEbOY5IE',
+      authOptions: FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
     );
 
     await di.init();
@@ -54,6 +64,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  // Stream subscription for deep links
+  StreamSubscription? _sub;
   late final AuthBloc _authBloc;
   late final HomeFeedBloc _homeFeedBloc;
   late final ProfileBloc _profileBloc;
@@ -63,6 +75,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    _setupAuthListener();
     _authBloc = di.sl<AuthBloc>();
     _homeFeedBloc = di.sl<HomeFeedBloc>();
     _profileBloc = di.sl<ProfileBloc>();
@@ -79,6 +92,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
+    _sub?.cancel();
     _authBloc.close();
     _homeFeedBloc.close();
     _profileBloc.close();
@@ -111,5 +125,33 @@ class _MyAppState extends State<MyApp> {
         routerConfig: _router, // Use the configured GoRouter instance
       ),
     );
+  }
+
+  void _setupAuthListener() {
+    // This listener helps in managing the authentication state globally.
+    // It's crucial for understanding when a user logs in, out, or changes state.
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final AuthChangeEvent event = data.event;
+      final Session? session = data.session;
+
+      debugPrint('Auth event: $event, Session: $session');
+
+      // You can implement navigation logic here based on auth state
+      if (event == AuthChangeEvent.signedIn ||
+          event == AuthChangeEvent.initialSession) {
+        // User is signed in or session is restored
+        // Navigate to home screen or dashboard
+        // if (mounted) {
+        //   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
+        // }
+      } else if (event == AuthChangeEvent.signedOut) {
+        // User signed out
+        // Navigate to login screen
+        // if (mounted) {
+        //   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => LoginPage()));
+        // }
+      }
+      // Handle other events like AuthChangeEvent.passwordRecovery, AuthChangeEvent.userUpdated, etc.
+    });
   }
 }

@@ -26,7 +26,7 @@ class HomeRepositoryImpl implements HomeRepository {
 
       return Right(PostsPaginationResult(posts: posts, lastDocument: lastDoc, hasMore: hasMore));
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     }
   }
 
@@ -36,7 +36,7 @@ class HomeRepositoryImpl implements HomeRepository {
       final user = await remoteDataSource.fetchUserInfo(uid);
       return Right(user);
     } on ServerException catch (e) {
-      return Left(ServerFailure(message: e.message));
+      return Left(ServerFailure(e.message));
     }
   }
 }
