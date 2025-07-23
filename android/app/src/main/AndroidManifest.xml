@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- ✅ SEULEMENT CES LIGNES AJOUTÉES -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
@@ -23,9 +24,9 @@
     <application
         android:label="Dadadu"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
         android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -54,10 +55,12 @@
 
                 <data
                     android:scheme="your-app-scheme"
-                    android:host="login-callback" />
+                    android:host="login-callback"
+                    tools:ignore="AppLinkUrlError" />
                 <data
                     android:scheme="your-app-scheme"
-                    android:host="reset-password-callback" />
+                    android:host="reset-password-callback"
+                    tools:ignore="AppLinkUrlError" />
             </intent-filter>
         </activity>
         <meta-data

@@ -24,6 +24,7 @@ dependencies:
 
   # Media & Files
   image_picker: ^1.1.2
+  image_editor_plus: ^1.0.6
   video_player: ^2.7.0
   flutter_sound: ^9.2.13
   just_audio: ^0.9.34
