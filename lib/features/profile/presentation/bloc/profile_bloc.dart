@@ -1,5 +1,7 @@
 // lib/features/profile/presentation/bloc/profile_bloc.dart
 
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart'; // For @immutable
@@ -12,8 +14,8 @@ import '../../../home/domain/entities/post_entity.dart';
 import '../../domain/usecases/delete_profile_image_usecase.dart';
 import '../../domain/usecases/get_posts_usecase.dart';
 import '../../domain/usecases/get_user_profile_usecase.dart';
+import '../../domain/usecases/update_profile_photo_usecase.dart';
 import '../../domain/usecases/update_profile_usecase.dart';
-import '../../domain/usecases/upload_profile_image_usecase.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
@@ -23,7 +25,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UpdateProfileUseCase updateProfileUseCase;
   final GetPostsUseCase getPostsUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
-  final UploadProfileImageUseCase uploadProfileImageUseCase;
+  final UpdateProfilePhotoUseCase _updateProfilePhotoUseCase;
   final DeleteProfileImageUseCase deleteProfileImageUseCase;
 
   ProfileBloc({
@@ -31,13 +33,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required this.updateProfileUseCase,
     required this.getPostsUseCase,
     required this.getCurrentUserUseCase,
-    required this.uploadProfileImageUseCase,
+    required UpdateProfilePhotoUseCase uploadProfileImageUseCase,
     required this.deleteProfileImageUseCase,
-  }) : super(const ProfileInitial()) {
+  })  : _updateProfilePhotoUseCase = uploadProfileImageUseCase,
+        super(const ProfileInitial()) {
     on<LoadUserProfile>(_onLoadUserProfile);
     on<UpdateUserProfile>(_onUpdateUserProfile);
     on<LoadUserPosts>(_onLoadUserPosts);
-    on<UploadProfileImage>(_onUploadProfileImage);
+    on<UpdateProfilePhoto>(_onUpdateProfilePhoto);
     on<DeleteProfileImage>(_onDeleteProfileImage);
   }
 
@@ -93,17 +96,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     );
   }
 
-  Future<void> _onUploadProfileImage(
-      UploadProfileImage event, Emitter<ProfileState> emit) async {
-    if (state is ProfileLoaded) {
-      emit((state as ProfileLoaded).copyWith(isUploadingImage: true));
-    } else {
-      emit(const ProfileLoading()); // Or a more specific state
-    }
+  Future<void> _onUpdateProfilePhoto(
+      UpdateProfilePhoto event, Emitter<ProfileState> emit) async {
+    emit(const ProfileLoading());
 
-    final result = await uploadProfileImageUseCase(UploadProfileImageParams(
+    final result = await _updateProfilePhotoUseCase(UpdateProfilePhotoParams(
       userId: event.userId,
-      imagePath: event.imagePath,
+      photoFile: event.photoFile,
     ));
 
     result.fold(
@@ -147,3 +146,4 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     return 'An unexpected error occurred.';
   }
 }
+

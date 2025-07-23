@@ -1,9 +1,6 @@
 // lib/features/auth/data/datasources/auth_remote_data_source_impl.dart
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as p; // Helps with path manipulation
 import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 
 import '../../../../core/errors/exceptions.dart';
@@ -26,8 +23,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     String? fullName,
     String? username,
-    String? bio,
-    File? profilePhotoFile, // This is the file from the UI
   }) async {
     try {
       // 1. Sign up with Supabase Auth (email and password)
@@ -52,23 +47,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       String? profilePhotoUrl;
       // 2. Upload profile photo if provided
-      if (profilePhotoFile != null) {
-        final String fileExtension = p.extension(profilePhotoFile.path);
-        final String fileName =
-            '${supabaseUser.id}-${DateTime.now().microsecondsSinceEpoch}$fileExtension';
-        final String path = 'avatars/$fileName'; // Example bucket: 'avatars'
-
-        final storageResponse = await supabaseClient.storage
-            .from('avatars') // Replace with your actual bucket name
-            .upload(path, profilePhotoFile,
-                fileOptions: const FileOptions(
-                  cacheControl: '3600',
-                  upsert: false,
-                ));
-
-        // Get public URL of the uploaded image
-        profilePhotoUrl = _getPublicUrl('avatars', path);
-      }
 
       // 3. Insert/Update user profile into the 'profiles' table
       // IMPORTANT: Your 'profiles' table should have an 'id' column
@@ -81,14 +59,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'email': supabaseUser.email,
         'full_name': fullName,
         'username': username,
-        'bio': bio,
-        'profile_photo_url': profilePhotoUrl,
-        // Add other fields from UserModel that are relevant for initial signup
-        // e.g., 'created_at': DateTime.now().toIso8601String(),
-        // For counts, rank etc., they often default or are managed by triggers
-        'followers_count': 0, // Default values
-        'following_count': 0,
-        'post_count': 0,
       };
 
       final List<Map<String, dynamic>> response = await supabaseClient
@@ -235,8 +205,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           moodStatus: '',
           language: '',
           discoverMode: 'Entertainment',
-          uploadedVideoUrls: [],
-          profilePhotoFile: null,
           isEmailConfirmed: false,
         );
       }
@@ -289,8 +257,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 moodStatus: '',
                 language: '',
                 discoverMode: 'Entertainment',
-                uploadedVideoUrls: [],
-                profilePhotoFile: null,
                 isEmailConfirmed: false,
               );
             }
@@ -316,8 +282,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               moodStatus: '',
               language: '',
               discoverMode: 'Entertainment',
-              uploadedVideoUrls: [],
-              profilePhotoFile: null,
               isEmailConfirmed: false,
             );
           }

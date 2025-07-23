@@ -1,7 +1,5 @@
 // lib/features/auth/domain/repositories/auth_repository.dart
 
-import 'dart:io'; // NEW: for File
-
 import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -15,8 +13,6 @@ abstract class AuthRepository {
     required String password,
     String? fullName, // NEW
     String? username, // NEW
-    String? bio, // NEW
-    File? profilePhotoFile, // NEW
   });
 
   Future<Either<Failure, UserEntity>> signIn({

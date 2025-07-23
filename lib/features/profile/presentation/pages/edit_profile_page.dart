@@ -83,10 +83,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           fullName: _fullNameController.text,
           bio: _bioController.text,
           // Update bio
-          profilePhotoFile: _pickedImageFile,
           profilePhotoUrl: _currentUser?.profilePhotoUrl,
           isEmailConfirmed: _currentUser!.isEmailConfirmed,
-          uploadedVideoUrls: _currentUser?.uploadedVideoUrls ?? [],
           moodStatus: _currentUser!.moodStatus as String,
           language: _currentUser!.language,
           discoverMode: _currentUser!.discoverMode,

@@ -53,7 +53,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthRefreshCurrentUser>(_onAuthRefreshCurrentUser);
   }
 
-  void _setupAuthListener() {
+  Future<void> _setupAuthListener() async {
     // Now explicitly listen to the aliased supabase.AuthState stream
     _authStateSubscription =
         supabase.Supabase.instance.client.auth.onAuthStateChange.listen(
@@ -97,13 +97,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onAuthSignUpRequested(
       AuthSignUpRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
+    // Note: The SignUpUseCase no longer needs the profilePhotoFile parameter
     final result = await signUpUseCase(SignUpParams(
       email: event.email,
       password: event.password,
       fullName: event.fullName,
       username: event.username,
-      bio: event.bio,
-      profilePhotoFile: event.profilePhotoFile,
     ));
     result.fold(
       (failure) {
@@ -113,7 +112,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthError(message: failure.message));
         }
       },
-      (_) {}, // Success is handled by the listener
+      // ✅ SUCCESS IMPLEMENTATION:
+      // When sign-up is successful, emit the new AuthSignUpSuccess state.
+      // This gives the UI a clear signal to navigate to the next step,
+      // like the 'Upload Profile Photo' page.
+      (user) {
+        emit(AuthSignUpSuccess(user: user));
+      },
     );
   }
 

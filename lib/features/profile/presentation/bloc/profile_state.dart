@@ -80,6 +80,15 @@ class UserPostsLoaded extends ProfileState {
   List<Object> get props => [posts];
 }
 
+class ProfileUpdateSuccess extends ProfileState {
+  final String photoUrl;
+
+  const ProfileUpdateSuccess(this.photoUrl);
+
+  @override
+  List<Object> get props => [photoUrl];
+}
+
 class ProfileUpdating extends ProfileState {
   const ProfileUpdating();
 }

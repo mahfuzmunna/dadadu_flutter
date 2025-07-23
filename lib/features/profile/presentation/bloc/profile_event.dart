@@ -42,15 +42,15 @@ class LoadUserPosts extends ProfileEvent {
   List<Object> get props => [userId];
 }
 
-class UploadProfileImage extends ProfileEvent {
+class UpdateProfilePhoto extends ProfileEvent {
   final String userId;
-  final String imagePath; // Path to the local image file
+  final File photoFile; // Path to the local image file
 
-  const UploadProfileImage({required this.userId, required this.imagePath});
+  const UpdateProfilePhoto({required this.userId, required this.photoFile});
 
   @override
   // This can remain List<Object> as both are non-nullable
-  List<Object> get props => [userId, imagePath];
+  List<Object> get props => [userId, photoFile];
 }
 
 class DeleteProfileImage extends ProfileEvent {

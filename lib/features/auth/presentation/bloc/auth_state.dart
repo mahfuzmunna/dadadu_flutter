@@ -58,3 +58,12 @@ class AuthPasswordResetEmailSent extends AuthState {
   @override
   List<Object?> get props => [email];
 }
+
+class AuthSignUpSuccess extends AuthState {
+  final UserEntity user;
+
+  const AuthSignUpSuccess({required this.user});
+
+  @override
+  List<Object?> get props => [user];
+}

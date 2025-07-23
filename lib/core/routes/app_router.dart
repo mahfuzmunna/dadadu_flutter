@@ -9,7 +9,8 @@ import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // A
 // If you have a ForgotPasswordPage, make sure to import it too
 import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
-// import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart'; // No longer explicitly needed if LoginPage handles signup
+import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo_page.dart';
+// import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
@@ -53,6 +54,11 @@ class AppRouter {
           path: '/forgot-password',
           builder: (context, state) => const ForgotPasswordPage(),
         ),
+        GoRoute(
+          path: '/upload-profile-photo',
+          builder: (context, state) => const UploadProfilePhotoPage(),
+        ),
+
         GoRoute(
           path: '/camera',
           builder: (context, state) => const CameraScreen(),
@@ -167,6 +173,11 @@ class AppRouter {
         final authState = authBloc.state;
         final currentLocation = state.uri.toString();
 
+        if (authState is AuthSignUpSuccess) {
+          return currentLocation == '/upload-profile-photo'
+              ? null
+              : 'upload-profile-photo';
+        }
         // 1. Define Authentication-related routes
         final isAuthRoute = currentLocation == '/login' ||
             currentLocation == '/signUp' ||
@@ -209,7 +220,7 @@ class AppRouter {
 
       // Listens to AuthBloc's stream to trigger redirects whenever auth state changes.
       // This is crucial for reacting to login/logout events.
-      refreshListenable: GoRouterRefreshStream(authBloc.stream),
+      // refreshListenable: GoRouterRefreshStream(authBloc.stream),
     );
   }
 }

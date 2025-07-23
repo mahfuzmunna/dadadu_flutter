@@ -109,10 +109,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<String> uploadProfileImage(String userId, String imagePath) async {
+  Future<String> uploadProfileImage(String userId, File photoFile) async {
     try {
-      final file = File(imagePath);
-      final fileExtension = imagePath.split('.').last;
+      final file = photoFile;
+      final fileExtension = file.path.split('.').last;
       // Object key for Wasabi
       final String objectKey =
           'profile_images/$userId/${_uuid.v4()}.$fileExtension';

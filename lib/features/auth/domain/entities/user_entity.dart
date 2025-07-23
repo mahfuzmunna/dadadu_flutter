@@ -1,6 +1,4 @@
 // lib/features/auth/domain/entities/user_entity.dart
-import 'dart:io';
-
 import 'package:equatable/equatable.dart';
 
 class UserEntity extends Equatable {
@@ -20,9 +18,6 @@ class UserEntity extends Equatable {
   final String? moodStatus;
   final String language;
   final String discoverMode;
-  final List<String> uploadedVideoUrls;
-  final File?
-      profilePhotoFile; // Used for local selection, not persisted directly as URL
   final bool isEmailConfirmed;
 
   const UserEntity({
@@ -42,8 +37,6 @@ class UserEntity extends Equatable {
     required this.moodStatus,
     required this.language,
     required this.discoverMode,
-    required this.uploadedVideoUrls,
-    required this.profilePhotoFile,
     required this.isEmailConfirmed,
   });
 
@@ -65,8 +58,6 @@ class UserEntity extends Equatable {
         moodStatus,
         language,
         discoverMode,
-        uploadedVideoUrls,
-        profilePhotoFile,
         isEmailConfirmed
       ];
 
@@ -87,8 +78,6 @@ class UserEntity extends Equatable {
       required String moodStatus,
       required String language,
       required String discoverMode,
-      required List<String> uploadedVideoUrls,
-      required File? profilePhotoFile,
       required bool isEmailConfirmed}) {
     return UserEntity(
         id: id,
@@ -107,8 +96,6 @@ class UserEntity extends Equatable {
         moodStatus: moodStatus,
         language: language,
         discoverMode: discoverMode,
-        uploadedVideoUrls: uploadedVideoUrls,
-        profilePhotoFile: profilePhotoFile,
         isEmailConfirmed: isEmailConfirmed);
   }
 }

@@ -1,7 +1,5 @@
 // lib/features/auth/data/datasources/auth_remote_data_source.dart
 
-import 'dart:io'; // NEW: for File
-
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/user_model.dart';
@@ -13,8 +11,6 @@ abstract class AuthRemoteDataSource {
     required String password,
     String? fullName, // NEW
     String? username, // NEW
-    String? bio, // NEW
-    File? profilePhotoFile, // NEW
   });
 
   Future<UserModel> signInWithEmailAndPassword({

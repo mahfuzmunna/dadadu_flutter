@@ -1,7 +1,5 @@
 // lib/features/auth/domain/usecases/sign_up_usecase.dart
 
-import 'dart:io'; // NEW: for File
-
 import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dadadu_app/core/usecases/usecase.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
@@ -22,10 +20,6 @@ class SignUpUseCase implements UseCase<UserEntity, SignUpParams> {
       fullName: params.fullName,
       // Pass new fields
       username: params.username,
-      // Pass new fields
-      bio: params.bio,
-      // Pass new fields
-      profilePhotoFile: params.profilePhotoFile, // Pass new fields
     );
   }
 }
@@ -35,19 +29,14 @@ class SignUpParams extends Equatable {
   final String password;
   final String? fullName; // NEW
   final String? username; // NEW
-  final String? bio; // NEW
-  final File? profilePhotoFile; // NEW
 
   const SignUpParams({
     required this.email,
     required this.password,
     this.fullName,
     this.username,
-    this.bio,
-    this.profilePhotoFile,
   });
 
   @override
-  List<Object?> get props =>
-      [email, password, fullName, username, bio, profilePhotoFile];
+  List<Object?> get props => [email, password, fullName, username];
 }

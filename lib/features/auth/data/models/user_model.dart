@@ -20,8 +20,6 @@ class UserModel extends UserEntity {
     required super.moodStatus,
     required super.language,
     required super.discoverMode,
-    required super.uploadedVideoUrls,
-    required super.profilePhotoFile,
     required super.isEmailConfirmed, // Keep if used for temporary local file selection
   });
 
@@ -44,8 +42,6 @@ class UserModel extends UserEntity {
       moodStatus: map['user_mode_emoji'],
       language: map['language'],
       discoverMode: map['discover_mode'],
-      uploadedVideoUrls: List<String>.from(map['uploaded_video_urls']),
-      profilePhotoFile: null,
       isEmailConfirmed: false,
       // Always null when loaded from DB
     );

@@ -1,5 +1,7 @@
 // lib/features/profile/data/repositories/profile_repository_impl.dart
 
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/exceptions.dart';
@@ -51,8 +53,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
         moodStatus: user.moodStatus,
         language: user.language,
         discoverMode: user.discoverMode,
-        uploadedVideoUrls: user.uploadedVideoUrls,
-        profilePhotoFile: user.profilePhotoFile,
         isEmailConfirmed: user.isEmailConfirmed,
       );
       await remoteDataSource.updateUserProfile(userModel);
@@ -78,8 +78,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, String>> uploadProfileImage(
-      String userId, String imagePath) async {
+  Future<Either<Failure, String>> uploadProfileImage(String userId,
+      File imagePath) async {
     try {
       final imageUrl =
           await remoteDataSource.uploadProfileImage(userId, imagePath);

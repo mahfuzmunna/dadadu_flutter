@@ -1,5 +1,7 @@
 // lib/features/profile/domain/repositories/profile_repository.dart
 
+import 'dart:io';
+
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
@@ -13,7 +15,7 @@ abstract class ProfileRepository {
 
   Future<Either<Failure, List<PostEntity>>> getUserPosts(String userId);
 
-  Future<Either<Failure, String>> uploadProfileImage(
-      String userId, String imagePath); // Returns URL
+  Future<Either<Failure, String>> uploadProfileImage(String userId,
+      File photoFile); // Returns URL
   Future<Either<Failure, void>> deleteProfileImage(String userId);
 }

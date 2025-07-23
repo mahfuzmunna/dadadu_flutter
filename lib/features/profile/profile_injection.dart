@@ -12,8 +12,8 @@ import 'domain/repositories/profile_repository.dart';
 import 'domain/usecases/delete_profile_image_usecase.dart';
 import 'domain/usecases/get_posts_usecase.dart';
 import 'domain/usecases/get_user_profile_usecase.dart';
+import 'domain/usecases/update_profile_photo_usecase.dart';
 import 'domain/usecases/update_profile_usecase.dart';
-import 'domain/usecases/upload_profile_image_usecase.dart';
 // Profile Feature Presentation Layer
 import 'presentation/bloc/profile_bloc.dart';
 
@@ -35,7 +35,7 @@ Future<void> profileInjection() async {
   sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
   sl.registerLazySingleton(() => GetPostsUseCase(sl()));
-  sl.registerLazySingleton(() => UploadProfileImageUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateProfilePhotoUseCase(sl()));
   sl.registerLazySingleton(() => DeleteProfileImageUseCase(sl()));
 
   // Profile Feature - Data Layer (Repository)

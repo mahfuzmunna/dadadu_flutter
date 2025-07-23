@@ -1,7 +1,5 @@
 // lib/features/auth/data/repositories/auth_repository_impl.dart
 
-import 'dart:io'; // NEW: for File
-
 import 'package:dartz/dartz.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -21,9 +19,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     String? fullName, // NEW
-    String? username, // NEW
-    String? bio, // NEW
-    File? profilePhotoFile, // NEW
+    String? username, // NEWW
   }) async {
     try {
       // Pass all signup data to the remote data source
@@ -32,8 +28,6 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         fullName: fullName,
         username: username,
-        bio: bio,
-        profilePhotoFile: profilePhotoFile,
       );
       return Right(user);
     } on ServerException catch (e) {
