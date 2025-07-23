@@ -35,20 +35,25 @@ class ProfileRepositoryImpl implements ProfileRepository {
     try {
       // Assuming UserModel can be created from UserEntity for data layer operations
       final userModel = UserModel(
-        uid: user.uid,
+        id: user.id,
         email: user.email,
+        fullName: user.fullName,
         username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        profilePhotoUrl: user.profilePhotoUrl,
-        displayName: user.displayName,
         bio: user.bio,
-        userModeEmoji: user.userModeEmoji,
-        rank: user.rank,
+        profilePhotoUrl: user.profilePhotoUrl,
         followersCount: user.followersCount,
         followingCount: user.followingCount,
         postCount: user.postCount,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        rank: user.rank,
+        referralLink: user.referralLink,
+        moodStatus: user.moodStatus,
+        language: user.language,
+        discoverMode: user.discoverMode,
         uploadedVideoUrls: user.uploadedVideoUrls,
+        profilePhotoFile: user.profilePhotoFile,
+        isEmailConfirmed: user.isEmailConfirmed,
       );
       await remoteDataSource.updateUserProfile(userModel);
       return const Right(null);

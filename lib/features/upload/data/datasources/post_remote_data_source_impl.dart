@@ -191,4 +191,27 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           throw ServerException('Post data not found in realtime update.');
         });
   }
+
+  @override
+  Stream<List<PostModel>> getPostsStream() {
+    try {
+      // This is the corrected order of operations
+      return supabaseClient
+          .from('posts')
+          .stream(primaryKey: ['id'])
+          // 1. ✅ First, define the query with .select() and .order()
+          //     .select('*, users(*)')
+          .order('created_at', ascending: false)
+
+          // 2. ✅ THEN, convert that query into a real-time stream
+
+          // 3. ✅ Finally, map the stream's output to your data models
+          .map((listOfMaps) =>
+              listOfMaps.map((postMap) => PostModel.fromMap(postMap)).toList());
+    } catch (e) {
+      // If setting up the stream fails, throw a ServerException.
+      throw ServerException(
+          'Failed to connect to the post stream: ${e.toString()}');
+    }
+  }
 }

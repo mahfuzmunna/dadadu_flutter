@@ -5,20 +5,22 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/foundation.dart'; // For debugPrint
+import 'package:flutter/foundation.dart';
+// 🔑 FIX: Import Supabase with an alias to prevent name conflicts.
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../core/usecases/usecase.dart'; // Assuming NoParams is defined here
+import '../../../../core/usecases/usecase.dart';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/reset_password_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
 import '../../domain/usecases/sign_in_with_oauth_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
-import '../../domain/usecases/sign_up_usecase.dart'; // Ensure SignUpUseCase is updated
+import '../../domain/usecases/sign_up_usecase.dart';
 
 part 'auth_event.dart';
-part 'auth_state.dart';
+part 'auth_state.dart'; // This defines YOUR AuthState
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInUseCase signInUseCase;
@@ -28,7 +30,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final ResetPasswordUseCase resetPasswordUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
 
-  StreamSubscription<UserEntity?>? _authStateSubscription;
+  // This subscription listens to the aliased Supabase AuthState
+  StreamSubscription<supabase.AuthState>? _authStateSubscription;
 
   AuthBloc({
     required this.signInUseCase,
@@ -38,21 +41,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.resetPasswordUseCase,
     required this.getCurrentUserUseCase,
   }) : super(AuthInitial()) {
-    on<AuthInitialCheckRequested>(
-        _onAuthInitialCheckRequested); // Updated event name
+    _setupAuthListener();
+
+    on<AuthInitialCheckRequested>(_onAuthInitialCheckRequested);
     on<AuthSignInRequested>(_onAuthSignInRequested);
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
     on<AuthSignInWithOAuthRequested>(_onAuthSignInWithOAuthRequested);
     on<AuthSignOutRequested>(_onAuthSignOutRequested);
-    on<AuthPasswordResetRequested>(
-        _onAuthPasswordResetRequested); // Updated event name
+    on<AuthPasswordResetRequested>(_onAuthPasswordResetRequested);
     on<AuthUserChanged>(_onAuthUserChanged);
+    on<AuthRefreshCurrentUser>(_onAuthRefreshCurrentUser);
+  }
 
-    // Listen to Supabase's auth state changes and dispatch AuthUserChanged
+  void _setupAuthListener() {
+    // Now explicitly listen to the aliased supabase.AuthState stream
     _authStateSubscription =
-        (signInUseCase.repository.onAuthStateChange()).listen((user) {
-      add(AuthUserChanged(user));
-    });
+        supabase.Supabase.instance.client.auth.onAuthStateChange.listen(
+      (data) {
+        final user = data.session?.user;
+        if (user != null) {
+          add(const AuthRefreshCurrentUser());
+        } else {
+          add(const AuthUserChanged(null));
+        }
+      },
+      onError: (error) {
+        add(const AuthUserChanged(null));
+      },
+    );
   }
 
   Future<void> _onAuthInitialCheckRequested(
@@ -60,7 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     final result = await getCurrentUserUseCase(NoParams());
     result.fold(
-      (failure) => emit(AuthUnauthenticated(message: failure.message)),
+      (_) => emit(const AuthUnauthenticated()),
       (user) => user != null
           ? emit(AuthAuthenticated(user: user))
           : emit(const AuthUnauthenticated()),
@@ -73,8 +89,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await signInUseCase(
         SignInParams(email: event.email, password: event.password));
     result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (user) => emit(AuthAuthenticated(user: user)),
+      (failure) => emit(AuthUnauthenticated(message: failure.message)),
+      (_) {}, // Success is handled by the listener
     );
   }
 
@@ -85,12 +101,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       email: event.email,
       password: event.password,
       fullName: event.fullName,
-      // Pass new fields
       username: event.username,
-      // Pass new fields
       bio: event.bio,
-      // Pass new fields
-      profilePhotoFile: event.profilePhotoFile, // Pass new fields
+      profilePhotoFile: event.profilePhotoFile,
     ));
     result.fold(
       (failure) {
@@ -100,44 +113,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           emit(AuthError(message: failure.message));
         }
       },
-      (user) {
-        // If Supabase requires email verification, user might be null or not fully authenticated.
-        // The _onAuthUserChanged listener will catch the authenticated state after verification/login.
-        // For now, if the sign-up itself was successful and returned a user, emit authenticated.
-        // Otherwise, the EMAIL_CONFIRMATION_REQUIRED state is handled above.
-        emit(AuthAuthenticated(
-            user:
-                user)); // User is returned from use case after profile creation
-      },
+      (_) {}, // Success is handled by the listener
     );
   }
 
   Future<void> _onAuthSignInWithOAuthRequested(
       AuthSignInWithOAuthRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    // OAuth typically doesn't return the user immediately.
-    // The BLoC listener will catch the subsequent session update.
-    final result = await signInWithOAuthUseCase(
+    // Use the aliased supabase.OAuthProvider
+    await signInWithOAuthUseCase(
         SignInWithOAuthParams(provider: event.provider));
-    result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (user) {
-        // For Supabase, the user is typically null immediately after initiating OAuth
-        // because the flow redirects to a browser. The deep link callback then triggers
-        // AuthUserChanged. We emit AuthLoading and let AuthUserChanged handle the final state.
-        emit(AuthLoading()); // Keep loading until AuthUserChanged is received
-      },
-    );
   }
 
   Future<void> _onAuthSignOutRequested(
       AuthSignOutRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
-    final result = await signOutUseCase(NoParams());
-    result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (_) => emit(const AuthUnauthenticated()),
-    );
+    await signOutUseCase(NoParams());
+    // Success is handled by the listener
   }
 
   Future<void> _onAuthPasswordResetRequested(
@@ -160,9 +152,28 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  Future<void> _onAuthRefreshCurrentUser(
+      AuthRefreshCurrentUser event, Emitter<AuthState> emit) async {
+    final result = await getCurrentUserUseCase(NoParams());
+    result.fold(
+      (_) => emit(const AuthUnauthenticated()),
+      (user) => user != null
+          ? emit(AuthAuthenticated(user: user))
+          : emit(const AuthUnauthenticated()),
+    );
+  }
+
   @override
   Future<void> close() {
     _authStateSubscription?.cancel();
     return super.close();
   }
 }
+
+// Ensure your events and states are also updated to use the alias where necessary.
+// For example, in auth_event.dart:
+
+// class AuthSignInWithOAuthRequested extends AuthEvent {
+//   final supabase.OAuthProvider provider; // Explicitly use the aliased type
+//   ...
+// }

@@ -21,7 +21,7 @@ class EditProfilePage extends StatefulWidget {
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _usernameController;
-  late TextEditingController _firstNameController;
+  late TextEditingController _fullNameController;
   late TextEditingController _lastNameController;
   late TextEditingController
       _bioController; // Renamed for clarity (was _displayNameController)
@@ -40,8 +40,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     _usernameController = TextEditingController(text: _currentUser?.username ?? '');
-    _firstNameController = TextEditingController(text: _currentUser?.firstName ?? '');
-    _lastNameController = TextEditingController(text: _currentUser?.lastName ?? '');
+    _fullNameController =
+        TextEditingController(text: _currentUser?.fullName ?? '');
     _bioController =
         TextEditingController(text: _currentUser?.bio ?? ''); // Use bio field
   }
@@ -49,7 +49,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   @override
   void dispose() {
     _usernameController.dispose();
-    _firstNameController.dispose();
+    _fullNameController.dispose();
     _lastNameController.dispose();
     _bioController.dispose();
     super.dispose();
@@ -76,18 +76,34 @@ class _EditProfilePageState extends State<EditProfilePage> {
         );
         return;
       }
+      if (_currentUser != null) {
+        // Create an updated UserEntity from the form inputs
+        final updatedUser = _currentUser!.copyWith(
+          username: _usernameController.text,
+          fullName: _fullNameController.text,
+          bio: _bioController.text,
+          // Update bio
+          profilePhotoFile: _pickedImageFile,
+          profilePhotoUrl: _currentUser?.profilePhotoUrl,
+          isEmailConfirmed: _currentUser!.isEmailConfirmed,
+          uploadedVideoUrls: _currentUser?.uploadedVideoUrls ?? [],
+          moodStatus: _currentUser!.moodStatus as String,
+          language: _currentUser!.language,
+          discoverMode: _currentUser!.discoverMode,
+          followersCount: _currentUser!.followersCount,
+          followingCount: _currentUser!.followingCount,
+          postCount: _currentUser!.postCount as int,
+          createdAt: _currentUser!.createdAt,
+          updatedAt: _currentUser!.updatedAt,
+          rank: _currentUser!.rank,
+          referralLink: _currentUser!.referralLink,
+          id: _currentUser!.id,
+          email: _currentUser!.email as String,
+        );
 
-      // Create an updated UserEntity from the form inputs
-      final updatedUser = _currentUser!.copyWith(
-        username: _usernameController.text,
-        firstName: _firstNameController.text,
-        lastName: _lastNameController.text,
-        bio: _bioController.text,
-        profilePhotoFile: _pickedImageFile, // Pass the picked file if any
-      );
-
-      // Dispatch the UpdateUserProfile event to ProfileBloc
-      context.read<ProfileBloc>().add(UpdateUserProfile(user: updatedUser));
+        // Dispatch the UpdateUserProfile event to ProfileBloc
+        context.read<ProfileBloc>().add(UpdateUserProfile(user: updatedUser));
+      }
     }
   }
 
@@ -165,8 +181,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
               setState(() {
                 _currentUser = authState.user;
                 _usernameController.text = _currentUser?.username ?? '';
-                _firstNameController.text = _currentUser?.firstName ?? '';
-                _lastNameController.text = _currentUser?.lastName ?? '';
+                _fullNameController.text = _currentUser?.fullName ?? '';
                 _bioController.text = _currentUser?.bio ?? ''; // Update bio
                 _pickedImageFile =
                     null; // Clear picked file if data came from external update
@@ -225,7 +240,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   const SizedBox(height: 16),
 
                   TextFormField(
-                    controller: _firstNameController,
+                    controller: _fullNameController,
                     decoration: const InputDecoration(
                         labelText: 'First Name', border: OutlineInputBorder()),
                   ),

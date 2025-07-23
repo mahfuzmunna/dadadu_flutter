@@ -6,6 +6,7 @@ import 'package:dadadu_app/features/home/data/repositories/home_repository_impl.
 import 'package:dadadu_app/features/home/domain/repositories/home_repository.dart';
 import 'package:dadadu_app/features/home/domain/usecases/get_posts_usecase.dart';
 import 'package:dadadu_app/features/home/domain/usecases/get_user_info_usecase.dart';
+import 'package:dadadu_app/features/home/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart';
 import 'package:get_it/get_it.dart';
 
@@ -22,7 +23,10 @@ final sl = GetIt.instance;
 Future<void> homeInjection() async {
   // Bloc
   sl.registerFactory(
-    () => PostBloc(postRepository: sl()),
+    () => FeedBloc(postRepository: sl()),
+  );
+  sl.registerFactory(
+    () => PostBloc(profileRepository: sl(), postRepository: sl()),
   );
 
   // Use cases
@@ -33,6 +37,9 @@ Future<void> homeInjection() async {
   sl.registerLazySingleton<HomeRepository>(
         () => HomeRepositoryImpl(remoteDataSource: sl()),
   );
+  // sl.registerLazySingleton<PostRepository>(
+  //       () => PostRepositoryImpl(remoteDataSource: sl()),
+  // );
 
   // Data sources
   sl.registerLazySingleton<HomeRemoteDataSource>(
@@ -45,7 +52,7 @@ Future<void> homeInjection() async {
 
 Future<void> postInjection() async {
   // Register new Post related dependencies
-  sl.registerFactory(() => PostBloc(postRepository: sl()));
+  sl.registerFactory(() => FeedBloc(postRepository: sl()));
 
   sl.registerLazySingleton<PostRepository>(
     () => PostRepositoryImpl(remoteDataSource: sl()),

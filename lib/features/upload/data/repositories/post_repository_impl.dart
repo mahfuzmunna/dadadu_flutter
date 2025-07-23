@@ -79,4 +79,38 @@ class PostRepositoryImpl implements PostRepository {
     // Map PostModel stream to PostEntity stream
     return remoteDataSource.subscribeToPostChanges(postId);
   }
+
+  @override
+  Stream<List<PostEntity>> getPostsStream() {
+    // Directly return the stream from the data source.
+    // The BLoC layer will be responsible for handling stream errors.
+    // Since PostModel is a subclass of PostEntity, the stream types are compatible.
+    return remoteDataSource.getPostsStream();
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadThumbnailToStorage(
+      {required File thumbnailFile, required String userId}) {
+    // TODO: implement uploadThumbnailToStorage
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Either<Failure, String>> uploadVideoToStorage(
+      {required File videoFile, required String userId}) {
+    // TODO: implement uploadVideoToStorage
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Either<Failure, PostEntity>> decrementDiamond(String postId) {
+    // TODO: implement decrementDiamond
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Either<Failure, PostEntity>> incrementDiamond(String postId) {
+    // TODO: implement incrementDiamond
+    throw UnimplementedError();
+  }
 }

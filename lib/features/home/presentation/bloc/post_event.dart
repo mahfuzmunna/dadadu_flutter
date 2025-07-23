@@ -8,6 +8,7 @@ abstract class PostEvent extends Equatable {
   List<Object> get props => [];
 }
 
+/// Dispatched to load and subscribe to a specific post's updates.
 class LoadPost extends PostEvent {
   final String postId;
 
@@ -17,10 +18,22 @@ class LoadPost extends PostEvent {
   List<Object> get props => [postId];
 }
 
-class UpdatePost extends PostEvent {
-  final PostEntity post;
+/// A public event dispatched when a user likes a post.
+class IncrementLike extends PostEvent {
+  final String postId;
 
-  const UpdatePost(this.post);
+  const IncrementLike(this.postId);
+
+  @override
+  List<Object> get props => [postId];
+}
+
+/// An internal event used to push updates from the realtime stream into the bloc.
+class _PostUpdated extends PostEvent {
+  final PostEntity post;
+  final UserModel? author;
+
+  const _PostUpdated({required this.post, this.author});
 
   @override
   List<Object> get props => [post];

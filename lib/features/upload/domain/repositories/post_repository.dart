@@ -23,4 +23,19 @@ abstract class PostRepository {
     required File videoFile,
     required File thumbnailFile,
   });
+
+  Stream<List<PostEntity>> getPostsStream(); // NEW
+  Future<Either<Failure, String>> uploadVideoToStorage({
+    required File videoFile,
+    required String userId,
+  });
+
+  Future<Either<Failure, String>> uploadThumbnailToStorage({
+    required File thumbnailFile,
+    required String userId,
+  });
+
+  Future<Either<Failure, PostEntity>> incrementDiamond(String postId);
+
+  Future<Either<Failure, PostEntity>> decrementDiamond(String postId);
 }

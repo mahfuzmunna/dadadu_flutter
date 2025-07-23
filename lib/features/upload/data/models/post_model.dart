@@ -2,8 +2,6 @@
 
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 
-import '../../../auth/data/models/user_model.dart';
-
 class PostModel extends PostEntity {
   const PostModel({
     required super.id,
@@ -19,7 +17,6 @@ class PostModel extends PostEntity {
     super.visibilityLevel = 0,
     super.views = 0,
     super.location,
-    super.author, // Add author to constructor
   });
 
   factory PostModel.fromMap(Map<String, dynamic> map) {
@@ -32,15 +29,11 @@ class PostModel extends PostEntity {
       tag: map['tag'] as String,
       diamonds: map['diamonds'] as int,
       comments: map['comments'] as int,
-      createdAt: DateTime.parse(map['created_at'] as String),
+      createdAt: map['created_at'] as String,
       isDisabled: map['disabled'] as bool,
       visibilityLevel: map['visibility_level'] as int,
       views: map['views'] as int,
       location: map['location'] as String,
-      // NEW: Check if the 'users' table data is present and parse it
-      author: map['users'] != null
-          ? UserModel.fromMap(map['users'] as Map<String, dynamic>)
-          : null,
     );
   }
 
@@ -56,7 +49,7 @@ class PostModel extends PostEntity {
       'diamonds': diamonds,
       'comments': comments,
       // Convert DateTime back to an ISO 8601 string for Supabase.
-      'created_at': createdAt.toIso8601String(),
+      'created_at': createdAt,
       'disabled': isDisabled,
       'visibility_level': visibilityLevel,
       'views': views,
@@ -74,7 +67,7 @@ class PostModel extends PostEntity {
     String? tag,
     int? diamonds,
     int? comments,
-    DateTime? createdAt,
+    String? createdAt,
     bool? isDisabled,
     int? visibilityLevel,
     int? views,

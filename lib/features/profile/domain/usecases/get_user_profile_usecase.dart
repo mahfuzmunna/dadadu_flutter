@@ -1,11 +1,9 @@
-// lib/features/profile/domain/usecases/get_user_profile_usecase.dart
-
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart'; // For UseCase and NoParams if needed
-import '../../../auth/domain/entities/user_entity.dart'; // Reusing UserEntity
+import '../../../../core/usecases/usecase.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../repositories/profile_repository.dart';
 
 class GetUserProfileUseCase implements UseCase<UserEntity, GetUserProfileParams> {

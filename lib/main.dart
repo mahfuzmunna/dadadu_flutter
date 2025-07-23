@@ -4,12 +4,10 @@ import 'dart:async';
 
 import 'package:dadadu_app/core/routes/app_router.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart';
+import 'package:dadadu_app/features/home/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
-import 'package:dadadu_app/firebase_options.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -22,16 +20,12 @@ void main() async {
 
   try {
     await initializeCameras();
-
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-
     await Supabase.initialize(
       url: 'https://sqdqbmnqosfzhmrpbvqe.supabase.co',
       anonKey:
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxZHFibW5xb3NmemhtcnBidnFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0NDUyODQsImV4cCI6MjA2ODAyMTI4NH0.O4SHLpBxaxKTXjyPiysYR4I57JXPS5LaBaktEbOY5IE',
-      authOptions: FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
+      authOptions:
+          const FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
     );
 
     await di.init();
@@ -67,7 +61,7 @@ class _MyAppState extends State<MyApp> {
   // Stream subscription for deep links
   StreamSubscription? _sub;
   late final AuthBloc _authBloc;
-  late final PostBloc _postBloc;
+  late final FeedBloc _postBloc;
   late final ProfileBloc _profileBloc;
 
   late final GoRouter _router;
@@ -75,9 +69,8 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    _setupAuthListener();
     _authBloc = di.sl<AuthBloc>();
-    _postBloc = di.sl<PostBloc>();
+    _postBloc = di.sl<FeedBloc>();
     _profileBloc = di.sl<ProfileBloc>();
 
     debugPrint('MyApp: AuthBloc instance retrieved from DI.');
@@ -87,7 +80,7 @@ class _MyAppState extends State<MyApp> {
     _router = AppRouter.router(authBloc: _authBloc);
     debugPrint('MyApp: GoRouter initialized with AuthBloc.');
 
-    _authBloc.add(AuthInitialCheckRequested());
+    _authBloc.add(const AuthInitialCheckRequested());
   }
 
   @override
@@ -110,7 +103,7 @@ class _MyAppState extends State<MyApp> {
         BlocProvider<AuthBloc>.value(
           value: _authBloc,
         ),
-        BlocProvider<PostBloc>.value(
+        BlocProvider<FeedBloc>.value(
           value: _postBloc,
         ),
         BlocProvider<ProfileBloc>.value(
@@ -125,33 +118,5 @@ class _MyAppState extends State<MyApp> {
         routerConfig: _router, // Use the configured GoRouter instance
       ),
     );
-  }
-
-  void _setupAuthListener() {
-    // This listener helps in managing the authentication state globally.
-    // It's crucial for understanding when a user logs in, out, or changes state.
-    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
-      final AuthChangeEvent event = data.event;
-      final Session? session = data.session;
-
-      debugPrint('Auth event: $event, Session: $session');
-
-      // You can implement navigation logic here based on auth state
-      if (event == AuthChangeEvent.signedIn ||
-          event == AuthChangeEvent.initialSession) {
-        // User is signed in or session is restored
-        // Navigate to home screen or dashboard
-        // if (mounted) {
-        //   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => HomePage()));
-        // }
-      } else if (event == AuthChangeEvent.signedOut) {
-        // User signed out
-        // Navigate to login screen
-        // if (mounted) {
-        //   Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => LoginPage()));
-        // }
-      }
-      // Handle other events like AuthChangeEvent.passwordRecovery, AuthChangeEvent.userUpdated, etc.
-    });
   }
 }

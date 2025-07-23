@@ -61,7 +61,7 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
       return;
     }
 
-    final String userId = currentUser!.uid;
+    final String userId = currentUser!.id;
 
     // 2. Call the Use Case to handle file uploads and post creation
     final result = await uploadPostUseCase(

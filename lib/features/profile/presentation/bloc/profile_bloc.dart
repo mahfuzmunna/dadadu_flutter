@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart'; // For @immutable
 
 import '../../../../core/errors/failures.dart';
-import '../../../../core/usecases/usecase.dart'; // For NoParams, if applicable
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/usecases/get_current_user_usecase.dart'; // To get the current authenticated user
 // import '../../domain/entities/user_entity.dart'; // Reusing UserEntity from Auth
@@ -34,7 +33,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required this.getCurrentUserUseCase,
     required this.uploadProfileImageUseCase,
     required this.deleteProfileImageUseCase,
-  }) : super(ProfileInitial()) {
+  }) : super(const ProfileInitial()) {
     on<LoadUserProfile>(_onLoadUserProfile);
     on<UpdateUserProfile>(_onUpdateUserProfile);
     on<LoadUserPosts>(_onLoadUserPosts);
@@ -46,32 +45,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       LoadUserProfile event, Emitter<ProfileState> emit) async {
     emit(const ProfileLoading());
     // First, try to get the current authenticated user's UID
-    final currentUserResult = await getCurrentUserUseCase(NoParams());
+    final currentUserResult = await getUserProfileUseCase(
+        GetUserProfileParams(userId: event.userId as String));
 
-    await currentUserResult.fold(
+    currentUserResult.fold(
       (failure) async =>
           emit(ProfileError(message: _mapFailureToMessage(failure))),
-      (currentUser) async {
-        if (currentUser == null) {
-          // If no current user, we can't load a profile for the authenticated user.
-          // This might indicate an unauthenticated state, or an error.
-          emit(const ProfileError(
-              message: 'No authenticated user to load profile for.'));
-          return;
-        }
-
-        // Use the event's userId if provided (for viewing other profiles),
-        // otherwise use the current authenticated user's UID.
-        final targetUserId = event.userId ?? currentUser.uid;
-
-        final result = await getUserProfileUseCase(
-            GetUserProfileParams(userId: targetUserId));
-        result.fold(
-          (failure) =>
-              emit(ProfileError(message: _mapFailureToMessage(failure))),
-          (userProfile) => emit(ProfileLoaded(user: userProfile)),
-        );
-      },
+      (currentUser) => emit(ProfileLoaded(user: currentUser)),
     );
   }
 
@@ -85,7 +65,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       (failure) => emit(ProfileError(message: _mapFailureToMessage(failure))),
       (_) {
         // After successful update, reload the profile to get the latest data
-        add(LoadUserProfile(userId: event.user.uid));
+        add(LoadUserProfile(userId: event.user.id));
       },
     );
   }
@@ -99,7 +79,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     final result = await getPostsUseCase(GetPostsParams(userId: event.userId));
     result.fold(
-          (failure) => emit(ProfileError(message: _mapFailureToMessage(failure))),
+      (failure) => emit(ProfileError(message: _mapFailureToMessage(failure))),
       (posts) {
         // If profile is already loaded, update it with posts
         if (state is ProfileLoaded) {

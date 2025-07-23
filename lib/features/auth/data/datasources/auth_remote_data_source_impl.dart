@@ -217,11 +217,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         // If profile data is missing, create a basic UserModel from auth user
         // This might happen if user only signed up via auth but profile wasn't fully created
         return UserModel(
-          uid: currentUser.id,
+          id: currentUser.id,
           email: currentUser.email,
-          displayName: currentUser.userMetadata?['full_name'] as String?,
+          fullName: currentUser.userMetadata?['full_name'] as String?,
           // Or username, if you store it there
           username: currentUser.userMetadata?['username'] as String?,
+          bio: currentUser.userMetadata?['bio'] as String?,
+          profilePhotoUrl:
+              currentUser.userMetadata?['profile_photo_url'] as String?,
+          followersCount: 0,
+          followingCount: 0,
+          postCount: 0,
+          createdAt: DateTime.now().toIso8601String(),
+          updatedAt: DateTime.now().toIso8601String(),
+          rank: 'Leaf',
+          referralLink: '',
+          moodStatus: '',
+          language: '',
+          discoverMode: 'Entertainment',
+          uploadedVideoUrls: [],
+          profilePhotoFile: null,
+          isEmailConfirmed: false,
         );
       }
 
@@ -255,20 +271,54 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             } else {
               // If profile not found, return a basic UserModel from auth user
               return UserModel(
-                uid: currentUser.id,
+                id: currentUser.id,
                 email: currentUser.email,
-                displayName: currentUser.userMetadata?['full_name'] as String?,
+                fullName: currentUser.userMetadata?['full_name'] as String?,
+                // Or username, if you store it there
                 username: currentUser.userMetadata?['username'] as String?,
+                bio: currentUser.userMetadata?['bio'] as String?,
+                profilePhotoUrl:
+                    currentUser.userMetadata?['profile_photo_url'] as String?,
+                followersCount: 0,
+                followingCount: 0,
+                postCount: 0,
+                createdAt: DateTime.now().toIso8601String(),
+                updatedAt: DateTime.now().toIso8601String(),
+                rank: 'Leaf',
+                referralLink: '',
+                moodStatus: '',
+                language: '',
+                discoverMode: 'Entertainment',
+                uploadedVideoUrls: [],
+                profilePhotoFile: null,
+                isEmailConfirmed: false,
               );
             }
           } catch (e) {
             debugPrint('Error fetching user profile in AuthStateChange: $e');
             // Fallback: return basic user if profile fetch fails
             return UserModel(
-              uid: currentUser.id,
+              id: currentUser.id,
               email: currentUser.email,
-              displayName: currentUser.userMetadata?['full_name'] as String?,
+              fullName: currentUser.userMetadata?['full_name'] as String?,
+              // Or username, if you store it there
               username: currentUser.userMetadata?['username'] as String?,
+              bio: currentUser.userMetadata?['bio'] as String?,
+              profilePhotoUrl:
+                  currentUser.userMetadata?['profile_photo_url'] as String?,
+              followersCount: 0,
+              followingCount: 0,
+              postCount: 0,
+              createdAt: DateTime.now().toIso8601String(),
+              updatedAt: DateTime.now().toIso8601String(),
+              rank: 'Leaf',
+              referralLink: '',
+              moodStatus: '',
+              language: '',
+              discoverMode: 'Entertainment',
+              uploadedVideoUrls: [],
+              profilePhotoFile: null,
+              isEmailConfirmed: false,
             );
           }
         }

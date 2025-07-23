@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import '../../config/app_config.dart'; // Import your AppConfig
 // Profile Feature Data Layer
 import 'data/datasources/profile_remote_data_source.dart';
+import 'data/datasources/profile_remote_data_source_impl.dart';
 import 'data/repositories/profile_repository_impl.dart';
 // Profile Feature Domain Layer
 import 'domain/repositories/profile_repository.dart';

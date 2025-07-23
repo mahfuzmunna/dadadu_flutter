@@ -2,21 +2,22 @@
 
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart'; // Import your PostBloc
+import 'package:dadadu_app/features/home/presentation/bloc/feed_bloc.dart'; // Import your PostBloc
+import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart'; // Import Bloc
 import 'package:video_player/video_player.dart';
 
 class VideoPostItem extends StatefulWidget {
-  final PostEntity initialPost; // Renamed to initialPost
+  final PostEntity post; // Renamed to initialPost
   final UserEntity? postUser;
   final bool isCurrentPage;
   final ValueChanged<String>? onUserTapped;
 
   const VideoPostItem({
     super.key,
-    required this.initialPost, // Use initialPost
+    required this.post, // Use initialPost
     this.postUser,
     required this.isCurrentPage,
     this.onUserTapped,
@@ -31,6 +32,7 @@ class _VideoPostItemState extends State<VideoPostItem>
   CachedVideoPlayerPlus? _videoController;
   Future<void>? _initializeVideoPlayerFuture;
   bool _showPlayPauseOverlay = false;
+  bool _isVideoInitialized = false;
   bool _hasError = false;
   late AnimationController _fadeAnimationController;
 
@@ -49,7 +51,8 @@ class _VideoPostItemState extends State<VideoPostItem>
     isDisabled: false,
     visibilityLevel: 0,
     views: 0,
-    createdAt: DateTime.now(), // Placeholder or provide a default
+    createdAt:
+        DateTime.now().toIso8601String(), // Placeholder or provide a default
   );
 
   @override
@@ -61,10 +64,10 @@ class _VideoPostItemState extends State<VideoPostItem>
       duration: const Duration(milliseconds: 300),
     );
 
-    _currentPost = widget.initialPost; // Initialize with the initial post
+    _currentPost = widget.post; // Initialize with the initial post
 
     debugPrint(
-        'VideoPostItem ${widget.initialPost.id} initState. isCurrentPage: ${widget.isCurrentPage}');
+        'VideoPostItem ${widget.post.id} initState. isCurrentPage: ${widget.isCurrentPage}');
 
     // Initialize video only if it's the current page initially
     if (widget.isCurrentPage) {
@@ -128,6 +131,11 @@ class _VideoPostItemState extends State<VideoPostItem>
         _videoController!.controller.setVolume(1.0);
         _videoController!.controller.addListener(_videoListener);
 
+        setState(() {
+          _isVideoInitialized = true;
+          _hasError = false;
+        });
+
         if (widget.isCurrentPage) {
           debugPrint(
               'VideoPostItem ${_currentPost.id} isCurrentPage is true, playing video.');
@@ -178,10 +186,10 @@ class _VideoPostItemState extends State<VideoPostItem>
         'VideoPostItem ${_currentPost.id} didUpdateWidget. oldCurrent: ${oldWidget.isCurrentPage}, newCurrent: ${widget.isCurrentPage}');
 
     // Scenario 1: Video URL changes (different post)
-    if (widget.initialPost.videoUrl != oldWidget.initialPost.videoUrl) {
+    if (widget.post.videoUrl != oldWidget.post.videoUrl) {
       debugPrint(
           'VideoPostItem ${_currentPost.id} Video URL changed. Re-initializing.');
-      _currentPost = widget.initialPost; // Update current post reference
+      _currentPost = widget.post; // Update current post reference
       _fadeAnimationController.reset();
       // Dispose old controller BEFORE initializing new one when URL changes
       if (_videoController != null) {
@@ -241,6 +249,7 @@ class _VideoPostItemState extends State<VideoPostItem>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
     debugPrint(
         'VideoPostItem ${_currentPost.id} didChangeAppLifecycleState: $state');
     // Only control if controller exists and is initialized
@@ -313,23 +322,22 @@ class _VideoPostItemState extends State<VideoPostItem>
       // Build only if the state is for THIS post
       buildWhen: (previous, current) {
         if (current is PostLoaded) {
-          return current.post.id == widget.initialPost.id;
+          return current.post?.id == widget.post.id;
         }
         return false; // Don't rebuild for other posts' states or non-loaded states
       },
       builder: (context, state) {
         // Update _currentPost if the state indicates a change for this specific post
         if (state is PostLoaded) {
-          _currentPost = state.post;
+          _currentPost = state.post!;
           debugPrint(
               'VideoPostItem ${_currentPost.id} received PostLoaded state.');
-        } else if (state is PostLoading &&
-            state.props.contains(widget.initialPost.id)) {
+        } else if (state is FeedLoading &&
+            state.props.contains(widget.post.id)) {
           // Optionally show a loading indicator just for the Post's data, not the video
           debugPrint(
               'VideoPostItem ${_currentPost.id} received PostLoading state.');
-        } else if (state is PostError &&
-            state.props.contains(widget.initialPost.id)) {
+        } else if (state is FeedError && state.props.contains(widget.post.id)) {
           // Handle error for post data specifically, maybe a small error icon
           debugPrint(
               'VideoPostItem ${_currentPost.id} received PostError state: ${state.message}');
@@ -456,7 +464,7 @@ class _VideoPostItemState extends State<VideoPostItem>
                               if (widget.onUserTapped != null &&
                                   widget.postUser != null) {
                                 // Assuming UserEntity has a 'uid' field
-                                widget.onUserTapped!(widget.postUser!.uid);
+                                widget.onUserTapped!(widget.postUser!.id);
                               } else {
                                 // Optional: provide feedback if tap can't be handled
                                 ScaffoldMessenger.of(context).showSnackBar(
@@ -619,7 +627,7 @@ class _VideoPostItemState extends State<VideoPostItem>
               return Container(
                 color: Colors.black, // Dark background while loading
                 child: Center(
-                  child: (state is PostLoading ||
+                  child: (state is FeedLoading ||
                           _videoController != null ||
                           widget.isCurrentPage)
                       ? CircularProgressIndicator(

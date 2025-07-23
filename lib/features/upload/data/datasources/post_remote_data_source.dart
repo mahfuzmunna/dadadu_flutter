@@ -30,5 +30,7 @@ abstract class PostRemoteDataSource {
 
   Future<PostModel> getPostById(String postId);
 
-  Stream<PostModel> subscribeToPostChanges(String postId); // NEW
+  Stream<PostModel> subscribeToPostChanges(String postId);
+
+  Stream<List<PostModel>> getPostsStream();
 }

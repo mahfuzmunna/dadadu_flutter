@@ -4,48 +4,50 @@ import '../../domain/entities/user_entity.dart';
 
 class UserModel extends UserEntity {
   const UserModel({
-    required super.uid,
-    super.email,
-    super.displayName,
-    super.firstName,
-    super.lastName,
-    super.username,
-    super.bio,
-    super.profilePhotoUrl,
-    super.userModeEmoji,
-    super.followersCount,
-    super.followingCount = 0,
-    super.postCount,
-    super.rank,
-    super.uploadedVideoUrls,
-    super.profilePhotoFile, // Keep if used for temporary local file selection
+    required super.id,
+    required super.email,
+    required super.fullName,
+    required super.username,
+    required super.bio,
+    required super.profilePhotoUrl,
+    required super.followersCount,
+    required super.followingCount,
+    required super.postCount,
+    required super.createdAt,
+    required super.updatedAt,
+    required super.rank,
+    required super.referralLink,
+    required super.moodStatus,
+    required super.language,
+    required super.discoverMode,
+    required super.uploadedVideoUrls,
+    required super.profilePhotoFile,
+    required super.isEmailConfirmed, // Keep if used for temporary local file selection
   });
 
   // Factory constructor to create UserModel from a Map (Supabase query result)
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      uid: map['id'] as String,
-      email: map['email'] as String?,
-      // Map 'full_name' from Supabase to 'displayName' in UserEntity
-      displayName: map['full_name'] as String?,
-      // firstName and lastName are no longer directly mapped from DB if you only have 'full_name'
-      firstName: null,
-      // Or derive from full_name if needed, but for simplicity set null
-      lastName: null,
-      // Or derive from full_name if needed
-      username: map['username'] as String?,
-      bio: map['bio'] as String?,
-      profilePhotoUrl: map['profile_photo_url'] as String?,
-      userModeEmoji: map['user_mode_emoji'] as String?,
-      followersCount: map['followers_count'] as int? ?? 0,
-      followingCount: map['following_count'] as int? ?? 0,
-      postCount: map['post_count'] as int?,
-      rank: map['rank'] as String?,
-      uploadedVideoUrls: (map['uploaded_video_urls'] as List<dynamic>?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
-      profilePhotoFile: null, // Always null when loaded from DB
+      id: map['id'],
+      email: map['email'],
+      fullName: map['full_name'],
+      username: map['username'],
+      bio: map['bio'],
+      profilePhotoUrl: map['profile_photo_url'],
+      followersCount: map['followers_count'],
+      followingCount: map['following_count'],
+      postCount: map['post_count'],
+      createdAt: map['created_at'],
+      updatedAt: map['updated_at'],
+      rank: map['rank'],
+      referralLink: map['referral_link'],
+      moodStatus: map['user_mode_emoji'],
+      language: map['language'],
+      discoverMode: map['discover_mode'],
+      uploadedVideoUrls: List<String>.from(map['uploaded_video_urls']),
+      profilePhotoFile: null,
+      isEmailConfirmed: false,
+      // Always null when loaded from DB
     );
   }
 
@@ -55,17 +57,21 @@ class UserModel extends UserEntity {
       // 'id' (uid) should not be sent in update/insert if it's an auto-generated primary key
       // It's used in .eq() for updates.
       'email': email,
-      'full_name': displayName,
-      // Map displayName (from UserEntity) to full_name (Supabase column)
+      'full_name': fullName,
       'username': username,
       'bio': bio,
       'profile_photo_url': profilePhotoUrl,
-      'user_mode_emoji': userModeEmoji,
       'followers_count': followersCount,
       'following_count': followingCount,
       'post_count': postCount,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
       'rank': rank,
-      'uploaded_video_urls': uploadedVideoUrls,
+      'referral_link': referralLink,
+      'user_mode_emoji': moodStatus,
+      'language': language,
+      'discover_mode': discoverMode,
+      'is_email_confirmed': isEmailConfirmed,
     };
   }
 

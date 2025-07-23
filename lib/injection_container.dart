@@ -1,6 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart'; // For Firestore if used
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:uuid/uuid.dart';
 
@@ -14,9 +11,6 @@ final sl = GetIt.instance;
 
 Future<void> init() async {
   // External Dependencies
-  sl.registerLazySingleton(() => firebase_auth.FirebaseAuth.instance);
-  sl.registerLazySingleton(() => FirebaseFirestore.instance); // If using Firestore
-  sl.registerLazySingleton(() => FirebaseStorage.instance); // NEW: Register FirebaseStorage
   sl.registerLazySingleton(() => const Uuid()); // NEW: Register UUID generator
 
   // Feature-specific injections

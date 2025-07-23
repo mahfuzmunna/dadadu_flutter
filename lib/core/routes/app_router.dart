@@ -5,7 +5,6 @@ import 'dart:async'; // For StreamSubscription
 import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // Ensure this path is correct
 // Core imports
 import 'package:dadadu_app/core/pages/splash_page.dart';
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart'; // Needed for ProfilePage viewedUser
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
 // If you have a ForgotPasswordPage, make sure to import it too
 import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
@@ -13,15 +12,18 @@ import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
-import 'package:dadadu_app/features/home/presentation/pages/home_page_s.dart';
+import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:dadadu_app/features/upload/presentation/pages/upload_page_t.dart'; // If you're using this
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/sign_up_page.dart';
+import '../../features/home/home_injection.dart' as di;
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 
 class AppRouter {
@@ -37,31 +39,23 @@ class AppRouter {
 
         GoRoute(
           path: '/',
-          builder: (BuildContext context, GoRouterState state) =>
-              const SplashPage(),
+          builder: (context, state) => const SplashPage(),
         ),
-        // Unified login/signup page route
         GoRoute(
-          path: '/login', // Changed from /signIn to /login for consistency
-          builder: (BuildContext context, GoRouterState state) =>
-              const SignInPage(),
+          path: '/login',
+          builder: (context, state) => const SignInPage(),
         ),
-        // Removed explicit /signUp route if LoginPage handles both.
-        // If you still have a separate SignUpPage, keep its route here.
         GoRoute(
           path: '/signUp',
-          builder: (BuildContext context, GoRouterState state) =>
-              const SignUpPage(),
+          builder: (context, state) => const SignUpPage(),
         ),
         GoRoute(
-          path: '/forgot-password', // Route for password reset
-          builder: (BuildContext context, GoRouterState state) =>
-              const ForgotPasswordPage(),
+          path: '/forgot-password',
+          builder: (context, state) => const ForgotPasswordPage(),
         ),
         GoRoute(
           path: '/camera',
-          builder: (BuildContext context, GoRouterState state) =>
-              const CameraScreen(),
+          builder: (context, state) => const CameraScreen(),
         ),
         GoRoute(
           path: '/createPost',
@@ -88,81 +82,76 @@ class AppRouter {
 
         // --- ShellRoute for the main app content with a bottom navigation bar ---
         StatefulShellRoute.indexedStack(
-          builder: (BuildContext context, GoRouterState state,
-              StatefulNavigationShell navigationShell) {
+          builder: (context, state, navigationShell) {
             return ScaffoldWithNavBar(navigationShell: navigationShell);
           },
           branches: <StatefulShellBranch>[
-            // Branch 1: Home Tab
+            // Home
             StatefulShellBranch(
-              routes: <RouteBase>[
+              routes: [
                 GoRoute(
                   path: '/home',
-                  builder: (BuildContext context, GoRouterState state) =>
-                      const HomePage(),
+                  builder: (context, state) => const HomePage(),
                 ),
               ],
             ),
-            // Branch 2: Discover Tab
+            // Discover
             StatefulShellBranch(
-              routes: <RouteBase>[
+              routes: [
                 GoRoute(
                   path: '/discover',
-                  builder: (BuildContext context, GoRouterState state) =>
-                      const DiscoverPage(),
+                  builder: (context, state) => const DiscoverPage(),
                 ),
               ],
             ),
-            // Branch 3: Upload Tab (Redirects to Camera)
+            // Upload (Redirects to Camera)
             StatefulShellBranch(
-              routes: <RouteBase>[
+              routes: [
                 GoRoute(
                   path: '/upload',
-                  // This builder is effectively never reached due to the redirect
-                  builder: (BuildContext context, GoRouterState state) =>
-                      const Center(child: Text('Initiating Upload...')),
-                  // Redirect from '/upload' (tab tap) directly to '/camera'
                   redirect: (context, state) => '/camera',
                 ),
               ],
             ),
-            // Branch 4: Friends Tab
+            // Friends
             StatefulShellBranch(
-              routes: <RouteBase>[
+              routes: [
                 GoRoute(
                   path: '/friends',
-                  builder: (BuildContext context, GoRouterState state) =>
-                      const FriendsPage(),
+                  builder: (context, state) => const FriendsPage(),
                 ),
               ],
             ),
-            // Branch 5: Profile Tab
+            // Profile
             StatefulShellBranch(
-              routes: <RouteBase>[
+              routes: [
                 GoRoute(
                   path: '/profile',
-                  builder: (BuildContext context, GoRouterState state) =>
-                      const ProfilePage(), // Displays current user's profile
+                  builder: (BuildContext context, GoRouterState state) {
+                    final authState = context.read<AuthBloc>().state;
+                    if (authState is AuthAuthenticated) {
+                      // Pass the currently logged-in user to the ProfilePage
+                      return ProfilePage(viewedUser: authState.user);
+                    }
+                    // Fallback or loading state if needed
+                    return const Center(child: CircularProgressIndicator());
+                  },
                   routes: [
-                    // Nested route for other user profiles: /profile/:userId
+                    // ✅ CORRECTED: Nested route for OTHER user profiles
                     GoRoute(
                       path: ':userId',
                       builder: (BuildContext context, GoRouterState state) {
                         final String userId = state.pathParameters['userId']!;
-                        // TODO: Implement actual user fetching logic here based on userId.
-                        // This is a placeholder for fetching another user's profile data.
-                        // Ensure your UserEntity matches what you expect
-                        final UserEntity dummyOtherUser = UserEntity(
-                          uid: userId,
-                          // Use 'id' for consistency with UserEntity
-                          email: 'user$userId@example.com',
-                          isEmailConfirmed: true,
-                          // Add other properties as needed by your UserEntity
-                          // e.g., username, profilePhotoUrl if they are part of UserEntity
+
+                        // Instead of fetching data here, we provide a ProfileBloc
+                        // that will do the fetching for us.
+                        return BlocProvider<ProfileBloc>(
+                          create: (context) => di.sl<ProfileBloc>()
+                            ..add(LoadUserProfile(userId: userId)),
+                          // The ProfilePage now takes NO arguments for this route.
+                          // It will get all its data from the ProfileBloc.
+                          child: const ProfilePage(),
                         );
-                        return ProfilePage(
-                            viewedUser:
-                                dummyOtherUser); // Pass the fetched/dummy user
                       },
                     ),
                   ],
@@ -173,83 +162,49 @@ class AppRouter {
         ),
       ],
 
-      // --- Global Redirect Logic based on Authentication State ---
+      // --- GLOBAL REDIRECT LOGIC ---
       redirect: (BuildContext context, GoRouterState state) {
-        final AuthState authState = authBloc.state;
-        final bool loggedIn = authState is AuthAuthenticated;
-        final bool isAuthStatusChecking =
-            authState is AuthInitial || authState is AuthLoading;
+        final authState = authBloc.state;
+        final currentLocation = state.uri.toString();
 
-        final String currentPath = state.uri.path;
-        final bool isSplashPath = currentPath == '/';
-        final bool isLoginPagePath = currentPath == '/login'; // Use /login
-        final bool isForgotPasswordPath =
-            currentPath == '/forgot-password'; // Check for forgot password path
+        // 1. Define Authentication-related routes
+        final isAuthRoute = currentLocation == '/login' ||
+            currentLocation == '/signUp' ||
+            currentLocation == '/forgot-password';
 
-        // Define public paths that do NOT require authentication
-        const List<String> publicPaths = [
-          '/',
-          '/login',
-          '/forgot-password'
-        ]; // Include /forgot-password
-        final bool isCurrentPathPublic = publicPaths.contains(currentPath);
-
-        // Define paths that require authentication (any path not public)
-        final bool isCurrentPathProtected = !isCurrentPathPublic;
-
-        // --- Debugging Prints (helpful during development) ---
-        debugPrint('--- GoRouter Redirect Check ---');
-        debugPrint('Current Path: $currentPath');
-        debugPrint('AuthBloc State: $authState');
-        debugPrint('Logged In: $loggedIn');
-        debugPrint('Is Auth Status Checking: $isAuthStatusChecking');
-        debugPrint('Is Current Path Public: $isCurrentPathPublic');
-        debugPrint('Is Current Path Protected: $isCurrentPathProtected');
-        debugPrint('-----------------------------');
-
-        // --- Redirect Logic ---
-
-        // Rule 1: While authentication status is still being determined (Splash Screen)
-        if (isAuthStatusChecking) {
-          debugPrint('Status: Auth checking.');
-          // Stay on splash page while checking auth status.
-          // If trying to access any other route before check is done, redirect to splash.
-          return isSplashPath ? null : '/';
+        // 2. Handle the initial loading state
+        if (authState is AuthInitial || authState is AuthLoading) {
+          // While checking auth, always show the splash screen.
+          return currentLocation == '/' ? null : '/';
         }
 
-        // Rule 2: User IS Authenticated (AuthAuthenticated)
-        if (loggedIn) {
-          debugPrint('Status: User authenticated.');
-          // If on a public path (splash, login, forgot password), redirect to home (default app start).
-          if (isCurrentPathPublic) {
-            debugPrint(
-                'Result: Logged in, on public path. Redirecting to /home.');
+        // 3. Handle the Authenticated state
+        final isLoggedIn = authState is AuthAuthenticated;
+        if (isLoggedIn) {
+          // If the user is logged in but on the splash or an auth route,
+          // redirect them to the home page.
+          if (currentLocation == '/' || isAuthRoute) {
             return '/home';
           }
-          // Otherwise, allow to proceed to the current requested (protected) path.
-          debugPrint('Result: Logged in, on protected path. Allow access.');
-          return null;
+        }
+        // 4. Handle the Unauthenticated state
+        else {
+          // If the user is not logged in and is trying to access a protected route
+          // (i.e., any route that ISN'T an auth route), redirect them to the login page.
+          if (!isAuthRoute) {
+            return '/login';
+          }
         }
 
-        // Rule 3: User is NOT Authenticated (AuthUnauthenticated or AuthError, and check is complete)
-        debugPrint('Status: User NOT authenticated (check complete).');
-        // If on a login or forgot password page, allow.
-        if (isLoginPagePath || isForgotPasswordPath) {
-          debugPrint('Result: Not logged in, on auth path. Allow access.');
-          return null;
-        }
-        // If on splash screen or any protected route, redirect to login.
-        debugPrint(
-            'Result: Not logged in, on splash or protected path. Redirecting to /login.');
-        return '/login';
+        // 5. No redirection needed
+        // If none of the above conditions are met, the user is allowed to stay on the current page.
+        // (e.g., logged in and on a protected page, or logged out and on an auth page).
+        return null;
       },
 
-      // Error builder for 404 pages (route not found)
-      errorBuilder: (BuildContext context, GoRouterState state) => Scaffold(
+      errorBuilder: (context, state) => Scaffold(
         appBar: AppBar(title: const Text('Page Not Found')),
-        body: Center(
-          child: Text('Error: Page not found at ${state.uri.path}'),
-        ),
+        body: Center(child: Text('Error: No route found for ${state.uri}')),
       ),
 
       // Listens to AuthBloc's stream to trigger redirects whenever auth state changes.

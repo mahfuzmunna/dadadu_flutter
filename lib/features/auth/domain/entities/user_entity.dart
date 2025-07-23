@@ -4,67 +4,111 @@ import 'dart:io';
 import 'package:equatable/equatable.dart';
 
 class UserEntity extends Equatable {
-  final String uid;
+  final String id;
   final String? email;
-  final String? displayName; // This might be 'full_name' from DB
-  final String? firstName;
-  final String? lastName;
+  final String? fullName; // This might be 'full_name' from DB
   final String? username;
   final String? bio;
   final String? profilePhotoUrl;
-  final String? userModeEmoji;
   final int followersCount;
   final int followingCount;
   final int? postCount;
-  final String? rank;
+  final String createdAt;
+  final String updatedAt;
+  final String rank;
+  final String referralLink;
+  final String? moodStatus;
+  final String language;
+  final String discoverMode;
   final List<String> uploadedVideoUrls;
   final File?
       profilePhotoFile; // Used for local selection, not persisted directly as URL
   final bool isEmailConfirmed;
 
   const UserEntity({
-    required this.uid,
-    this.email,
-    this.displayName,
-    this.firstName,
-    this.lastName,
-    this.username,
-    this.bio,
-    this.profilePhotoUrl,
-    this.userModeEmoji,
-    this.followersCount = 0,
-    this.followingCount = 0,
-    this.postCount,
-    this.rank,
-    this.uploadedVideoUrls = const [],
-    this.profilePhotoFile,
-    this.isEmailConfirmed = false,
+    required this.id,
+    required this.email,
+    required this.fullName,
+    required this.username,
+    required this.bio,
+    required this.profilePhotoUrl,
+    required this.followersCount,
+    required this.followingCount,
+    required this.postCount,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.rank,
+    required this.referralLink,
+    required this.moodStatus,
+    required this.language,
+    required this.discoverMode,
+    required this.uploadedVideoUrls,
+    required this.profilePhotoFile,
+    required this.isEmailConfirmed,
   });
 
   @override
   List<Object?> get props => [
-        uid,
+        id,
         email,
-        displayName,
-        firstName,
-        lastName,
+        fullName,
         username,
         bio,
         profilePhotoUrl,
-        userModeEmoji,
         followersCount,
         followingCount,
         postCount,
+        createdAt,
+        updatedAt,
         rank,
+        referralLink,
+        moodStatus,
+        language,
+        discoverMode,
         uploadedVideoUrls,
         profilePhotoFile,
-        isEmailConfirmed,
+        isEmailConfirmed
       ];
 
-  copyWith(
-      {required String username,
-      required String firstName,
-      required String lastName,
-      required String bio,
-      File? profilePhotoFile}) {}
+  UserEntity copyWith(
+      {required String id,
+      required String email,
+      required String fullName,
+      required String username,
+      required String? bio,
+      required String? profilePhotoUrl,
+      required int followersCount,
+      required int followingCount,
+      required int postCount,
+      required String createdAt,
+      required String updatedAt,
+      required String rank,
+      required String referralLink,
+      required String moodStatus,
+      required String language,
+      required String discoverMode,
+      required List<String> uploadedVideoUrls,
+      required File? profilePhotoFile,
+      required bool isEmailConfirmed}) {
+    return UserEntity(
+        id: id,
+        email: email,
+        fullName: fullName,
+        username: username,
+        bio: bio,
+        profilePhotoUrl: profilePhotoUrl,
+        followersCount: followersCount,
+        followingCount: followingCount,
+        postCount: postCount,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        rank: rank,
+        referralLink: referralLink,
+        moodStatus: moodStatus,
+        language: language,
+        discoverMode: discoverMode,
+        uploadedVideoUrls: uploadedVideoUrls,
+        profilePhotoFile: profilePhotoFile,
+        isEmailConfirmed: isEmailConfirmed);
+  }
 }

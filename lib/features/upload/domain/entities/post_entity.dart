@@ -1,4 +1,3 @@
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart'; // Make sure this import is correct
 import 'package:equatable/equatable.dart';
 
 class PostEntity extends Equatable {
@@ -12,12 +11,11 @@ class PostEntity extends Equatable {
   final String tag;
   final int diamonds;
   final int comments;
-  final DateTime createdAt;
+  final String? createdAt;
   final bool isDisabled;
   final int visibilityLevel;
   final int views;
   final String? location;
-  final UserEntity? author; // NEW: The user who created the post
 
   const PostEntity({
     required this.id,
@@ -33,7 +31,6 @@ class PostEntity extends Equatable {
     required this.visibilityLevel,
     required this.views,
     required this.location,
-    this.author, // NEW: The user who created the post
   });
 
   @override
@@ -51,6 +48,5 @@ class PostEntity extends Equatable {
         visibilityLevel,
         views,
         location,
-        author, // NEW: The user who created the post
       ];
 }

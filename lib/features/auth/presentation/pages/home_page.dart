@@ -1,6 +1,7 @@
 // lib/features/auth/presentation/pages/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../domain/entities/user_entity.dart';
 import '../bloc/auth_bloc.dart';
 
@@ -45,7 +46,7 @@ class HomePage extends StatelessWidget {
                 else if (user != null) ...[
                   const Text('Welcome!', style: TextStyle(fontSize: 24)),
                   const SizedBox(height: 16),
-                  Text('User ID: ${user.uid}'),
+                  Text('User ID: ${user.id}'),
                   Text('Email: ${user.email ?? 'N/A'}'),
                   Text(
                       'Email Confirmed: ${user.isEmailConfirmed ? 'Yes' : 'No'}'),
