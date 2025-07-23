@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:dadadu_app/core/routes/app_router.dart';
+import 'package:dadadu_app/core/theme/theme_cubit.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/home/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -100,6 +101,7 @@ class _MyAppState extends State<MyApp> {
     // This allows other widgets (like SignInPage, ProfilePage, etc.) to access it.
     return MultiBlocProvider(
       providers: [
+        BlocProvider(create: (context) => ThemeCubit()),
         BlocProvider<AuthBloc>.value(
           value: _authBloc,
         ),
@@ -110,13 +112,18 @@ class _MyAppState extends State<MyApp> {
           value: _profileBloc,
         ),
       ],
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false, // Set to false for production
-        title: 'Dadadu App',
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        routerConfig: _router, // Use the configured GoRouter instance
-      ),
+      child: BlocBuilder<ThemeCubit, ThemeMode>(builder: (context, themeMode) {
+        final GoRouter router = _router;
+        return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
+          // Set to false for production
+          title: 'Dadadu App',
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          routerConfig: _router, // Use the configured GoRouter instance
+        );
+      }),
     );
   }
 }

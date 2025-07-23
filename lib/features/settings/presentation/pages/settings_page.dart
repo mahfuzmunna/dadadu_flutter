@@ -1,179 +1,208 @@
 // lib/features/settings/presentation/pages/settings_page.dart
 
+import 'package:dadadu_app/core/theme/theme_cubit.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _notificationsEnabled = true; // Local state for the notification toggle
+
+  @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final themeCubit = context.watch<ThemeCubit>();
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          'Settings',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-        ),
+        title: Text('Settings',
+            style: theme.textTheme.headlineSmall
+                ?.copyWith(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: ListView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
         children: [
-          // Example Settings Tile
-          ListTile(
-            leading: Icon(Icons.privacy_tip_rounded,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text('Privacy Settings',
-                style: Theme.of(context).textTheme.titleMedium),
-            trailing: Icon(Icons.arrow_forward_ios_rounded,
-                size: 18,
-                color: Theme.of(context).colorScheme.onSurfaceVariant),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Navigate to Privacy Settings')),
-              );
-              // context.push('/settings/privacy'); // Example navigation
-            },
+          _buildSectionHeader(context, 'Appearance'),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Theme', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 12),
+                  SegmentedButton<ThemeMode>(
+                    segments: const [
+                      ButtonSegment(
+                          value: ThemeMode.light,
+                          label: Text('Light'),
+                          icon: Icon(Icons.light_mode_rounded)),
+                      ButtonSegment(
+                          value: ThemeMode.dark,
+                          label: Text('Dark'),
+                          icon: Icon(Icons.dark_mode_rounded)),
+                      ButtonSegment(
+                          value: ThemeMode.system,
+                          label: Text('System'),
+                          icon: Icon(Icons.settings_suggest_rounded)),
+                    ],
+                    selected: {themeCubit.state},
+                    onSelectionChanged: (newSelection) {
+                      themeCubit.updateTheme(newSelection.first);
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
-          Divider(
-              indent: 16,
-              endIndent: 16,
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withOpacity(0.5)),
-          ListTile(
-            leading: Icon(Icons.notifications_active_rounded,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text('Notification Preferences',
-                style: Theme.of(context).textTheme.titleMedium),
-            trailing: Icon(Icons.arrow_forward_ios_rounded,
-                size: 18,
-                color: Theme.of(context).colorScheme.onSurfaceVariant),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text('Navigate to Notification Preferences')),
-              );
-              // context.push('/settings/notifications'); // Example navigation
-            },
+          const SizedBox(height: 24),
+
+          _buildSectionHeader(context, 'General'),
+          Card(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.notifications_active_rounded,
+                      color: theme.colorScheme.primary),
+                  title: Text('Push Notifications',
+                      style: theme.textTheme.titleMedium),
+                  trailing: Switch(
+                    value: _notificationsEnabled,
+                    onChanged: (bool value) {
+                      setState(() {
+                        _notificationsEnabled = value;
+                        // TODO: Add logic to save this preference to a repository
+                      });
+                    },
+                  ),
+                ),
+                _buildDivider(),
+                _buildNavigationTile(
+                  context,
+                  icon: Icons.privacy_tip_rounded,
+                  title: 'Privacy Settings',
+                  onTap: () {
+                    /* Navigate to privacy page */
+                  },
+                ),
+              ],
+            ),
           ),
-          Divider(
-              indent: 16,
-              endIndent: 16,
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withOpacity(0.5)),
-          ListTile(
-            leading: Icon(Icons.help_center_rounded,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text('Help & Support',
-                style: Theme.of(context).textTheme.titleMedium),
-            trailing: Icon(Icons.arrow_forward_ios_rounded,
-                size: 18,
-                color: Theme.of(context).colorScheme.onSurfaceVariant),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Navigate to Help & Support')),
-              );
-              // context.push('/settings/help'); // Example navigation
-            },
+          const SizedBox(height: 24),
+
+          _buildSectionHeader(context, 'Support'),
+          Card(
+            child: Column(
+              children: [
+                _buildNavigationTile(
+                  context,
+                  icon: Icons.help_center_rounded,
+                  title: 'Help & Support',
+                  onTap: () {
+                    /* Navigate to help page */
+                  },
+                ),
+                _buildDivider(),
+                _buildNavigationTile(
+                  context,
+                  icon: Icons.info_rounded,
+                  title: 'About Dadadu',
+                  onTap: () {
+                    /* Navigate to about page */
+                  },
+                ),
+              ],
+            ),
           ),
-          Divider(
-              indent: 16,
-              endIndent: 16,
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withOpacity(0.5)),
-          ListTile(
-            leading: Icon(Icons.info_rounded,
-                color: Theme.of(context).colorScheme.primary),
-            title: Text('About Dadadu App',
-                style: Theme.of(context).textTheme.titleMedium),
-            trailing: Icon(Icons.arrow_forward_ios_rounded,
-                size: 18,
-                color: Theme.of(context).colorScheme.onSurfaceVariant),
-            onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Navigate to About page')),
-              );
-              // context.push('/settings/about'); // Example navigation
-            },
-          ),
-          Divider(
-              indent: 16,
-              endIndent: 16,
-              color: Theme.of(context)
-                  .colorScheme
-                  .outlineVariant
-                  .withOpacity(0.5)),
           const SizedBox(height: 32),
 
           // Sign Out Button
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.logout_rounded),
-              label: const Text('Sign Out'),
-              onPressed: () {
-                // Confirm action before signing out
-                showDialog(
-                  context: context,
-                  builder: (BuildContext dialogContext) {
-                    return AlertDialog(
-                      title: const Text('Confirm Sign Out'),
-                      content: const Text('Are you sure you want to sign out?'),
-                      actions: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop(); // Dismiss dialog
-                          },
-                          child: Text('Cancel',
-                              style: TextStyle(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface)),
-                        ),
-                        FilledButton(
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop(); // Dismiss dialog
-                            // Dispatch Sign Out event
-                            context
-                                .read<AuthBloc>()
-                                .add(const AuthSignOutRequested());
-                          },
-                          style: FilledButton.styleFrom(
-                            backgroundColor:
-                                Theme.of(context).colorScheme.error,
-                            foregroundColor:
-                                Theme.of(context).colorScheme.onError,
-                          ),
-                          child: const Text('Sign Out'),
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-              style: FilledButton.styleFrom(
-                backgroundColor: Theme.of(context)
-                    .colorScheme
-                    .error, // Error color for sign out
-                foregroundColor: Theme.of(context).colorScheme.onError,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
+          FilledButton.icon(
+            icon: const Icon(Icons.logout_rounded),
+            label: const Text('Sign Out'),
+            onPressed: () => _showSignOutDialog(context),
+            style: FilledButton.styleFrom(
+              backgroundColor: theme.colorScheme.error,
+              foregroundColor: theme.colorScheme.onError,
+              padding: const EdgeInsets.symmetric(vertical: 16),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  // Helper method to build section headers for a grouped look
+  Widget _buildSectionHeader(BuildContext context, String title) {
+    return Padding(
+      padding:
+          const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0, top: 8.0),
+      child: Text(
+        title.toUpperCase(),
+        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              fontWeight: FontWeight.bold,
+            ),
+      ),
+    );
+  }
+
+  // Helper for consistent navigation list tiles
+  Widget _buildNavigationTile(BuildContext context,
+      {required IconData icon,
+      required String title,
+      required VoidCallback onTap}) {
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: Icon(icon, color: theme.colorScheme.primary),
+      title: Text(title, style: theme.textTheme.titleMedium),
+      trailing: Icon(Icons.arrow_forward_ios_rounded,
+          size: 18, color: theme.colorScheme.onSurfaceVariant),
+      onTap: onTap,
+    );
+  }
+
+  // Helper for consistent dividers
+  Widget _buildDivider() => Divider(
+      indent: 16,
+      endIndent: 16,
+      height: 1,
+      color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5));
+
+  // Helper to show the sign-out confirmation dialog
+  void _showSignOutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('Confirm Sign Out'),
+          content: const Text('Are you sure you want to sign out?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                context.read<AuthBloc>().add(const AuthSignOutRequested());
+              },
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
+              child: const Text('Sign Out'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
