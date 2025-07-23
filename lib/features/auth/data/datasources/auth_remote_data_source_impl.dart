@@ -59,6 +59,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'email': supabaseUser.email,
         'full_name': fullName,
         'username': username,
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
       };
 
       final List<Map<String, dynamic>> response = await supabaseClient
