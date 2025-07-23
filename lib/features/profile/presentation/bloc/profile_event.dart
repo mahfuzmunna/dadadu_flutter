@@ -22,13 +22,11 @@ class LoadUserProfile extends ProfileEvent {
   List<Object?> get props => [userId];
 }
 
-class UpdateUserProfile extends ProfileEvent {
+class UpdateUserProfileData extends ProfileEvent {
   final UserEntity user;
 
-  const UpdateUserProfile({required this.user});
-
+  const UpdateUserProfileData({required this.user});
   @override
-  // This can remain List<Object> as 'user' is non-nullable
   List<Object> get props => [user];
 }
 

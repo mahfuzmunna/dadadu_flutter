@@ -6,10 +6,11 @@ import '../../../../core/usecases/usecase.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../repositories/profile_repository.dart';
 
-class GetUserProfileUseCase implements UseCase<UserEntity, GetUserProfileParams> {
+class GetUserProfileDataUseCase
+    implements UseCase<UserEntity, GetUserProfileParams> {
   final ProfileRepository repository;
 
-  GetUserProfileUseCase(this.repository);
+  GetUserProfileDataUseCase(this.repository);
 
   @override
   Future<Either<Failure, UserEntity>> call(GetUserProfileParams params) async {

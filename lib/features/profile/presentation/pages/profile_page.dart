@@ -242,7 +242,6 @@ class _ProfileViewState extends State<_ProfileView> {
               : Icons.person_add_rounded),
           label: Text(isFollowing ? 'Unfollow' : 'Follow'),
           onPressed: () {
-            // TODO: Dispatch Follow/Unfollow event to a FriendsBloc
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text(

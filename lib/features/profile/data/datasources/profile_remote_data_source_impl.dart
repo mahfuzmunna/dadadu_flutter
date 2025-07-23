@@ -70,7 +70,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<void> updateUserProfile(UserModel user) async {
     try {
       await _supabaseClient
-          .from('users') // Your users table
+          .from('profiles') // Your users table
           .update(
               user.toMap()..['updated_at'] = DateTime.now().toIso8601String())
           .eq('id', user.id);

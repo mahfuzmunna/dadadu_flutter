@@ -15,16 +15,16 @@ import '../../../auth/domain/usecases/get_current_user_usecase.dart'; // To get 
 import '../../../home/domain/entities/post_entity.dart';
 import '../../domain/usecases/delete_profile_image_usecase.dart';
 import '../../domain/usecases/get_posts_usecase.dart';
-import '../../domain/usecases/get_user_profile_usecase.dart';
+import '../../domain/usecases/get_user_profile_data_usecase.dart';
 import '../../domain/usecases/update_profile_photo_usecase.dart';
-import '../../domain/usecases/update_profile_usecase.dart';
+import '../../domain/usecases/update_user_profile_usecase.dart';
 
 part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
-  final GetUserProfileUseCase getUserProfileUseCase;
-  final UpdateProfileUseCase updateProfileUseCase;
+  final GetUserProfileDataUseCase getUserProfileUseCase;
+  final UpdateUserProfileUseCase _updateProfileUseCase;
   final GetPostsUseCase getPostsUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final UpdateProfilePhotoUseCase _updateProfilePhotoUseCase;
@@ -33,7 +33,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   ProfileBloc({
     required this.getUserProfileUseCase,
-    required this.updateProfileUseCase,
+    required UpdateUserProfileUseCase updateProfileUseCase,
     required this.getPostsUseCase,
     required this.getCurrentUserUseCase,
     required UpdateProfilePhotoUseCase updateProfilePhotoUseCase,
@@ -41,9 +41,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required UpdateUserLocationUseCase updateUserLocationUseCase,
   })  : _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
         _updateUserLocationUseCase = updateUserLocationUseCase,
+        _updateProfileUseCase = updateProfileUseCase,
         super(const ProfileInitial()) {
     on<LoadUserProfile>(_onLoadUserProfile);
-    on<UpdateUserProfile>(_onUpdateUserProfile);
+    on<UpdateUserProfileData>(_onUpdateUserProfileData);
     on<LoadUserPosts>(_onLoadUserPosts);
     on<UpdateProfilePhoto>(_onUpdateProfilePhoto);
     on<DeleteProfileImage>(_onDeleteProfileImage);
@@ -64,17 +65,17 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     );
   }
 
-  Future<void> _onUpdateUserProfile(
-      UpdateUserProfile event, Emitter<ProfileState> emit) async {
+  Future<void> _onUpdateUserProfileData(
+      UpdateUserProfileData event, Emitter<ProfileState> emit) async {
     emit(
         const ProfileUpdating()); // Or ProfileLoaded.copyWith(isUpdating: true) if you want to keep data
-    final result = await updateProfileUseCase(
-        event.user); // event.user is already a UserEntity
+    final result = await _updateProfileUseCase(UpdateUserProfileParams(
+        event.user)); // event.user is already a UserEntity
     result.fold(
       (failure) => emit(ProfileError(message: _mapFailureToMessage(failure))),
       (_) {
         // After successful update, reload the profile to get the latest data
-        add(LoadUserProfile(userId: event.user.id));
+        emit(ProfileUpdateSuccess());
       },
     );
   }
@@ -111,7 +112,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     );
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
-      (photoUrl) => emit(ProfileUpdateSuccess(photoUrl)),
+      (photoUrl) => emit(ProfilePhotoUpdateSuccess(photoUrl)),
     );
   }
 

@@ -16,11 +16,11 @@ import 'data/repositories/profile_repository_impl.dart';
 import 'domain/repositories/profile_repository.dart';
 import 'domain/usecases/delete_profile_image_usecase.dart';
 import 'domain/usecases/get_posts_usecase.dart';
-import 'domain/usecases/get_user_profile_usecase.dart';
+import 'domain/usecases/get_user_profile_data_usecase.dart';
 import 'domain/usecases/update_profile_photo_usecase.dart';
-import 'domain/usecases/update_profile_usecase.dart';
 // Profile Feature Presentation Layer
 import 'domain/usecases/update_user_location_usecase.dart';
+import 'domain/usecases/update_user_profile_usecase.dart';
 import 'presentation/bloc/profile_bloc.dart';
 
 final sl = GetIt.instance; // Re-use the global GetIt instance
@@ -39,8 +39,8 @@ Future<void> profileInjection() async {
       ));
 
   // Profile Feature - Domain Layer (Use Cases)
-  sl.registerLazySingleton(() => GetUserProfileUseCase(sl()));
-  sl.registerLazySingleton(() => UpdateProfileUseCase(sl()));
+  sl.registerLazySingleton(() => GetUserProfileDataUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateUserProfileUseCase(sl()));
   sl.registerLazySingleton(() => GetPostsUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProfilePhotoUseCase(sl()));
   sl.registerLazySingleton(() => DeleteProfileImageUseCase(sl()));
