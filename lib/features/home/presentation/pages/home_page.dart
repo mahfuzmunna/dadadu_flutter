@@ -58,12 +58,10 @@ class _HomePageViewState extends State<_HomePageView> {
           if (state is FeedLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-
           // ERROR STATE
           if (state is FeedError) {
             return Center(child: Text('Error: ${state.message}'));
           }
-
           // LOADED STATE
           if (state is FeedLoaded) {
             final List<PostEntity> posts = state.posts;

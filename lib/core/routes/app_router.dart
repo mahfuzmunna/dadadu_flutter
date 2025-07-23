@@ -27,9 +27,13 @@ import '../../features/home/home_injection.dart' as di;
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 
+final GlobalKey<NavigatorState> _rootNavigatorKey =
+    GlobalKey<NavigatorState>(debugLabel: 'root');
+
 class AppRouter {
   static GoRouter router({required AuthBloc authBloc}) {
     return GoRouter(
+      navigatorKey: _rootNavigatorKey,
       // The initial location for the router
       initialLocation: '/',
       debugLogDiagnostics: true,
@@ -40,25 +44,31 @@ class AppRouter {
 
         GoRoute(
           path: '/',
+          parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const SplashPage(),
         ),
         GoRoute(
           path: '/login',
+          parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const SignInPage(),
         ),
         GoRoute(
           path: '/signUp',
+          parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const SignUpPage(),
         ),
         GoRoute(
           path: '/forgot-password',
+          parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const ForgotPasswordPage(),
         ),
         GoRoute(
             path: '/upload-profile-photo',
+            parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const UploadProfilePhotoPage()),
         GoRoute(
             path: '/settings',
+            parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const SettingsPage()),
 
         GoRoute(
@@ -170,24 +180,24 @@ class AppRouter {
         final authState = authBloc.state;
         final currentLocation = state.uri.toString();
 
-        if (authState is AuthSignUpSuccess) {
-          return currentLocation == '/upload-profile-photo'
-              ? null
-              : 'upload-profile-photo';
-        }
-        // 1. Define Authentication-related routes
-        final isAuthRoute = currentLocation == '/login' ||
-            currentLocation == '/signUp' ||
-            currentLocation == '/forgot-password';
-
-        // 2. Handle the initial loading state
         if (authState is AuthInitial || authState is AuthLoading) {
           // While checking auth, always show the splash screen.
           return currentLocation == '/' ? null : '/';
         }
 
+        if (authState is AuthSignUpSuccess) {
+          return currentLocation == '/upload-profile-photo'
+              ? null
+              : '/upload-profile-photo';
+        }
+
+        // 2. Handle the initial loading state
+
         // 3. Handle the Authenticated state
         final isLoggedIn = authState is AuthAuthenticated;
+        final isAuthRoute = currentLocation == '/login' ||
+            currentLocation == '/signUp' ||
+            currentLocation == '/forgot-password';
         if (isLoggedIn) {
           // If the user is logged in but on the splash or an auth route,
           // redirect them to the home page.
@@ -202,6 +212,9 @@ class AppRouter {
           if (!isAuthRoute) {
             return '/login';
           }
+        }
+        if (authState is FirstRun && isLoggedIn) {
+          return currentLocation == '/home' ? null : '/home';
         }
 
         // 5. No redirection needed

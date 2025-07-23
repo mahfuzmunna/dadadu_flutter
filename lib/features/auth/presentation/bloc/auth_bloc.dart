@@ -46,6 +46,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthInitialCheckRequested>(_onAuthInitialCheckRequested);
     on<AuthSignInRequested>(_onAuthSignInRequested);
     on<AuthSignUpRequested>(_onAuthSignUpRequested);
+    on<AuthOnboardingComplete>(_onAuthOnboardingComplete);
     on<AuthSignInWithOAuthRequested>(_onAuthSignInWithOAuthRequested);
     on<AuthSignOutRequested>(_onAuthSignOutRequested);
     on<AuthPasswordResetRequested>(_onAuthPasswordResetRequested);
@@ -98,6 +99,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthSignUpRequested event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     // Note: The SignUpUseCase no longer needs the profilePhotoFile parameter
+    _authStateSubscription?.pause();
     final result = await signUpUseCase(SignUpParams(
       email: event.email,
       password: event.password,
@@ -106,6 +108,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ));
     result.fold(
       (failure) {
+        _authStateSubscription?.resume();
         if (failure.code == 'EMAIL_CONFIRMATION_REQUIRED') {
           emit(AuthEmailVerificationRequired(email: event.email));
         } else {
@@ -120,6 +123,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthSignUpSuccess(user: user));
       },
     );
+  }
+
+  Future<void> _onAuthOnboardingComplete(
+    AuthOnboardingComplete event,
+    Emitter<AuthState> emit,
+  ) async {
+    // The user has finished onboarding (uploaded photo or skipped).
+    // Now we can emit the final Authenticated state and resume the listener.
+    emit(AuthAuthenticated(user: event.user));
+    _authStateSubscription?.resume();
+    emit(FirstRun(user: event.user));
   }
 
   Future<void> _onAuthSignInWithOAuthRequested(

@@ -41,7 +41,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
     }
   }
 
-  void _finalizeLogin() {
+  void _finalizeOnboarding() {
     // This function transitions the app to the fully authenticated state.
     // The GoRouter redirect logic will then automatically navigate to '/home'.
     final authState = context.read<AuthBloc>().state;
@@ -56,7 +56,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
     if (user != null) {
       // Dispatching AuthUserChanged ensures the state is AuthAuthenticated,
       // triggering the GoRouter redirect to the home page.
-      context.read<AuthBloc>().add(AuthUserChanged(user));
+      context.read<AuthBloc>().add(AuthOnboardingComplete(user: user));
     } else {
       // Fallback in case something went wrong
       context.go('/login');
@@ -106,7 +106,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
         listener: (context, state) {
           if (state is ProfileUpdateSuccess) {
             // ✅ FIX: After a successful photo upload, finalize the login process.
-            _finalizeLogin();
+            _finalizeOnboarding();
           } else if (state is ProfileError) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(state.message)));
@@ -163,7 +163,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
                         const SizedBox(height: 16),
                         TextButton(
                           // ✅ FIX: The skip button now also uses the robust finalize function.
-                          onPressed: _finalizeLogin,
+                          onPressed: _finalizeOnboarding,
                           child: const Text('Skip for Now'),
                         ),
                       ],

@@ -84,3 +84,12 @@ class AuthUserChanged extends AuthEvent {
 class AuthRefreshCurrentUser extends AuthEvent {
   const AuthRefreshCurrentUser(); // No props, it's just a signal
 }
+
+class AuthOnboardingComplete extends AuthEvent {
+  final UserEntity user;
+
+  const AuthOnboardingComplete({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
