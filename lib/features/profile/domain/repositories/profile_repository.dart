@@ -16,10 +16,13 @@ abstract class ProfileRepository {
 
   Future<Either<Failure, List<PostEntity>>> getUserPosts(String userId);
 
-  Future<Either<Failure, String>> uploadProfileImage(String userId,
-      File photoFile); // Returns URL
   Future<Either<Failure, void>> deleteProfileImage(String userId);
 
   Future<Either<Failure, void>> updateUserLocation(
       UpdateUserLocationParams params);
+
+  Future<Either<Failure, String>> updateProfilePhoto({
+    required String userId,
+    required File photoFile,
+  });
 }

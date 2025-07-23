@@ -82,21 +82,6 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, String>> uploadProfileImage(String userId,
-      File imagePath) async {
-    try {
-      final imageUrl =
-          await remoteDataSource.uploadProfileImage(userId, imagePath);
-      return Right(imageUrl);
-    } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(ServerFailure(
-          'An unexpected error occurred during image upload: ${e.toString()}'));
-    }
-  }
-
-  @override
   Future<Either<Failure, void>> deleteProfileImage(String userId) async {
     try {
       await remoteDataSource.deleteProfileImage(userId);
@@ -119,6 +104,22 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } on ServerException catch (e) {
       // Convert ServerException to ServerFailure and return Left
       return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> updateProfilePhoto({
+    required String userId,
+    required File photoFile,
+  }) async {
+    try {
+      final photoUrl = await remoteDataSource.updateProfilePhoto(
+        userId: userId,
+        photoFile: photoFile,
+      );
+      return Right(photoUrl);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
     }
   }
 }

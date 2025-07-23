@@ -11,10 +11,13 @@ abstract class ProfileRemoteDataSource {
   Future<void> updateUserProfile(UserModel user);
   Future<List<PostModel>> getUserPosts(String userId);
 
-  Future<String> uploadProfileImage(String userId,
-      File photoFile); // Returns URL
   Future<void> deleteProfileImage(String userId);
 
   Future<void> updateUserLocation(UpdateUserLocationParams user);
+
+  Future<String> updateProfilePhoto({
+    required String userId,
+    required File photoFile,
+  });
 }
 

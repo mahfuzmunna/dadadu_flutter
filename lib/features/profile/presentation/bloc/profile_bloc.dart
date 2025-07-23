@@ -36,10 +36,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required this.updateProfileUseCase,
     required this.getPostsUseCase,
     required this.getCurrentUserUseCase,
-    required UpdateProfilePhotoUseCase uploadProfileImageUseCase,
+    required UpdateProfilePhotoUseCase updateProfilePhotoUseCase,
     required this.deleteProfileImageUseCase,
     required UpdateUserLocationUseCase updateUserLocationUseCase,
-  })  : _updateProfilePhotoUseCase = uploadProfileImageUseCase,
+  })  : _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
         _updateUserLocationUseCase = updateUserLocationUseCase,
         super(const ProfileInitial()) {
     on<LoadUserProfile>(_onLoadUserProfile);
@@ -102,22 +102,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     );
   }
 
-  Future<void> _onUpdateProfilePhoto(
-      UpdateProfilePhoto event, Emitter<ProfileState> emit) async {
-    emit(const ProfileLoading());
-
-    final result = await _updateProfilePhotoUseCase(UpdateProfilePhotoParams(
-      userId: event.userId,
-      photoFile: event.photoFile,
-    ));
-
+  Future<void> _onUpdateProfilePhoto(UpdateProfilePhoto event,
+      Emitter<ProfileState> emit,) async {
+    emit(ProfileLoading());
+    final result = await _updateProfilePhotoUseCase(
+      UpdateProfilePhotoParams(
+          userId: event.userId, photoFile: event.photoFile),
+    );
     result.fold(
-      (failure) => emit(ProfileError(message: _mapFailureToMessage(failure))),
-      (newImageUrl) {
-        // Assuming success means the user profile needs to be refreshed to show the new image
-        add(LoadUserProfile(
-            userId: event.userId)); // Reload profile to get new image URL
-      },
+      (failure) => emit(ProfileError(message: failure.message)),
+      (photoUrl) => emit(ProfileUpdateSuccess(photoUrl)),
     );
   }
 

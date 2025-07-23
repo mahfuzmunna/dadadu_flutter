@@ -17,7 +17,8 @@ class UpdateProfilePhotoUseCase
 
   @override
   Future<Either<Failure, String>> call(UpdateProfilePhotoParams params) async {
-    return await repository.uploadProfileImage(params.userId, params.photoFile);
+    return await repository.updateProfilePhoto(
+        userId: params.userId, photoFile: params.photoFile);
   }
 }
 

@@ -14,7 +14,7 @@ import '../../domain/usecases/update_user_location_usecase.dart';
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   final SupabaseClient _supabaseClient; // For Supabase DB
-  late final Minio _minioClient; // For Wasabi Storage
+  final Minio _minioClient; // For Wasabi Storage
   final Uuid _uuid;
 
   // Wasabi/S3 client details
@@ -26,6 +26,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   ProfileRemoteDataSourceImpl({
     required SupabaseClient supabaseClient,
+    required Minio minioClient,
     required Uuid uuid,
     required String wasabiAccessKey,
     required String wasabiSecretKey,
@@ -33,19 +34,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     required String wasabiBucketName, // Specific bucket for profile images
     required String bunnyCdnHostname,
   })  : _supabaseClient = supabaseClient,
+        _minioClient = minioClient,
         _uuid = uuid,
         _wasabiAccessKey = wasabiAccessKey,
         _wasabiSecretKey = wasabiSecretKey,
         _wasabiEndpoint = wasabiEndpoint,
         _wasabiBucketName = wasabiBucketName,
-        _bunnyCdnHostname = bunnyCdnHostname {
-    _minioClient = Minio(
-      endPoint: _wasabiEndpoint,
-      accessKey: _wasabiAccessKey,
-      secretKey: _wasabiSecretKey,
-      useSSL: true, // Always use SSL for production
-    );
-  }
+        _bunnyCdnHostname = bunnyCdnHostname;
 
   @override
   Future<UserModel> getUserProfile(String userId) async {
@@ -109,58 +104,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
   }
 
-  @override
-  Future<String> uploadProfileImage(String userId, File photoFile) async {
-    try {
-      final file = photoFile;
-      final fileExtension = file.path.split('.').last;
-      // Object key for Wasabi
-      final String objectKey =
-          'profile_images/$userId/${_uuid.v4()}.$fileExtension';
-
-      // Determine MIME type for Content-Type header
-      final String? mimeType = lookupMimeType(file.path);
-
-      // Upload the file to Wasabi using Minio
-      await _minioClient.putObject(
-        _wasabiBucketName, // Your Wasabi bucket name for profile images
-        objectKey, // The path/key for the object in the bucket
-        file.openRead().cast<Uint8List>(),
-        // Cast Stream<List<int>> to Stream<Uint8List>
-        size: file.lengthSync(), // Content length
-        metadata: {
-          if (mimeType != null) 'Content-Type': mimeType,
-        },
-      );
-
-      // Construct the public URL using the BunnyCDN hostname
-      final String cdnImageUrl = 'https://$_bunnyCdnHostname/$objectKey';
-
-      // Update the user's profile in the Supabase database with the new image URL
-      await _supabaseClient.from('users').update({
-        'profile_photo_url': cdnImageUrl,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', userId);
-
-      return cdnImageUrl;
-    }
-    // You might catch specific MinioException here if you've extended your exceptions
-    // on MinioException catch (e) {
-    //   throw ServerException('Minio error during profile image upload: ${e.message}', code: e.statusCode?.toString());
-    // }
-    on PostgrestException catch (e) {
-      throw ServerException(
-        'Failed to update profile after image upload: ${e.message}',
-        code: e.code ?? 'POSTGREST_ERROR',
-      );
-    } on ServerException {
-      rethrow; // Re-throw custom exceptions from deeper layers
-    } catch (e) {
-      throw ServerException(
-          'An unexpected error occurred during profile image upload: ${e.toString()}',
-          code: 'UNKNOWN_UPLOAD_ERROR');
-    }
-  }
 
   @override
   Future<void> deleteProfileImage(String userId) async {
@@ -237,6 +180,48 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     } catch (e) {
       // Handle other unexpected errors
       throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> updateProfilePhoto({
+    required String userId,
+    required File photoFile,
+  }) async {
+    try {
+      final fileExtension = photoFile.path.split('.').last;
+      // Define the object path in your Wasabi bucket
+      final String objectKey =
+          'profile_images/$userId/${_uuid.v4()}.$fileExtension';
+      final String? mimeType = lookupMimeType(photoFile.path);
+
+      // 1. Upload the file to Wasabi
+      await _minioClient.putObject(
+        _wasabiBucketName,
+        objectKey,
+        photoFile.openRead().cast<Uint8List>(),
+        size: photoFile.lengthSync(),
+        metadata: {if (mimeType != null) 'Content-Type': mimeType},
+      );
+
+      // 2. Construct the public CDN URL
+      final String cdnImageUrl = 'https://$_bunnyCdnHostname/$objectKey';
+
+      // 3. Update the 'profiles' table in Supabase
+      await _supabaseClient.from('profiles').update({
+        'profile_photo_url': cdnImageUrl,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', userId);
+
+      // Return the public URL on success
+      return cdnImageUrl;
+    } on PostgrestException catch (e) {
+      throw ServerException('Failed to update profile database: ${e.message}');
+    } catch (e) {
+      // This will catch Minio errors or other unexpected issues
+      throw ServerException(
+        'An unexpected error occurred during profile image upload: ${e.toString()}',
+      );
     }
   }
 }

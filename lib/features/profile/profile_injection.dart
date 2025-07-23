@@ -33,7 +33,7 @@ Future<void> profileInjection() async {
         getPostsUseCase: sl(),
         getCurrentUserUseCase: sl(),
         // From Auth feature, ensure it's registered
-        uploadProfileImageUseCase: sl(),
+        updateProfilePhotoUseCase: sl(),
         deleteProfileImageUseCase: sl(),
         updateUserLocationUseCase: sl(),
       ));
@@ -50,6 +50,7 @@ Future<void> profileInjection() async {
   sl.registerLazySingleton<LocationRepository>(
       () => LocationRepositoryImpl(remoteDataSource: sl()));
   // Profile Feature - Data Layer (Repository)
+
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(remoteDataSource: sl()),
   );
@@ -58,6 +59,7 @@ Future<void> profileInjection() async {
   sl.registerLazySingleton<ProfileRemoteDataSource>(
     () => ProfileRemoteDataSourceImpl(
       supabaseClient: sl(),
+      minioClient: sl(),
       // Inject SupabaseClient
       uuid: sl(),
       // Inject Uuid
