@@ -1,279 +1,250 @@
+// lib/features/upload/presentation/pages/upload_page.dart
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http; // For PUT request
-import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p; // For path.basename
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:uuid/uuid.dart'; // For generating unique IDs, add uuid: ^latest_version to pubspec.yaml
-
-// Assuming PostEntity is defined and Supabase is initialized
+import 'package:uuid/uuid.dart';
+import 'package:video_player/video_player.dart';
+import 'package:video_thumbnail/video_thumbnail.dart';
 
 class UploadPage extends StatefulWidget {
-  const UploadPage({super.key});
+  final String videoPath;
+
+  const UploadPage({
+    super.key,
+    required this.videoPath,
+  });
 
   @override
   State<UploadPage> createState() => _UploadPageState();
 }
 
 class _UploadPageState extends State<UploadPage> {
-  File? _pickedVideoFile;
-  String? _uploadStatus;
+  final SupabaseClient _supabase = Supabase.instance.client;
+  final Uuid _uuid = const Uuid();
+
+  late VideoPlayerController _videoPlayerController;
+  File? _thumbnailFile;
   bool _isLoading = false;
+  String _uploadStatus = '';
+
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _tagController = TextEditingController();
 
-  final SupabaseClient supabase = Supabase.instance.client;
-  final Uuid uuid = const Uuid();
+  @override
+  void initState() {
+    super.initState();
+    _initializeVideoAndThumbnail();
+  }
+
+  Future<void> _initializeVideoAndThumbnail() async {
+    _videoPlayerController = VideoPlayerController.file(File(widget.videoPath));
+    await _videoPlayerController.initialize();
+    await _videoPlayerController.setLooping(true);
+    await _videoPlayerController.play();
+    await _generateThumbnail();
+    setState(() {}); // Rebuild to show video and thumbnail
+  }
+
+  Future<void> _generateThumbnail() async {
+    try {
+      final String? thumbnailPath = await VideoThumbnail.thumbnailFile(
+        video: widget.videoPath,
+        imageFormat: ImageFormat.JPEG,
+        maxWidth: 200, // For a small, efficient thumbnail
+        quality: 75,
+      );
+      if (thumbnailPath != null) {
+        setState(() {
+          _thumbnailFile = File(thumbnailPath);
+        });
+      }
+    } catch (e) {
+      debugPrint("Error generating thumbnail: $e");
+      _showSnackBar('Could not generate a thumbnail for this video.');
+    }
+  }
 
   @override
   void dispose() {
+    _videoPlayerController.dispose();
     _descriptionController.dispose();
     _tagController.dispose();
     super.dispose();
   }
 
-  Future<void> _pickVideo() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickVideo(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _pickedVideoFile = File(pickedFile.path);
-        _uploadStatus = null;
-      });
+  void _showSnackBar(String message, {bool isError = false}) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: isError
+              ? Theme.of(context).colorScheme.error
+              : Theme.of(context).colorScheme.primary,
+        ),
+      );
     }
   }
 
-  Future<void> _uploadVideoAndThumbnail() async {
-    if (_pickedVideoFile == null) {
-      _showSnackBar('Please select a video first.');
+  Future<void> _uploadPost() async {
+    if (_isLoading) return;
+    final currentUserId = _supabase.auth.currentUser?.id;
+
+    if (currentUserId == null) {
+      _showSnackBar('You must be logged in to upload.', isError: true);
       return;
     }
-    if (supabase.auth.currentUser == null) {
-      _showSnackBar('You must be logged in to upload.');
+    if (_thumbnailFile == null) {
+      _showSnackBar('Thumbnail is not ready yet. Please wait.', isError: true);
       return;
     }
 
     setState(() {
       _isLoading = true;
-      _uploadStatus = 'Starting upload...';
+      _uploadStatus = 'Uploading video...';
     });
 
     try {
-      final String currentUserId = supabase.auth.currentUser!.id;
-      final String uniquePostId =
-          uuid.v4(); // Generate a unique ID for the post
+      final postId = _uuid.v4();
+      final videoFile = File(widget.videoPath);
+      final videoExt = videoFile.path.split('.').last;
+      final videoPath = 'public/$currentUserId/$postId.$videoExt';
 
-      // 1. **Initial Post Creation (Optional, but useful for tracking)**
-      // Create a pending post entry in the database. You might mark it as 'pending'
-      // or only insert final URLs later. For simplicity here, we create it and update.
-      _showSnackBar('Creating post entry...');
-      final initialPostResponse = await supabase.from('posts').insert({
-        'id': uniquePostId,
+      // 1. Upload Video
+      final videoUrl = await _uploadFile(videoPath, videoFile);
+      setState(() => _uploadStatus = 'Uploading thumbnail...');
+
+      // 2. Upload Thumbnail
+      final thumbExt = _thumbnailFile!.path.split('.').last;
+      final thumbPath = 'public/$currentUserId/$postId-thumb.$thumbExt';
+      final thumbnailUrl = await _uploadFile(thumbPath, _thumbnailFile!);
+      setState(() => _uploadStatus = 'Saving post details...');
+
+      // 3. Insert Post into Database
+      await _supabase.from('posts').insert({
+        'id': postId,
         'user_id': currentUserId,
+        'video_url': videoUrl,
+        'thumbnail_url': thumbnailUrl,
         'description': _descriptionController.text.trim(),
         'tag': _tagController.text.trim().isEmpty
             ? 'Entertainment'
             : _tagController.text.trim(),
-        'timestamp': DateTime.now().toIso8601String(),
-        // video_url and thumbnail_url will be updated later
-      }).select();
-
-      // if (initialPostResponse.error != null) {
-      //   throw initialPostResponse.error!;
-      // }
-      _showSnackBar('Post entry created. Uploading files...');
-
-      final fileName = p.basename(_pickedVideoFile!.path);
-      final videoContentType = 'video/mp4'; // Adjust based on actual video type
-      final thumbnailContentType = 'image/jpeg'; // Assuming JPEG for thumbnails
-
-      // --- Upload Video ---
-      _uploadStatus = 'Getting video upload URL...';
-      final videoSignedUrlResponse = await supabase.functions.invoke(
-        'create-signed-url',
-        body: {
-          'filename': fileName,
-          'contentType': videoContentType,
-        },
-      );
-
-      // if (videoSignedUrlResponse.error != null) {
-      //   throw videoSignedUrlResponse.error!;
-      // }
-      final videoSignedUrlData =
-          videoSignedUrlResponse.data as Map<String, dynamic>;
-      final String videoUploadUrl = videoSignedUrlData['signedUrl'];
-      final String videoFileKey =
-          videoSignedUrlData['fileKey']; // Path in Wasabi
-
-      setState(() {
-        _uploadStatus = 'Uploading video to Wasabi...';
-      });
-      final videoBytes = await _pickedVideoFile!.readAsBytes();
-      final videoUploadResult = await http.put(
-        Uri.parse(videoUploadUrl),
-        headers: {
-          'Content-Type': videoContentType,
-        },
-        body: videoBytes,
-      );
-
-      if (videoUploadResult.statusCode != 200) {
-        throw Exception(
-            'Failed to upload video to Wasabi: ${videoUploadResult.body}');
-      }
-      _showSnackBar('Video uploaded. Generating thumbnail...');
-
-      // --- Generate and Upload Thumbnail ---
-      // For a real app, you would use a package like 'video_thumbnail'
-      // to generate a thumbnail from the picked video file.
-      // Example using video_thumbnail:
-      // final Uint8List? thumbnailBytes = await VideoThumbnail.thumbnailData(
-      //   video: _pickedVideoFile!.path,
-      //   imageFormat: ImageFormat.JPEG,
-      //   quality: 75,
-      // );
-      // if (thumbnailBytes == null) throw Exception('Could not generate thumbnail.');
-      // final thumbnailFile = File('${_pickedVideoFile!.path}_thumb.jpeg')..writeAsBytesSync(thumbnailBytes);
-      // final thumbnailFileName = p.basename(thumbnailFile.path);
-
-      // For this example, let's use a placeholder thumbnail path
-      final String thumbnailFileName =
-          fileName.replaceFirst('.mp4', '_thumb.jpeg');
-      final String thumbnailFileKey = videoFileKey.replaceFirst(
-          '.mp4', '_thumb.jpeg'); // Follows same path structure
-
-      // Dummy thumbnail for demonstration. In a real app, this would be a real upload.
-      // You'd repeat the signed URL process for the thumbnail here.
-      final String dummyThumbnailUploadUrl = videoUploadUrl.replaceFirst(
-          fileName, thumbnailFileName); // Simplified
-      final dummyThumbnailBytes =
-          (await http.get(Uri.parse('https://via.placeholder.com/150')))
-              .bodyBytes; // Dummy
-      await http.put(
-        Uri.parse(dummyThumbnailUploadUrl),
-        headers: {'Content-Type': thumbnailContentType},
-        body: dummyThumbnailBytes,
-      );
-      // End dummy thumbnail part
-
-      _showSnackBar('Thumbnail uploaded. Recording URLs...');
-
-      // --- Record asset URLs in Supabase Postgres ---
-      final recordAssetResponse = await supabase.functions.invoke(
-        'record-post-asset', // Your Edge Function name
-        body: {
-          'postId': uniquePostId,
-          'fileKey': videoFileKey,
-          'assetType': 'video',
-        },
-      );
-
-      // if (recordAssetResponse.error != null) {
-      //   throw recordAssetResponse.error!;
-      // }
-
-      final recordThumbnailResponse = await supabase.functions.invoke(
-        'record-post-asset', // Your Edge Function name
-        body: {
-          'postId': uniquePostId,
-          'fileKey': thumbnailFileKey,
-          'assetType': 'thumbnail',
-        },
-      );
-
-      // if (recordThumbnailResponse.error != null) {
-      //   throw recordThumbnailResponse.error!;
-      // }
-
-      _showSnackBar('Upload and database update successful!');
-      setState(() {
-        _pickedVideoFile = null;
-        _descriptionController.clear();
-        _tagController.clear();
-        _uploadStatus = 'Video uploaded successfully!';
       });
 
-      // You can now navigate to another screen or show a success message
+      _showSnackBar('Upload successful!');
+      if (mounted) context.go('/home');
     } catch (e) {
-      setState(() {
-        _uploadStatus = 'Upload failed: ${e.toString()}';
-      });
-      debugPrint('Upload Error: $e');
-      _showSnackBar('Upload failed: ${e.toString()}');
+      debugPrint("Upload failed: $e");
+      _showSnackBar('Upload failed. Please try again.', isError: true);
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _uploadStatus = '';
+        });
+      }
     }
   }
 
-  void _showSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+  Future<String> _uploadFile(String path, File file) async {
+    await _supabase.storage.from('videos').upload(
+          path,
+          file,
+          fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+        );
+    return _supabase.storage.from('videos').getPublicUrl(path);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Upload Video')),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (_pickedVideoFile != null)
-                Text('Selected: ${p.basename(_pickedVideoFile!.path)}'),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: _pickVideo,
-                icon: const Icon(Icons.video_library),
-                label: const Text('Pick Video'),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _descriptionController,
-                decoration: const InputDecoration(
-                  labelText: 'Description',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _tagController,
-                decoration: const InputDecoration(
-                  labelText: 'Tag (e.g., Entertainment, Comedy)',
-                  border: OutlineInputBorder(),
+      appBar: AppBar(
+        title: const Text('Create Post'),
+        actions: [
+          TextButton(
+            onPressed: _isLoading ? null : _uploadPost,
+            child: const Text('Upload'),
+          )
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_isLoading)
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                child: Column(
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 16),
+                    Text(_uploadStatus,
+                        style: Theme.of(context).textTheme.bodyLarge),
+                  ],
                 ),
               ),
-              const SizedBox(height: 20),
-              _isLoading
-                  ? Column(
-                      children: [
-                        const CircularProgressIndicator(),
-                        const SizedBox(height: 10),
-                        Text(_uploadStatus ?? 'Processing...'),
-                      ],
-                    )
-                  : ElevatedButton.icon(
-                      onPressed: _uploadVideoAndThumbnail,
-                      icon: const Icon(Icons.upload),
-                      label: const Text('Upload Video'),
-                    ),
-              if (_uploadStatus != null && !_isLoading)
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(_uploadStatus!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red)),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 100,
+                  height: 150,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(8),
+                    image: _thumbnailFile != null
+                        ? DecorationImage(
+                            image: FileImage(_thumbnailFile!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: _thumbnailFile == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : null,
                 ),
-            ],
-          ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _descriptionController,
+                        decoration: const InputDecoration(
+                          hintText: 'Describe your video...',
+                          border: InputBorder.none,
+                        ),
+                        maxLines: 4,
+                      ),
+                      const Divider(),
+                      TextField(
+                        controller: _tagController,
+                        decoration: const InputDecoration(
+                          hintText: '#Tag (e.g. #Comedy)',
+                          border: InputBorder.none,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            Text('Video Preview',
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
+            _videoPlayerController.value.isInitialized
+                ? AspectRatio(
+                    aspectRatio: _videoPlayerController.value.aspectRatio,
+                    child: VideoPlayer(_videoPlayerController),
+                  )
+                : const Center(
+                    child: Text('Initializing video preview...'),
+                  ),
+          ],
         ),
       ),
     );

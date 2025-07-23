@@ -17,7 +17,7 @@ import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
-import 'package:dadadu_app/features/upload/presentation/pages/upload_page_t.dart'; // If you're using this
+import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -77,14 +77,16 @@ class AppRouter {
         ),
         GoRoute(
           path: '/createPost',
-          builder: (BuildContext context, GoRouterState state) {
+          builder: (context, state) {
             final String? videoPath = state.extra as String?;
             if (videoPath == null) {
               return const Center(
                   child: Text('Error: No video path provided!'));
             }
+
             // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
-            return const UploadPage(); // Or UploadPage, depending on your flow
+            return UploadPage(
+                videoPath: videoPath); // Or UploadPage, depending on your flow
           },
         ),
         GoRoute(
