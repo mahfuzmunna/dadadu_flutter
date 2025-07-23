@@ -1,5 +1,6 @@
 // lib/features/profile/presentation/pages/profile_page.dart
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -9,59 +10,34 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart'; // For sharing content
 
-/// This widget acts as a router.
-/// It decides whether to show the current user's profile (passed via constructor)
-/// or to use the ProfileBloc to fetch and display another user's profile.
+/// This page is the main entry point for the profile screen.
+/// It's driven by the AuthBloc to get the initial user data, which
+/// prevents a loading screen when viewing the current user's profile.
 class ProfilePage extends StatelessWidget {
-  /// This is used ONLY when viewing the currently logged-in user's profile.
-  /// When viewing another user, this will be null.
-  final UserEntity? viewedUser;
-
-  const ProfilePage({super.key, this.viewedUser});
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // If a viewedUser is passed directly, it's the current user's profile.
-    // This happens when navigating to '/profile' from the bottom nav bar.
-    if (viewedUser != null) {
-      return _ProfileView(user: viewedUser!);
-    }
-
-    // If no user is passed, it means we are viewing someone else's profile.
-    // We use the BlocBuilder to fetch the profile data based on the userId from the route.
-    else {
-      return BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          if (state is ProfileLoading || state is ProfileInitial) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          if (state is ProfileError) {
-            return Scaffold(
-              appBar: AppBar(title: const Text('Error')),
-              body: Center(child: Text('Error: ${state.message}')),
-            );
-          }
-          if (state is ProfileLoadedUser) {
-            return _ProfileView(user: state.user);
-          }
-          // Fallback
-          return const Scaffold(
-            body: Center(child: Text('Something went wrong.')),
-          );
-        },
-      );
-    }
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        if (authState is AuthAuthenticated) {
+          // Pass the currently logged-in user's data as the initial view.
+          // The ProfileBloc will then take over with live updates.
+          return _ProfileView(initialUser: authState.user);
+        }
+        // Fallback for when auth state is loading or unauthenticated.
+        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      },
+    );
   }
 }
 
 /// This is the actual UI for the profile page.
-/// It's a StatefulWidget to manage its own helper methods and dialogs.
+/// It subscribes to live updates from the ProfileBloc.
 class _ProfileView extends StatefulWidget {
-  final UserEntity user;
+  final UserEntity initialUser;
 
-  const _ProfileView({required this.user});
+  const _ProfileView({required this.initialUser});
 
   @override
   State<_ProfileView> createState() => _ProfileViewState();
@@ -69,78 +45,91 @@ class _ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<_ProfileView> {
   @override
+  void initState() {
+    super.initState();
+    // Subscribe to live updates for the user being viewed.
+    // This is triggered once when the widget is first created.
+    context
+        .read<ProfileBloc>()
+        .add(SubscribeToUserProfile(widget.initialUser.id));
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Determine if the profile being viewed belongs to the currently authenticated user.
-    final authState = context.watch<AuthBloc>().state;
-    final UserEntity? currentAuthUser =
-        (authState is AuthAuthenticated) ? authState.user : null;
-    final bool isMyProfile = currentAuthUser?.id == widget.user.id;
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, profileState) {
+        // The UI is built from the ProfileBloc's state for live data.
+        // It starts with the initial data and updates automatically when new data arrives.
+        final UserEntity userToDisplay = (profileState is ProfileLoadedUser)
+            ? profileState.user
+            : widget.initialUser;
 
-    // Dummy referral link (replace with actual generated link from your backend/logic)
-    final String referralLink =
-        'https://dadadu.app/invite/${widget.user.id.substring(0, 8)}';
+        // Determine if this profile belongs to the currently signed-in user.
+        final authState = context.watch<AuthBloc>().state;
+        final bool isMyProfile = (authState is AuthAuthenticated)
+            ? authState.user.id == userToDisplay.id
+            : false;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          isMyProfile ? 'My Profile' : (widget.user.username ?? 'Profile'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings_rounded,
-                color: Theme.of(context).colorScheme.primary),
-            tooltip: 'Settings',
-            onPressed: () => context.push('/settings'),
+        final String referralLink =
+            'https://dadadu.app/invite/${userToDisplay.id.substring(0, 8)}';
+
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              isMyProfile
+                  ? 'My Profile'
+                  : (userToDisplay.username ?? 'Profile'),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleLarge
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            centerTitle: true,
+            actions: [
+              if (isMyProfile)
+                IconButton(
+                  icon: Icon(Icons.settings_rounded,
+                      color: Theme.of(context).colorScheme.primary),
+                  tooltip: 'Settings',
+                  onPressed: () => context.push('/settings'),
+                ),
+              const SizedBox(width: 8),
+            ],
           ),
-          const SizedBox(width: 8),
-        ],
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // --- Profile Header ---
-            _buildProfileHeader(isMyProfile),
-            const SizedBox(height: 24),
-
-            // --- Mood & Badges Info ---
-            if (isMyProfile) ...[
-              _buildMoodAndBadgesSection(),
-              const SizedBox(height: 24),
-            ],
-
-            // --- Stats ---
-            _buildStatsRow(),
-            const SizedBox(height: 32),
-
-            // --- Referral Card ---
-            if (isMyProfile) ...[
-              _buildReferralCard(referralLink),
-              const SizedBox(height: 32),
-            ],
-
-            // --- Match History ---
-            if (isMyProfile) ...[
-              _buildMatchHistory(),
-              const SizedBox(height: 32),
-            ],
-
-            // --- Uploaded Videos ---
-            _buildVideosGrid(isMyProfile),
-          ],
-        ),
-      ),
+          body: SingleChildScrollView(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _buildProfileHeader(userToDisplay, isMyProfile),
+                const SizedBox(height: 24),
+                if (isMyProfile) ...[
+                  _buildMoodAndBadgesSection(userToDisplay),
+                  const SizedBox(height: 24),
+                ],
+                _buildStatsRow(userToDisplay),
+                const SizedBox(height: 32),
+                if (isMyProfile) ...[
+                  _buildReferralCard(referralLink),
+                  const SizedBox(height: 32),
+                ],
+                if (isMyProfile) ...[
+                  _buildMatchHistory(),
+                  const SizedBox(height: 32),
+                ],
+                _buildVideosGrid(userToDisplay, isMyProfile),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
   // --- WIDGET BUILDER METHODS ---
 
-  Widget _buildProfileHeader(bool isMyProfile) {
+  Widget _buildProfileHeader(UserEntity user, bool isMyProfile) {
     return Column(
       children: [
         Stack(
@@ -149,12 +138,12 @@ class _ProfileViewState extends State<_ProfileView> {
             CircleAvatar(
               radius: 70,
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-              backgroundImage: widget.user.profilePhotoUrl != null &&
-                      widget.user.profilePhotoUrl!.isNotEmpty
-                  ? NetworkImage(widget.user.profilePhotoUrl!)
+              backgroundImage: user.profilePhotoUrl != null &&
+                      user.profilePhotoUrl!.isNotEmpty
+                  ? CachedNetworkImageProvider(user.profilePhotoUrl!)
                   : null,
-              child: widget.user.profilePhotoUrl == null ||
-                      widget.user.profilePhotoUrl!.isEmpty
+              child: user.profilePhotoUrl == null ||
+                      user.profilePhotoUrl!.isEmpty
                   ? Icon(
                       Icons.person_rounded,
                       size: 70,
@@ -177,10 +166,8 @@ class _ProfileViewState extends State<_ProfileView> {
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: Theme.of(context).colorScheme.secondary,
-                  child: Text(
-                    widget.user.moodStatus ?? '😊',
-                    style: const TextStyle(fontSize: 20),
-                  ),
+                  child: Text(user.moodStatus ?? '😊',
+                      style: const TextStyle(fontSize: 20)),
                 ),
               ),
             ),
@@ -188,20 +175,20 @@ class _ProfileViewState extends State<_ProfileView> {
         ),
         const SizedBox(height: 24),
         Text(
-          '@${widget.user.username ?? 'No Username'}',
+          '@${user.username ?? 'No Username'}',
           style: Theme.of(context)
               .textTheme
               .headlineSmall
               ?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
-        if (widget.user.rank.isNotEmpty)
+        if (user.rank.isNotEmpty)
           Chip(
             avatar: Icon(Icons.star_rounded,
                 color: Theme.of(context).colorScheme.onSecondaryContainer,
                 size: 18),
             label: Text(
-              widget.user.rank,
+              user.rank,
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: Theme.of(context).colorScheme.onSecondaryContainer),
@@ -210,12 +197,12 @@ class _ProfileViewState extends State<_ProfileView> {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           ),
         const SizedBox(height: 16),
-        _buildDynamicActionButton(isMyProfile),
+        _buildDynamicActionButton(user, isMyProfile),
       ],
     );
   }
 
-  Widget _buildDynamicActionButton(bool isMyProfile) {
+  Widget _buildDynamicActionButton(UserEntity user, bool isMyProfile) {
     if (isMyProfile) {
       return SizedBox(
         width: 200,
@@ -225,15 +212,13 @@ class _ProfileViewState extends State<_ProfileView> {
           onPressed: () => context.push('/editProfile'),
           style: FilledButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
           ),
         ),
       );
     } else {
-      // In a real app, you would check a FriendsBloc state here
-      bool isFollowing = false; // Placeholder
+      bool isFollowing = false; // Placeholder for FriendsBloc state
       return SizedBox(
         width: 200,
         child: FilledButton.icon(
@@ -245,7 +230,7 @@ class _ProfileViewState extends State<_ProfileView> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                   content: Text(
-                      '${isFollowing ? 'Unfollowing' : 'Following'} ${widget.user.username}')),
+                      '${isFollowing ? 'Unfollowing' : 'Following'} ${user.username}')),
             );
           },
           style: FilledButton.styleFrom(
@@ -261,21 +246,24 @@ class _ProfileViewState extends State<_ProfileView> {
     }
   }
 
-  Widget _buildMoodAndBadgesSection() {
+  Widget _buildMoodAndBadgesSection(UserEntity user) {
     return Row(
       children: [
-        ElevatedButton.icon(
-          icon: const Icon(Icons.sentiment_satisfied_alt_rounded),
-          label: Text(widget.user.moodStatus != null
-              ? 'Mood: ${widget.user.moodStatus}'
-              : 'Set Mood'),
-          onPressed: () => _showMoodSelectionBottomSheet(context),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-            foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        Expanded(
+          child: ElevatedButton.icon(
+            icon: const Icon(Icons.sentiment_satisfied_alt_rounded),
+            label: Text(user.moodStatus != null
+                ? 'Mood: ${user.moodStatus}'
+                : 'Set Mood'),
+            onPressed: () => _showMoodSelectionBottomSheet(context),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              foregroundColor:
+                  Theme.of(context).colorScheme.onSecondaryContainer,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
           ),
         ),
         const SizedBox(width: 16),
@@ -296,16 +284,16 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(UserEntity user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildStatColumn(context, Icons.people_alt_rounded,
-            '${widget.user.followersCount}', 'Followers'),
+            '${user.followersCount}', 'Followers'),
         _buildStatColumn(context, Icons.person_add_alt_1_rounded,
-            '${widget.user.followingCount}', 'Following'),
+            '${user.followingCount}', 'Following'),
         _buildStatColumn(context, Icons.ondemand_video_rounded,
-            '${widget.user.postCount}', 'Videos'),
+            '${user.postCount ?? 0}', 'Videos'),
       ],
     );
   }
@@ -323,9 +311,10 @@ class _ProfileViewState extends State<_ProfileView> {
           children: [
             Text(
               'Invite Friends & Earn Diamonds!',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
             Text(
@@ -408,7 +397,7 @@ class _ProfileViewState extends State<_ProfileView> {
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: SizedBox(
             width: double.infinity,
-            height: 150, // Give it a fixed height
+            height: 150,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -430,19 +419,19 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
-  Widget _buildVideosGrid(bool isMyProfile) {
+  Widget _buildVideosGrid(UserEntity user, bool isMyProfile) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Uploaded Videos (${widget.user.postCount})',
+          'Uploaded Videos (${user.postCount ?? 0})',
           style: Theme.of(context)
               .textTheme
               .titleLarge
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        if (widget.user.postCount == 0)
+        if (user.postCount == null || user.postCount == 0)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 40.0),
             child: Center(
@@ -464,7 +453,7 @@ class _ProfileViewState extends State<_ProfileView> {
               mainAxisSpacing: 10,
               childAspectRatio: 0.7,
             ),
-            itemCount: widget.user.postCount,
+            itemCount: user.postCount,
             itemBuilder: (context, index) {
               return Card(
                 clipBehavior: Clip.antiAlias,
@@ -487,7 +476,7 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
-  // --- HELPER METHODS FOR DIALOGS AND BOTTOM SHEETS ---
+  // --- HELPER METHODS ---
 
   Widget _buildStatColumn(
       BuildContext context, IconData icon, String count, String label) {
@@ -546,19 +535,15 @@ class _ProfileViewState extends State<_ProfileView> {
           children: [
             Icon(Icons.military_tech_rounded),
             SizedBox(width: 10),
-            Text(
-              'Dadadu Badge System',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-            )
+            Text('Dadadu Badge System',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18))
           ],
         ),
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
-              Text('Earn badges by achieving various milestones!'),
-              const SizedBox(
-                height: 10,
-              ),
+              const Text('Earn badges by achieving various milestones!'),
+              const SizedBox(height: 10),
               _buildBadgeInfoRow(context, '🍃', 'LEAF (0 - 9,999 diamonds)',
                   'Starting level for new users.'),
               _buildBadgeInfoRow(

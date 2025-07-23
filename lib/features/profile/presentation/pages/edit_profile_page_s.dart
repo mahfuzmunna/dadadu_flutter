@@ -39,7 +39,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (authState is AuthAuthenticated) {
       _currentUser = authState.user;
     }
-    _usernameController = TextEditingController(text: _currentUser?.username ?? '');
+    _usernameController =
+        TextEditingController(text: _currentUser?.username ?? '');
     _fullNameController =
         TextEditingController(text: _currentUser?.fullName ?? '');
     _bioController = TextEditingController(text: _currentUser?.bio ?? '');
@@ -89,27 +90,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (_formKey.currentState?.validate() ?? false) {
       if (_currentUser == null) return;
 
-      if (_editedImageFile != null) {
-        context.read<ProfileBloc>().add(UpdateProfilePhoto(
-            userId: _currentUser!.id, photoFile: _editedImageFile!));
-      }
-
+      // Create the updated user data from the text fields.
       final updatedUserData = _currentUser!.copyWith(
         username: _usernameController.text.trim(),
         fullName: _fullNameController.text.trim(),
         bio: _bioController.text.trim(),
       );
 
-      context
-          .read<ProfileBloc>()
-          .add(UpdateUserProfileData(user: updatedUserData));
+      // Dispatch one single, comprehensive event with all the necessary data.
+      context.read<ProfileBloc>().add(UpdateProfile(
+            user: updatedUserData,
+            photoFile:
+                _editedImageFile, // Pass the new photo file, or null if unchanged
+          ));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Keep the local user in sync with the global auth state
     final authState = context.watch<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
+      // This is a safeguard if the user gets signed out while on this page.
       return const Scaffold(
           body: Center(child: Text('User not authenticated.')));
     }
@@ -118,13 +120,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        // ✅ The 'Save' button has been removed from here.
+        actions: [
+          // The save button is now in the body, driven by the loading state.
+        ],
       ),
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, profileState) {
           if (profileState is ProfileUpdateSuccess) {
+            // After ANY successful update, refresh the global user data and pop the page.
             context.read<AuthBloc>().add(const AuthRefreshCurrentUser());
-            // Show a success message before popping
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 content: Text('Profile saved successfully!'),
@@ -142,6 +146,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, profileState) {
             final isLoading = profileState is ProfileLoading;
+
             return AbsorbPointer(
               absorbing: isLoading,
               child: SingleChildScrollView(
@@ -164,7 +169,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                   ? FileImage(_editedImageFile!)
                                       as ImageProvider
                                   : (_currentUser?.profilePhotoUrl != null &&
-                                          _currentUser!.profilePhotoUrl!.isNotEmpty
+                                          _currentUser!
+                                              .profilePhotoUrl!.isNotEmpty
                                       ? CachedNetworkImageProvider(
                                           _currentUser!.profilePhotoUrl!)
                                       : null),
@@ -223,8 +229,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         maxLines: 3,
                       ),
                       const SizedBox(height: 32),
-
-                      // ✅ NEW: Save button moved here and styled
                       if (isLoading)
                         const CircularProgressIndicator()
                       else

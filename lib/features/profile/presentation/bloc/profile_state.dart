@@ -19,7 +19,7 @@ class ProfileLoading extends ProfileState {
 }
 
 // State for when profile data is loaded
-class ProfileLoaded extends ProfileState {
+class ProfileLoadedUser extends ProfileState {
   final UserEntity user;
   final List<PostEntity> posts; // Posts related to this user
   final bool isLoadingPosts; // To indicate if posts are still loading
@@ -27,7 +27,7 @@ class ProfileLoaded extends ProfileState {
   final bool isUploadingImage; // To indicate if profile image is being uploaded
   final bool isDeletingImage; // To indicate if profile image is being deleted
 
-  const ProfileLoaded({
+  const ProfileLoadedUser({
     required this.user,
     this.posts = const [],
     this.isLoadingPosts = false,
@@ -36,7 +36,7 @@ class ProfileLoaded extends ProfileState {
     this.isDeletingImage = false,
   });
 
-  ProfileLoaded copyWith({
+  ProfileLoadedUser copyWith({
     UserEntity? user,
     List<PostEntity>? posts,
     bool? isLoadingPosts,
@@ -44,7 +44,7 @@ class ProfileLoaded extends ProfileState {
     bool? isUploadingImage,
     bool? isDeletingImage,
   }) {
-    return ProfileLoaded(
+    return ProfileLoadedUser(
       user: user ?? this.user,
       posts: posts ?? this.posts,
       isLoadingPosts: isLoadingPosts ?? this.isLoadingPosts,
@@ -63,6 +63,15 @@ class ProfileLoaded extends ProfileState {
         isUploadingImage,
         isDeletingImage,
       ];
+}
+
+class ProfileLoaded extends ProfileState {
+  final String userId;
+
+  const ProfileLoaded({required this.userId});
+
+  @override
+  List<Object> get props => [userId];
 }
 
 // State specifically for loading posts if the profile is already loaded

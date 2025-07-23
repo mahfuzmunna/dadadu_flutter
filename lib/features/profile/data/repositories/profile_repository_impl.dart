@@ -122,4 +122,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Left(ServerFailure(e.message));
     }
   }
+
+  @override
+  Either<Failure, Stream<UserEntity>> streamUserProfile(String userId) {
+    try {
+      final userStream = remoteDataSource.streamUserProfile(userId);
+      return Right(userStream);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
 }

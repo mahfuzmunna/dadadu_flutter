@@ -77,3 +77,30 @@ class UpdateUserLocation extends ProfileEvent {
   @override
   List<Object?> get props => [userId, latitude, longitude, locationName];
 }
+
+// Event to start listening to profile updates
+class SubscribeToUserProfile extends ProfileEvent {
+  final String userId;
+
+  const SubscribeToUserProfile(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+// Internal event to push new data from the stream into the BLoC
+class _UserProfileUpdated extends ProfileEvent {
+  final UserEntity user;
+
+  const _UserProfileUpdated(this.user);
+}
+
+class UpdateProfile extends ProfileEvent {
+  final UserEntity user;
+  final File? photoFile; // The new photo is optional
+
+  const UpdateProfile({required this.user, this.photoFile});
+
+  @override
+  List<Object?> get props => [user, photoFile];
+}

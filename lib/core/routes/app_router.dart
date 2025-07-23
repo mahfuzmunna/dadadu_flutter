@@ -14,8 +14,8 @@ import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page_s.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
-import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
-import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
+import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page_s.dart';
+import 'package:dadadu_app/features/profile/presentation/pages/profile_page_s.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
 import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
 import 'package:flutter/material.dart';
@@ -146,7 +146,7 @@ class AppRouter {
                     final authState = context.read<AuthBloc>().state;
                     if (authState is AuthAuthenticated) {
                       // Pass the currently logged-in user to the ProfilePage
-                      return ProfilePage(viewedUser: authState.user);
+                      return const ProfilePage();
                     }
                     // Fallback or loading state if needed
                     return const Center(child: CircularProgressIndicator());
@@ -162,7 +162,8 @@ class AppRouter {
                         // that will do the fetching for us.
                         return BlocProvider<ProfileBloc>(
                           create: (context) => di.sl<ProfileBloc>()
-                            ..add(LoadUserProfile(userId: userId)),
+                            // ..add(LoadUserProfile(userId: userId)),
+                            ..add(SubscribeToUserProfile(userId)),
                           // The ProfilePage now takes NO arguments for this route.
                           // It will get all its data from the ProfileBloc.
                           child: const ProfilePage(),

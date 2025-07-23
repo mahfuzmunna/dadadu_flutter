@@ -224,4 +224,27 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       );
     }
   }
+
+  @override
+  Stream<UserModel> streamUserProfile(String userId) {
+    try {
+      // Listen to changes on the 'profiles' table for a specific user ID
+      final stream = _supabaseClient
+          .from('profiles')
+          .stream(primaryKey: ['id']).eq('id', userId);
+
+      // The stream returns a List<Map<String, dynamic>>. We need to transform it.
+      return stream.map((data) {
+        if (data.isEmpty) {
+          // You might want to handle the case where the user profile is deleted
+          throw ServerException('User profile not found in stream.',
+              code: 'USER_NOT_FOUND');
+        }
+        // Return the first (and only) user profile from the list as a UserModel
+        return UserModel.fromMap(data.first);
+      });
+    } catch (e) {
+      throw ServerException('Failed to stream user profile: ${e.toString()}');
+    }
+  }
 }

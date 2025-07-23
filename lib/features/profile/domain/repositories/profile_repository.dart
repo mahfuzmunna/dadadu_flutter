@@ -10,6 +10,8 @@ import '../../../home/domain/entities/post_entity.dart';
 import '../usecases/update_user_location_usecase.dart'; // Assuming PostEntity exists
 
 abstract class ProfileRepository {
+  Either<Failure, Stream<UserEntity>> streamUserProfile(String userId);
+
   Future<Either<Failure, UserEntity>> getUserProfile(String userId);
 
   Future<Either<Failure, void>> updateUserProfile(UserEntity user);

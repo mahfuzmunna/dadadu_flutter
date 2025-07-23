@@ -7,6 +7,7 @@ import '../../../upload/data/models/post_model.dart';
 import '../../domain/usecases/update_user_location_usecase.dart';
 
 abstract class ProfileRemoteDataSource {
+  Stream<UserModel> streamUserProfile(String userId);
   Future<UserModel> getUserProfile(String userId);
   Future<void> updateUserProfile(UserModel user);
   Future<List<PostModel>> getUserPosts(String userId);

@@ -16,6 +16,7 @@ import '../../../home/domain/entities/post_entity.dart';
 import '../../domain/usecases/delete_profile_image_usecase.dart';
 import '../../domain/usecases/get_posts_usecase.dart';
 import '../../domain/usecases/get_user_profile_data_usecase.dart';
+import '../../domain/usecases/stream_user_profile_usecase.dart';
 import '../../domain/usecases/update_profile_photo_usecase.dart';
 import '../../domain/usecases/update_user_profile_usecase.dart';
 
@@ -23,6 +24,8 @@ part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  final StreamUserProfileUseCase _streamUserProfileUseCase;
+  StreamSubscription? _profileSubscription;
   final GetUserProfileDataUseCase getUserProfileUseCase;
   final UpdateUserProfileUseCase _updateProfileUseCase;
   final GetPostsUseCase getPostsUseCase;
@@ -32,6 +35,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UpdateUserLocationUseCase _updateUserLocationUseCase;
 
   ProfileBloc({
+    required StreamUserProfileUseCase streamUserProfileUseCase,
     required this.getUserProfileUseCase,
     required UpdateUserProfileUseCase updateProfileUseCase,
     required this.getPostsUseCase,
@@ -39,7 +43,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required UpdateProfilePhotoUseCase updateProfilePhotoUseCase,
     required this.deleteProfileImageUseCase,
     required UpdateUserLocationUseCase updateUserLocationUseCase,
-  })  : _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
+  })  : _streamUserProfileUseCase = streamUserProfileUseCase,
+        _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
         _updateUserLocationUseCase = updateUserLocationUseCase,
         _updateProfileUseCase = updateProfileUseCase,
         super(const ProfileInitial()) {
@@ -49,6 +54,40 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<UpdateProfilePhoto>(_onUpdateProfilePhoto);
     on<DeleteProfileImage>(_onDeleteProfileImage);
     on<UpdateUserLocation>(_onUpdateUserLocation);
+    on<SubscribeToUserProfile>(_onSubscribeToUserProfile);
+    on<UpdateProfile>(_onUpdateProfile);
+  }
+
+  Future<void> _onSubscribeToUserProfile(
+    SubscribeToUserProfile event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(const ProfileLoading());
+    // Cancel any existing subscription before creating a new one
+    await _profileSubscription?.cancel();
+
+    final result = await _streamUserProfileUseCase(event.userId);
+
+    result.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (userStream) {
+        _profileSubscription = userStream.listen((user) {
+          add(_UserProfileUpdated(user));
+          emit(ProfileLoaded(userId: event.userId));
+        });
+      },
+    );
+  }
+
+  void _onUserProfileUpdated(
+      _UserProfileUpdated event, Emitter<ProfileState> emit) {
+    emit(ProfileLoadedUser(user: event.user));
+  }
+
+  @override
+  Future<void> close() {
+    _profileSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onLoadUserProfile(
@@ -61,7 +100,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     currentUserResult.fold(
       (failure) async =>
           emit(ProfileError(message: _mapFailureToMessage(failure))),
-      (currentUser) => emit(ProfileLoaded(user: currentUser)),
+      (currentUser) => emit(ProfileLoadedUser(user: currentUser)),
     );
   }
 
@@ -92,8 +131,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       (failure) => emit(ProfileError(message: _mapFailureToMessage(failure))),
       (posts) {
         // If profile is already loaded, update it with posts
-        if (state is ProfileLoaded) {
-          emit((state as ProfileLoaded)
+        if (state is ProfileLoadedUser) {
+          emit((state as ProfileLoadedUser)
               .copyWith(posts: posts, isLoadingPosts: false));
         } else {
           // Otherwise, just emit the posts state (e.g., if only posts are loaded initially)
@@ -118,8 +157,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onDeleteProfileImage(
       DeleteProfileImage event, Emitter<ProfileState> emit) async {
-    if (state is ProfileLoaded) {
-      emit((state as ProfileLoaded).copyWith(isDeletingImage: true));
+    if (state is ProfileLoadedUser) {
+      emit((state as ProfileLoadedUser).copyWith(isDeletingImage: true));
     } else {
       emit(const ProfileLoading());
     }
@@ -169,6 +208,40 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (_) => emit(UserLocationUpdateSuccess()),
+    );
+  }
+
+  Future<void> _onUpdateProfile(
+    UpdateProfile event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(const ProfileLoading());
+
+    // Step 1: Update Photo if a new one was provided
+    if (event.photoFile != null) {
+      final photoResult = await _updateProfilePhotoUseCase(
+        UpdateProfilePhotoParams(
+            userId: event.user.id, photoFile: event.photoFile!),
+      );
+
+      // If photo upload fails, emit an error and stop.
+      if (photoResult.isLeft()) {
+        return photoResult.fold(
+          (failure) => emit(ProfileError(message: failure.message)),
+          (_) {}, // This side won't be reached
+        );
+      }
+    }
+
+    // Step 2: Update the text-based user data
+    final dataResult = await _updateProfileUseCase(
+      UpdateUserProfileParams(event.user),
+    );
+
+    dataResult.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (_) =>
+          emit(ProfileUpdateSuccess()), // Signal that all updates are complete
     );
   }
 }
