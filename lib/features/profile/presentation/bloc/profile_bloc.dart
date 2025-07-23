@@ -1,8 +1,10 @@
 // lib/features/profile/presentation/bloc/profile_bloc.dart
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:dadadu_app/features/profile/domain/usecases/update_user_location_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart'; // For @immutable
 
@@ -27,6 +29,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final UpdateProfilePhotoUseCase _updateProfilePhotoUseCase;
   final DeleteProfileImageUseCase deleteProfileImageUseCase;
+  final UpdateUserLocationUseCase _updateUserLocationUseCase;
 
   ProfileBloc({
     required this.getUserProfileUseCase,
@@ -35,13 +38,16 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required this.getCurrentUserUseCase,
     required UpdateProfilePhotoUseCase uploadProfileImageUseCase,
     required this.deleteProfileImageUseCase,
+    required UpdateUserLocationUseCase updateUserLocationUseCase,
   })  : _updateProfilePhotoUseCase = uploadProfileImageUseCase,
+        _updateUserLocationUseCase = updateUserLocationUseCase,
         super(const ProfileInitial()) {
     on<LoadUserProfile>(_onLoadUserProfile);
     on<UpdateUserProfile>(_onUpdateUserProfile);
     on<LoadUserPosts>(_onLoadUserPosts);
     on<UpdateProfilePhoto>(_onUpdateProfilePhoto);
     on<DeleteProfileImage>(_onDeleteProfileImage);
+    on<UpdateUserLocation>(_onUpdateUserLocation);
   }
 
   Future<void> _onLoadUserProfile(
@@ -144,6 +150,31 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       return failure.message;
     }
     return 'An unexpected error occurred.';
+  }
+
+  Future<void> _onUpdateUserLocation(
+    UpdateUserLocation event,
+    Emitter<ProfileState> emit,
+  ) async {
+    // Optionally emit a loading state to show a spinner in the UI
+    emit(ProfileLoading());
+
+    // Create the parameters object for the use case
+    final params = UpdateUserLocationParams(
+      userId: event.userId,
+      latitude: event.latitude,
+      longitude: event.longitude,
+      locationName: event.locationName,
+    );
+
+    // Call the use case
+    final result = await _updateUserLocationUseCase(params);
+
+    // Handle the result using fold
+    result.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (_) => emit(UserLocationUpdateSuccess()),
+    );
   }
 }
 

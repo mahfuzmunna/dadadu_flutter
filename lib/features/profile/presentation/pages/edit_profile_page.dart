@@ -97,6 +97,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
           referralLink: _currentUser!.referralLink,
           id: _currentUser!.id,
           email: _currentUser!.email as String,
+          latitude: _currentUser!.latitude,
+          longitude: _currentUser!.longitude,
+          location: _currentUser!.location,
         );
 
         // Dispatch the UpdateUserProfile event to ProfileBloc

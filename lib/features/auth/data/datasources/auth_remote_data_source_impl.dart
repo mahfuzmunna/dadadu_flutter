@@ -206,6 +206,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           language: '',
           discoverMode: 'Entertainment',
           isEmailConfirmed: false,
+          latitude: 0.0,
+          longitude: 0.0,
+          location: '',
         );
       }
 
@@ -258,6 +261,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 language: '',
                 discoverMode: 'Entertainment',
                 isEmailConfirmed: false,
+                latitude: 0.0,
+                longitude: 0.0,
+                location: '',
               );
             }
           } catch (e) {
@@ -283,6 +289,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               language: '',
               discoverMode: 'Entertainment',
               isEmailConfirmed: false,
+              latitude: 0.0,
+              longitude: 0.0,
+              location: '',
             );
           }
         }

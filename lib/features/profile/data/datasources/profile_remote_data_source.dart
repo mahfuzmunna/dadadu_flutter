@@ -4,6 +4,7 @@ import 'dart:io';
 
 import '../../../auth/data/models/user_model.dart';
 import '../../../upload/data/models/post_model.dart';
+import '../../domain/usecases/update_user_location_usecase.dart';
 
 abstract class ProfileRemoteDataSource {
   Future<UserModel> getUserProfile(String userId);
@@ -13,5 +14,7 @@ abstract class ProfileRemoteDataSource {
   Future<String> uploadProfileImage(String userId,
       File photoFile); // Returns URL
   Future<void> deleteProfileImage(String userId);
+
+  Future<void> updateUserLocation(UpdateUserLocationParams user);
 }
 

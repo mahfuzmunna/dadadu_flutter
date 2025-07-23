@@ -93,6 +93,9 @@ class ProfileUpdating extends ProfileState {
   const ProfileUpdating();
 }
 
+// Emitted when the profile (including location) is successfully updated
+class UserLocationUpdateSuccess extends ProfileState {}
+
 class ProfileError extends ProfileState {
   final String message;
 

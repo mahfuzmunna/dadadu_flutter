@@ -62,3 +62,20 @@ class DeleteProfileImage extends ProfileEvent {
   // This can remain List<Object> as 'userId' is non-nullable
   List<Object> get props => [userId];
 }
+
+class UpdateUserLocation extends ProfileEvent {
+  final String userId;
+  final double latitude;
+  final double longitude;
+  final String locationName;
+
+  const UpdateUserLocation({
+    required this.userId,
+    required this.latitude,
+    required this.longitude,
+    required this.locationName,
+  });
+
+  @override
+  List<Object?> get props => [userId, latitude, longitude, locationName];
+}

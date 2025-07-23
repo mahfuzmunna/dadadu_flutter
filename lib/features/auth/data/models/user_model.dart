@@ -20,7 +20,10 @@ class UserModel extends UserEntity {
     required super.moodStatus,
     required super.language,
     required super.discoverMode,
-    required super.isEmailConfirmed, // Keep if used for temporary local file selection
+    required super.isEmailConfirmed,
+    required super.latitude,
+    required super.longitude,
+    required super.location, // Keep if used for temporary local file selection
   });
 
   // Factory constructor to create UserModel from a Map (Supabase query result)
@@ -43,6 +46,9 @@ class UserModel extends UserEntity {
       language: map['language'],
       discoverMode: map['discover_mode'],
       isEmailConfirmed: false,
+      latitude: 0.0,
+      longitude: 0.0,
+      location: '',
       // Always null when loaded from DB
     );
   }
@@ -68,6 +74,9 @@ class UserModel extends UserEntity {
       'language': language,
       'discover_mode': discoverMode,
       'is_email_confirmed': isEmailConfirmed,
+      'latitude': latitude,
+      'longitude': longitude,
+      'location': location,
     };
   }
 

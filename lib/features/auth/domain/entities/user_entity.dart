@@ -19,6 +19,9 @@ class UserEntity extends Equatable {
   final String language;
   final String discoverMode;
   final bool isEmailConfirmed;
+  final double latitude;
+  final double longitude;
+  final String location;
 
   const UserEntity({
     required this.id,
@@ -38,6 +41,9 @@ class UserEntity extends Equatable {
     required this.language,
     required this.discoverMode,
     required this.isEmailConfirmed,
+    required this.latitude,
+    required this.longitude,
+    required this.location,
   });
 
   @override
@@ -58,27 +64,34 @@ class UserEntity extends Equatable {
         moodStatus,
         language,
         discoverMode,
-        isEmailConfirmed
+        isEmailConfirmed,
+        latitude,
+        longitude,
+        location,
       ];
 
-  UserEntity copyWith(
-      {required String id,
-      required String email,
-      required String fullName,
-      required String username,
-      required String? bio,
-      required String? profilePhotoUrl,
-      required int followersCount,
-      required int followingCount,
-      required int postCount,
-      required String createdAt,
-      required String updatedAt,
-      required String rank,
-      required String referralLink,
-      required String moodStatus,
-      required String language,
-      required String discoverMode,
-      required bool isEmailConfirmed}) {
+  UserEntity copyWith({
+    required String id,
+    required String email,
+    required String fullName,
+    required String username,
+    required String? bio,
+    required String? profilePhotoUrl,
+    required int followersCount,
+    required int followingCount,
+    required int postCount,
+    required String createdAt,
+    required String updatedAt,
+    required String rank,
+    required String referralLink,
+    required String moodStatus,
+    required String language,
+    required String discoverMode,
+    required bool isEmailConfirmed,
+    required double latitude,
+    required double longitude,
+    required String location,
+  }) {
     return UserEntity(
         id: id,
         email: email,
@@ -96,6 +109,9 @@ class UserEntity extends Equatable {
         moodStatus: moodStatus,
         language: language,
         discoverMode: discoverMode,
-        isEmailConfirmed: isEmailConfirmed);
+        isEmailConfirmed: isEmailConfirmed,
+        latitude: latitude,
+        longitude: longitude,
+        location: location);
   }
 }

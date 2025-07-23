@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../upload/data/models/post_model.dart';
+import '../../domain/usecases/update_user_location_usecase.dart';
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   final SupabaseClient _supabaseClient; // For Supabase DB
@@ -211,6 +212,31 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       throw ServerException(
           'An unexpected error occurred during image deletion: ${e.toString()}',
           code: 'UNKNOWN_DELETE_ERROR');
+    }
+  }
+
+  @override
+  Future<void> updateUserLocation(UpdateUserLocationParams params) async {
+    try {
+      // ✅ Create a map containing ONLY the fields you want to update.
+      // This is the key to not overwriting other profile data.
+      final updateData = {
+        'latitude': params.latitude,
+        'longitude': params.longitude,
+        'location': params.locationName,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      await _supabaseClient
+          .from('profiles')
+          .update(updateData)
+          .eq('id', params.userId); // Target the specific user
+    } on PostgrestException catch (e) {
+      // Handle potential database errors
+      throw ServerException(e.message);
+    } catch (e) {
+      // Handle other unexpected errors
+      throw ServerException(e.toString());
     }
   }
 }

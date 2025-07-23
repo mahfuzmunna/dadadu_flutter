@@ -10,6 +10,7 @@ import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../home/domain/entities/post_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
+import '../../domain/usecases/update_user_location_usecase.dart';
 import '../datasources/profile_remote_data_source.dart';
 
 class ProfileRepositoryImpl implements ProfileRepository {
@@ -54,6 +55,9 @@ class ProfileRepositoryImpl implements ProfileRepository {
         language: user.language,
         discoverMode: user.discoverMode,
         isEmailConfirmed: user.isEmailConfirmed,
+        latitude: user.latitude,
+        longitude: user.longitude,
+        location: user.location,
       );
       await remoteDataSource.updateUserProfile(userModel);
       return const Right(null);
@@ -102,6 +106,19 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } catch (e) {
       return Left(ServerFailure(
           'An unexpected error occurred during image deletion: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateUserLocation(
+      UpdateUserLocationParams params) async {
+    try {
+      // Call the data source method and return Right on success
+      await remoteDataSource.updateUserLocation(params);
+      return const Right(null);
+    } on ServerException catch (e) {
+      // Convert ServerException to ServerFailure and return Left
+      return Left(ServerFailure(e.message, code: e.code));
     }
   }
 }
