@@ -55,9 +55,11 @@ class AppRouter {
           builder: (context, state) => const ForgotPasswordPage(),
         ),
         GoRoute(
-          path: '/upload-profile-photo',
-          builder: (context, state) => const UploadProfilePhotoPage(),
-        ),
+            path: '/upload-profile-photo',
+            builder: (context, state) => const UploadProfilePhotoPage()),
+        GoRoute(
+            path: '/settings',
+            builder: (context, state) => const SettingsPage()),
 
         GoRoute(
           path: '/camera',
@@ -79,11 +81,6 @@ class AppRouter {
           path: '/editProfile',
           builder: (BuildContext context, GoRouterState state) =>
               const EditProfilePage(),
-        ),
-        GoRoute(
-          path: '/settings',
-          builder: (BuildContext context, GoRouterState state) =>
-              const SettingsPage(),
         ),
 
         // --- ShellRoute for the main app content with a bottom navigation bar ---
@@ -220,7 +217,7 @@ class AppRouter {
 
       // Listens to AuthBloc's stream to trigger redirects whenever auth state changes.
       // This is crucial for reacting to login/logout events.
-      // refreshListenable: GoRouterRefreshStream(authBloc.stream),
+      refreshListenable: GoRouterRefreshStream(authBloc.stream),
     );
   }
 }

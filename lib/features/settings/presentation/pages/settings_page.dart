@@ -145,7 +145,7 @@ class SettingsPage extends StatelessWidget {
                             // Dispatch Sign Out event
                             context
                                 .read<AuthBloc>()
-                                .add(AuthSignOutRequested());
+                                .add(const AuthSignOutRequested());
                           },
                           style: FilledButton.styleFrom(
                             backgroundColor:

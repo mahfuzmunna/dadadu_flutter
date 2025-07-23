@@ -244,13 +244,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                   const SizedBox(height: 16),
 
-                  TextFormField(
-                    controller: _lastNameController,
-                    decoration: const InputDecoration(
-                        labelText: 'Last Name', border: OutlineInputBorder()),
-                  ),
-                  const SizedBox(height: 16),
-
                   // Bio TextFormField
                   TextFormField(
                     controller: _bioController, // Use _bioController
