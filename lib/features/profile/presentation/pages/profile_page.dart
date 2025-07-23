@@ -170,7 +170,7 @@ class _ProfileViewState extends State<_ProfileView> {
                   color: Theme.of(context).colorScheme.surface,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Theme.of(context).colorScheme.background,
+                    color: Theme.of(context).colorScheme.surface,
                     width: 3,
                   ),
                 ),
@@ -265,21 +265,18 @@ class _ProfileViewState extends State<_ProfileView> {
   Widget _buildMoodAndBadgesSection() {
     return Row(
       children: [
-        Expanded(
-          child: ElevatedButton.icon(
-            icon: const Icon(Icons.sentiment_satisfied_alt_rounded),
-            label: Text(widget.user.moodStatus != null
-                ? 'Mood: ${widget.user.moodStatus}'
-                : 'Set Mood'),
-            onPressed: () => _showMoodSelectionBottomSheet(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-              foregroundColor:
-                  Theme.of(context).colorScheme.onSecondaryContainer,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.sentiment_satisfied_alt_rounded),
+          label: Text(widget.user.moodStatus != null
+              ? 'Mood: ${widget.user.moodStatus}'
+              : 'Set Mood'),
+          onPressed: () => _showMoodSelectionBottomSheet(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+            foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
         ),
         const SizedBox(width: 16),
@@ -550,24 +547,45 @@ class _ProfileViewState extends State<_ProfileView> {
           children: [
             Icon(Icons.military_tech_rounded),
             SizedBox(width: 10),
-            Text('Dadadu Badge System'),
+            Text(
+              'Dadadu Badge System',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            )
           ],
         ),
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
               Text('Earn badges by achieving various milestones!'),
-              const SizedBox(height: 10),
+              const SizedBox(
+                height: 10,
+              ),
               _buildBadgeInfoRow(context, '🍃', 'LEAF (0 - 9,999 diamonds)',
-                  'Starting level.'),
-              // ... other badge info rows
+                  'Starting level for new users.'),
+              _buildBadgeInfoRow(
+                  context,
+                  '☘️',
+                  'THREELEAF (10K - 999K diamonds)',
+                  'Active community member.'),
+              _buildBadgeInfoRow(context, '🎀', 'FIVELEAF (1M - 9.9M diamonds)',
+                  'Popular creator status.'),
+              _buildBadgeInfoRow(context, '👑', 'DADALORD (10M+ diamonds)',
+                  'Elite status worth \$10,000+ with +2% per million diamonds.'),
+              const SizedBox(height: 16),
+              Text(
+                '📈 Higher badges = more prestige + marketplace value',
+                style: Theme.of(context).textTheme.bodyMedium,
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(
-            child: const Text('Got It!'),
-            onPressed: () => Navigator.of(context).pop(),
+          Center(
+            child: FilledButton.tonal(
+              child: const Text('Got It!'),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
           ),
         ],
       ),
