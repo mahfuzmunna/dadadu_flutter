@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 
 class ScaffoldWithNavBar extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
@@ -17,20 +18,23 @@ class ScaffoldWithNavBar extends StatefulWidget {
 
 class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
+  // late final AnimationController _controller;
+  late final AnimationController _lottieController;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(seconds: 5),
-      vsync: this,
-    )..repeat();
+    // _controller = AnimationController(
+    //   duration: const Duration(seconds: 5),
+    //   vsync: this,
+    // )..repeat();
+    _lottieController = AnimationController(vsync: this);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // _controller.dispose();
+    _lottieController.dispose();
     super.dispose();
   }
 
@@ -100,10 +104,20 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
         // ✅ Tooltip updated
         elevation: currentBranchIndex == 1 ? 12 : 6,
         // ✅ Elevation check updated
-        child: RotationTransition(
-          turns: _controller,
-          child: const Icon(
-              Icons.public), // The spinning globe is now for Discover
+        // child: RotationTransition(
+        //   turns: _controller,
+        //   child: const Icon(
+        //       Icons.public), // The spinning globe is now for Discover
+        // ),
+        child: Lottie.asset(
+          'assets/animations/globe.json', // Your Lottie file path
+          controller: _lottieController,
+          onLoaded: (composition) {
+            // Configure the animation to play continuously
+            _lottieController
+              ..duration = composition.duration
+              ..repeat();
+          },
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,

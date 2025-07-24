@@ -116,10 +116,55 @@ class _NowPageViewState extends State<_NowPageView> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Now'),
-        centerTitle: true,
+        centerTitle: false,
+        title: BlocBuilder<FeedBloc, FeedState>(
+          builder: (context, state) {
+            final int totalPosts =
+                (state is FeedLoaded) ? state.posts.length : 0;
+            return Chip(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              avatar: Container(
+                width: 10,
+                height: 10,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.error,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'NOW',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2,
+                      fontSize: 16,
+                      color: theme.colorScheme.onSurface,
+                    ),
+                  ),
+                  if (totalPosts > 0)
+                    Text(
+                      ' ${_currentPageIndex + 1}/$totalPosts',
+                      style: TextStyle(
+                        color: theme.colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                ],
+              ),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(color: theme.colorScheme.outlineVariant),
+              ),
+            );
+          },
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded),
