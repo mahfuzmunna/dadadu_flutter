@@ -3,7 +3,7 @@
 import 'dart:async'; // For StreamSubscription
 
 // import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // Ensure this path is correct
-import 'package:dadadu_app/core/common/widgets/scaffold_with_navbar.dart'; // Ensure this path is correct
+import 'package:dadadu_app/core/common/widgets/scaffold_with_navbar_s.dart'; // Ensure this path is correct
 // Core imports
 import 'package:dadadu_app/core/pages/splash_page.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic

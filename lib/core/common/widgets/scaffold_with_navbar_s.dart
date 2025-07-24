@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class ScaffoldWithNavBar extends StatelessWidget {
+class ScaffoldWithNavBar extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
   const ScaffoldWithNavBar({
@@ -11,126 +11,160 @@ class ScaffoldWithNavBar extends StatelessWidget {
     Key? key,
   }) : super(key: key ?? const ValueKey<String>('ScaffoldWithNavBar'));
 
+  @override
+  State<ScaffoldWithNavBar> createState() => _ScaffoldWithNavBarState();
+}
+
+class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // ✅ Logic updated for the new button order
   void _onTap(BuildContext context, int index) {
+    // Branch order in AppRouter: 0=Home, 1=Discover, 2=Upload, 3=Friends, 4=Profile
+    // Button order in BottomAppBar: 0=Home, 1=Upload, (FAB), 2=Friends, 3=Profile
     int targetBranchIndex;
-    if (index < 2) {
-      targetBranchIndex = index;
-    } else {
-      targetBranchIndex = index + 1;
+    switch (index) {
+      case 0: // Home
+        targetBranchIndex = 0;
+        break;
+      case 1: // Upload
+        targetBranchIndex = 2;
+        break;
+      case 2: // Friends
+        targetBranchIndex = 3;
+        break;
+      case 3: // Profile
+        targetBranchIndex = 4;
+        break;
+      default:
+        targetBranchIndex = 0;
     }
-    navigationShell.goBranch(
+
+    widget.navigationShell.goBranch(
       targetBranchIndex,
-      initialLocation: targetBranchIndex == navigationShell.currentIndex,
+      initialLocation: targetBranchIndex == widget.navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final int currentBranchIndex = navigationShell.currentIndex;
+    final int currentBranchIndex = widget.navigationShell.currentIndex;
+
+    // ✅ Logic updated to map branch index back to the visual button index
     int selectedButtonIndex;
-    if (currentBranchIndex <= 1) {
-      selectedButtonIndex = currentBranchIndex;
-    } else if (currentBranchIndex >= 3) {
-      selectedButtonIndex = currentBranchIndex - 1;
-    } else {
-      selectedButtonIndex = -1;
+    switch (currentBranchIndex) {
+      case 0: // Home
+        selectedButtonIndex = 0;
+        break;
+      case 2: // Upload
+        selectedButtonIndex = 1;
+        break;
+      case 3: // Friends
+        selectedButtonIndex = 2;
+        break;
+      case 4: // Profile
+        selectedButtonIndex = 3;
+        break;
+      default: // Discover (FAB is active) or no match
+        selectedButtonIndex = -1;
+        break;
     }
 
-    // ✅ WRAP a Stack around the Scaffold to allow for overlaying widgets.
-    return Stack(
-      children: [
-        Scaffold(
-          body: navigationShell,
-          floatingActionButton: FloatingActionButton(
-            shape: const CircleBorder(),
-            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-            foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-            onPressed: () {
-              navigationShell.goBranch(2);
-            },
-            tooltip: 'Upload',
-            elevation: currentBranchIndex == 2 ? 8 : 4,
-            child: const Icon(Icons.add_a_photo),
-          ),
-          floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
-          bottomNavigationBar: BottomAppBar(
-            shape: const CircularNotchedRectangle(),
-            notchMargin: 8.0,
-            color: Theme.of(context).colorScheme.surfaceContainerHighest,
-            elevation: 4.0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                IconButton(
-                  icon: Icon(
-                    selectedButtonIndex == 0 ? Icons.home : Icons.home_outlined,
-                    color: selectedButtonIndex == 0
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () => _onTap(context, 0),
-                  tooltip: 'Home',
-                ),
-                IconButton(
-                  icon: Icon(
-                    selectedButtonIndex == 1
-                        ? Icons.explore
-                        : Icons.explore_outlined,
-                    color: selectedButtonIndex == 1
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () => _onTap(context, 1),
-                  tooltip: 'Discover',
-                ),
-                const SizedBox(width: 48.0),
-                IconButton(
-                  icon: Icon(
-                    selectedButtonIndex == 2
-                        ? Icons.people
-                        : Icons.people_outline,
-                    color: selectedButtonIndex == 2
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () => _onTap(context, 2),
-                  tooltip: 'Friends',
-                ),
-                IconButton(
-                  icon: Icon(
-                    selectedButtonIndex == 3
-                        ? Icons.person
-                        : Icons.person_outlined,
-                    color: selectedButtonIndex == 3
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                  onPressed: () => _onTap(context, 3),
-                  tooltip: 'Profile',
-                ),
-              ],
+    return Scaffold(
+      body: widget.navigationShell,
+      floatingActionButton: FloatingActionButton(
+        shape: const CircleBorder(),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        onPressed: () {
+          // ✅ FAB now navigates to the 'Discover' branch (branch index 1)
+          widget.navigationShell.goBranch(1);
+        },
+        tooltip: 'Discover',
+        // ✅ Tooltip updated
+        elevation: currentBranchIndex == 1 ? 12 : 6,
+        // ✅ Elevation check updated
+        child: RotationTransition(
+          turns: _controller,
+          child: const Icon(
+              Icons.public), // The spinning globe is now for Discover
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: BottomAppBar(
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        elevation: 4.0,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: <Widget>[
+            // Home Button (Unchanged)
+            IconButton(
+              icon: Icon(
+                selectedButtonIndex == 0 ? Icons.home : Icons.home_outlined,
+                color: selectedButtonIndex == 0
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              onPressed: () => _onTap(context, 0),
+              tooltip: 'Home',
             ),
-          ),
+            // ✅ Upload Button (Previously Discover)
+            IconButton(
+              icon: Icon(
+                selectedButtonIndex == 1
+                    ? Icons.add_a_photo
+                    : Icons.add_a_photo_outlined,
+                color: selectedButtonIndex == 1
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              onPressed: () => _onTap(context, 1), // Taps branch 2
+              tooltip: 'Upload',
+            ),
+            const SizedBox(width: 48.0), // Spacer for the FAB
+            // Friends Button (Unchanged)
+            IconButton(
+              icon: Icon(
+                selectedButtonIndex == 2 ? Icons.people : Icons.people_outline,
+                color: selectedButtonIndex == 2
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              onPressed: () => _onTap(context, 2), // Taps branch 3
+              tooltip: 'Friends',
+            ),
+            // Profile Button (Unchanged)
+            IconButton(
+              icon: Icon(
+                selectedButtonIndex == 3 ? Icons.person : Icons.person_outlined,
+                color: selectedButtonIndex == 3
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+              onPressed: () => _onTap(context, 3), // Taps branch 4
+              tooltip: 'Profile',
+            ),
+          ],
         ),
-
-        // ✅ ADD the second FAB here, positioned on top of the Scaffold.
-        Positioned(
-          // Standard Material Design positioning for a default FAB
-          bottom: 96.0,
-          right: 16.0,
-          child: FloatingActionButton(
-            // This is the "normal default" implementation
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Secondary Action Tapped!')),
-              );
-            },
-            tooltip: 'Secondary Action',
-            child: const Icon(Icons.chat_bubble_outline_rounded),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }
