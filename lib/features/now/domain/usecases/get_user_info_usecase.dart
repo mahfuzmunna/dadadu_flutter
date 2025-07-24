@@ -1,11 +1,11 @@
-// lib/features/home/domain/usecases/get_user_info_usecase.dart
+// lib/features/now/domain/usecases/get_user_info_usecase.dart
 
-import 'package:dartz/dartz.dart';
-import 'package:equatable/equatable.dart';
 import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dadadu_app/core/usecases/usecase.dart';
-import 'package:dadadu_app/features/home/domain/repositories/home_repository.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:dadadu_app/features/now/domain/repositories/home_repository.dart';
+import 'package:dartz/dartz.dart';
+import 'package:equatable/equatable.dart';
 
 class GetUserInfoUseCase implements UseCase<UserEntity, GetUserInfoParams> {
   final HomeRepository repository;

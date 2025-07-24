@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../../core/usecases/usecase.dart';
-import '../../../home/domain/entities/post_entity.dart'; // Assuming PostEntity is in profile/domain/entities
+import '../../../now/domain/entities/post_entity.dart'; // Assuming PostEntity is in profile/domain/entities
 import '../repositories/profile_repository.dart';
 
 class GetPostsUseCase implements UseCase<List<PostEntity>, GetPostsParams> {

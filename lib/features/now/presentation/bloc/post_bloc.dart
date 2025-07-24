@@ -1,4 +1,4 @@
-// lib/features/home/presentation/bloc/post_bloc.dart
+// lib/features/now/presentation/bloc/post_bloc.dart
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';

@@ -1,4 +1,4 @@
-// lib/features/auth/presentation/pages/home_page.dart
+// lib/features/auth/presentation/pages/now_page.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

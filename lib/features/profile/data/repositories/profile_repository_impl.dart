@@ -8,7 +8,7 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
-import '../../../home/domain/entities/post_entity.dart';
+import '../../../now/domain/entities/post_entity.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../../domain/usecases/update_user_location_usecase.dart';
 import '../datasources/profile_remote_data_source.dart';

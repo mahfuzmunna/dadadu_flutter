@@ -1,4 +1,4 @@
-// lib/features/home/presentation/bloc/post_event.dart
+// lib/features/now/presentation/bloc/post_event.dart
 part of 'post_bloc.dart';
 
 abstract class PostEvent extends Equatable {

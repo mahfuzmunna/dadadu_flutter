@@ -6,7 +6,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart'; // Reusing UserEntity for profile data
-import '../../../home/domain/entities/post_entity.dart';
+import '../../../now/domain/entities/post_entity.dart';
 import '../usecases/update_user_location_usecase.dart'; // Assuming PostEntity exists
 
 abstract class ProfileRepository {

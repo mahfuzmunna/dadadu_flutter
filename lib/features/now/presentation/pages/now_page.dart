@@ -1,13 +1,13 @@
-import 'package:dadadu_app/features/home/presentation/bloc/feed_bloc.dart';
-import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart';
-import 'package:dadadu_app/features/home/presentation/widgets/video_post_item.dart';
+import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
+import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
+import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class NowPage extends StatelessWidget {
+  const NowPage({super.key});
 
   @override
   Widget build(BuildContext context) {

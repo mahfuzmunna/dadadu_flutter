@@ -1,4 +1,4 @@
-// lib/features/home/presentation/bloc/feed_state.dart
+// lib/features/now/presentation/bloc/feed_state.dart
 part of 'feed_bloc.dart';
 
 abstract class FeedState extends Equatable {

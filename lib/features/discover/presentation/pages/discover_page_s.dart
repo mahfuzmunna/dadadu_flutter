@@ -1,4 +1,4 @@
-// lib/features/home/presentation/pages/discover_page.dart
+// lib/features/now/presentation/pages/discover_page.dart
 import 'dart:async';
 
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';

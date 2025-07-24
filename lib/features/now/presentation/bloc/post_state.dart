@@ -1,4 +1,4 @@
-// lib/features/home/presentation/bloc/post_state.dart
+// lib/features/now/presentation/bloc/post_state.dart
 part of 'post_bloc.dart';
 
 abstract class PostState extends Equatable {

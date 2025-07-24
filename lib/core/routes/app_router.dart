@@ -2,7 +2,8 @@
 
 import 'dart:async'; // For StreamSubscription
 
-import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // Ensure this path is correct
+// import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // Ensure this path is correct
+import 'package:dadadu_app/core/common/widgets/scaffold_with_navbar_s.dart'; // Ensure this path is correct
 // Core imports
 import 'package:dadadu_app/core/pages/splash_page.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
@@ -13,7 +14,7 @@ import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page_s.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
-import 'package:dadadu_app/features/home/presentation/pages/home_page.dart';
+import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
@@ -23,7 +24,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/sign_up_page.dart';
-import '../../features/home/home_injection.dart' as di;
+import '../../features/now/home_injection.dart' as di;
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 
@@ -106,7 +107,7 @@ class AppRouter {
               routes: [
                 GoRoute(
                   path: '/home',
-                  builder: (context, state) => const HomePage(),
+                  builder: (context, state) => const NowPage(),
                 ),
               ],
             ),

@@ -1,4 +1,4 @@
-// lib/features/home/data/datasources/home_remote_data_source.dart
+// lib/features/now/data/datasources/home_remote_data_source.dart
 
 // No more Firebase imports
 // import 'package:cloud_firestore/cloud_firestore.dart';

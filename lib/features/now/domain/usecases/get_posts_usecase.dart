@@ -1,10 +1,10 @@
-// lib/features/home/domain/usecases/get_posts_usecase.dart
+// lib/features/now/domain/usecases/get_posts_usecase.dart
 
 // Removed: import 'package:cloud_firestore/cloud_firestore.dart'; // No longer needed for DocumentSnapshot
 
 import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dadadu_app/core/usecases/usecase.dart'; // Assuming UseCase and NoParams or similar exist
-import 'package:dadadu_app/features/home/domain/repositories/home_repository.dart'; // Import the repository and PostsPaginationResult
+import 'package:dadadu_app/features/now/domain/repositories/home_repository.dart'; // Import the repository and PostsPaginationResult
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 

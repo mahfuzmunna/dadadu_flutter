@@ -4,8 +4,8 @@ import 'package:uuid/uuid.dart';
 
 import 'config/app_config.dart';
 import 'features/auth/auth_injection.dart'; // Import feature-specific injection files
-// import 'features/home/domain/usecases/get_feed_posts_usecase.dart';
-import 'features/home/home_injection.dart';
+// import 'features/now/domain/usecases/get_feed_posts_usecase.dart';
+import 'features/now/home_injection.dart';
 import 'features/profile/profile_injection.dart';
 import 'features/upload/upload_injection.dart';
 

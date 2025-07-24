@@ -2,11 +2,11 @@
 // // Make sure you have your dependencies set up in injection_container.dart for PostBloc
 //
 // import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-// import 'package:dadadu_app/features/home/presentation/bloc/feed_bloc.dart';
-// import 'package:dadadu_app/features/home/presentation/widgets/video_post_item.dart';
+// import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
+// import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 // import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 // import 'package:dadadu_app/injection_container.dart'; // For sl()
-// // lib/features/home/presentation/pages/home_page.dart (Example)
+// // lib/features/now/presentation/pages/now_page.dart (Example)
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bloc/flutter_bloc.dart';
 //

@@ -12,7 +12,7 @@ import '../../../../core/errors/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../auth/domain/usecases/get_current_user_usecase.dart'; // To get the current authenticated user
 // import '../../domain/entities/user_entity.dart'; // Reusing UserEntity from Auth
-import '../../../home/domain/entities/post_entity.dart';
+import '../../../now/domain/entities/post_entity.dart';
 import '../../domain/usecases/delete_profile_image_usecase.dart';
 import '../../domain/usecases/get_posts_usecase.dart';
 import '../../domain/usecases/get_user_profile_data_usecase.dart';

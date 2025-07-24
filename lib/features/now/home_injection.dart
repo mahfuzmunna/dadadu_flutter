@@ -1,13 +1,13 @@
-// lib/features/home/home_injection.dart
+// lib/features/now/home_injection.dart
 
 import 'package:dadadu_app/config/app_config.dart';
-import 'package:dadadu_app/features/home/data/datasources/home_remote_data_source.dart';
-import 'package:dadadu_app/features/home/data/repositories/home_repository_impl.dart';
-import 'package:dadadu_app/features/home/domain/repositories/home_repository.dart';
-import 'package:dadadu_app/features/home/domain/usecases/get_posts_usecase.dart';
-import 'package:dadadu_app/features/home/domain/usecases/get_user_info_usecase.dart';
-import 'package:dadadu_app/features/home/presentation/bloc/feed_bloc.dart';
-import 'package:dadadu_app/features/home/presentation/bloc/post_bloc.dart';
+import 'package:dadadu_app/features/now/data/datasources/home_remote_data_source.dart';
+import 'package:dadadu_app/features/now/data/repositories/home_repository_impl.dart';
+import 'package:dadadu_app/features/now/domain/repositories/home_repository.dart';
+import 'package:dadadu_app/features/now/domain/usecases/get_posts_usecase.dart';
+import 'package:dadadu_app/features/now/domain/usecases/get_user_info_usecase.dart';
+import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
+import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../upload/data/datasources/post_remote_data_source.dart';
