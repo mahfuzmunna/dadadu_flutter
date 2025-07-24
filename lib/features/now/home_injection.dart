@@ -50,7 +50,7 @@ Future<void> homeInjection() async {
   );
 }
 
-Future<void> postInjection() async {
+Future<void> feedPostInjection() async {
   // Register new Post related dependencies
   sl.registerFactory(() => FeedBloc(postRepository: sl()));
 

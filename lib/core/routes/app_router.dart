@@ -18,13 +18,14 @@ import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
-import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
+// import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/sign_up_page.dart';
 import '../../features/now/home_injection.dart' as di;
+import '../../features/posts/presentation/pages/upload_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 
@@ -86,8 +87,8 @@ class AppRouter {
             }
 
             // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
-            return UploadPage(
-                videoPath: videoPath); // Or UploadPage, depending on your flow
+            return UploadPage(); // Or UploadPage, depending on your flow
+            // return UploadPage(videoPath: videoPath); // Or UploadPage, depending on your flow
           },
         ),
         GoRoute(
@@ -125,8 +126,9 @@ class AppRouter {
               routes: [
                 GoRoute(
                   path: '/upload',
-                  redirect: (context, state) => '/camera',
-                ),
+                    builder: (context, state) => const UploadPage()
+                    // redirect: (context, state) => '/camera',
+                    ),
               ],
             ),
             // Friends
