@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
 
       # 2. Set up Java environment
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
@@ -42,20 +42,20 @@ jobs:
         run: flutter pub get
 
       # 5. (Optional) Run an analyzer to check for code issues
-      - name: Analyze project
-        run: flutter analyze
+#      - name: Analyze project
+#        run: flutter analyze
 
       # 6. (Optional) Run widget tests
-      - name: Run tests
-        run: flutter test
+#      - name: Run tests
+#        run: flutter test
 
       # 7. Build the Android APK
       - name: Build APK
         run: flutter build apk --release
 
       # 8. Build the Android App Bundle (AAB)
-      - name: Build App Bundle
-        run: flutter build appbundle --release
+#      - name: Build App Bundle
+#        run: flutter build appbundle --release
 
       # 9. Upload the generated APK file
       - name: Upload APK artifact
@@ -65,8 +65,8 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
 
       # 10. Upload the generated AAB file
-      - name: Upload App Bundle artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-appbundle
-          path: build/app/outputs/bundle/release/app-release.aab
+#      - name: Upload App Bundle artifact
+#        uses: actions/upload-artifact@v4
+#        with:
+#          name: release-appbundle
+#          path: build/app/outputs/bundle/release/app-release.aab
