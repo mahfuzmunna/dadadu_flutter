@@ -32,16 +32,12 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
     });
   }
 
-  // Future<void> _onVideoSelected(UploadVideoSelected event, Emitter<UploadState> emit) async {
-  //   // This handler now also changes the view mode to preview
-  //   emit(state.copyWith(status: UploadStatus.loadingThumbnail, viewMode: UploadViewMode.preview));
-  //   // ... rest of the thumbnail generation logic
-  // }
-  // // ...
-
   Future<void> _onVideoSelected(
       UploadVideoSelected event, Emitter<UploadState> emit) async {
-    emit(state.copyWith(status: UploadStatus.loadingThumbnail));
+    // This handler now also changes the view mode to preview
+    emit(state.copyWith(
+        status: UploadStatus.loadingThumbnail,
+        viewMode: UploadViewMode.preview));
     try {
       final thumbnailPath = await VideoThumbnail.thumbnailFile(
         video: event.videoFile.path,

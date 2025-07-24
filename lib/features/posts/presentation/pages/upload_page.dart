@@ -239,6 +239,7 @@ class _CameraViewState extends State<_CameraView> {
   bool _isRecording = false;
   int _recordSeconds = 0;
   Timer? _timer;
+  bool _isCameraInitializing = true;
 
   @override
   void initState() {
@@ -258,37 +259,59 @@ class _CameraViewState extends State<_CameraView> {
     }
   }
 
-  void _onNewCameraSelected(CameraDescription description) {
-    _cameraController?.dispose();
-    _cameraController =
+  Future<void> _onNewCameraSelected(CameraDescription description) async {
+    if (mounted)
+      setState(() {
+        _isCameraInitializing = true;
+      });
+    final oldController = _cameraController;
+    if (oldController != null) {
+      await oldController.dispose();
+    }
+
+    final newController =
         CameraController(description, ResolutionPreset.high, enableAudio: true);
-    _cameraController?.initialize().then((_) {
-      if (mounted) setState(() {});
-    });
+    _cameraController = newController;
+
+    try {
+      await newController.initialize();
+    } on CameraException catch (e) {
+      print('Error initializing camera: $e');
+    }
+    if (mounted) setState(() => _isCameraInitializing = false);
   }
 
   void _switchCamera() {
-    if (_cameras.length > 1) {
-      final currentLensDirection = _cameraController!.description.lensDirection;
-      final newDescription = _cameras.firstWhere(
-          (desc) => desc.lensDirection != currentLensDirection,
-          orElse: () => _cameras.first);
-      _onNewCameraSelected(newDescription);
-    }
+    if (_cameras.length < 2 || _cameraController == null) return;
+
+    final currentLensDirection = _cameraController!.description.lensDirection;
+    final newDescription = _cameras.firstWhere(
+      (desc) => desc.lensDirection != currentLensDirection,
+      orElse: () => _cameras.first,
+    );
+    _onNewCameraSelected(newDescription);
   }
 
   Future<void> _toggleRecording() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized)
+      return;
+
     if (_isRecording) {
-      final file = await _cameraController?.stopVideoRecording();
+      final file = await _cameraController!.stopVideoRecording();
       _timer?.cancel();
       setState(() => _isRecording = false);
-      if (file != null) {
-        widget.onVideoRecorded(File(file.path));
-      }
+      widget.onVideoRecorded(File(file.path));
     } else {
-      await _cameraController?.startVideoRecording();
-      setState(() => _isRecording = true);
+      await _cameraController!.startVideoRecording();
+      setState(() {
+        _isRecording = true;
+        _recordSeconds = 0;
+      });
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+        if (!mounted) {
+          timer.cancel();
+          return;
+        }
         setState(() => _recordSeconds++);
         if (_recordSeconds >= 20) {
           _toggleRecording();
@@ -306,10 +329,16 @@ class _CameraViewState extends State<_CameraView> {
 
   @override
   Widget build(BuildContext context) {
-    if (_cameraController == null || !_cameraController!.value.isInitialized) {
+    if (_isCameraInitializing ||
+        _cameraController == null ||
+        !_cameraController!.value.isInitialized) {
       return Container(
+        decoration: BoxDecoration(
           color: Colors.black,
-          child: const Center(child: CircularProgressIndicator()));
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Center(child: CircularProgressIndicator()),
+      );
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -323,13 +352,21 @@ class _CameraViewState extends State<_CameraView> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     if (_isRecording)
-                      Text('$_recordSeconds / 20s',
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          '$_recordSeconds / 20s',
                           style: const TextStyle(
-                              color: Colors.white,
-                              backgroundColor: Colors.black45)),
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     const Spacer(),
                     IconButton(
                       icon: const Icon(Icons.close, color: Colors.white),
@@ -342,20 +379,28 @@ class _CameraViewState extends State<_CameraView> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    const SizedBox(width: 48), // Spacer
+                    // A placeholder to balance the row
+                    IconButton(
+                      icon:
+                          const Icon(Icons.flash_on, color: Colors.transparent),
+                      onPressed: null,
+                    ),
                     IconButton(
                       icon: Icon(
-                          _isRecording
-                              ? Icons.stop_circle
-                              : Icons.radio_button_checked,
-                          color: Colors.red,
-                          size: 64),
+                        _isRecording
+                            ? Icons.stop_circle
+                            : Icons.radio_button_checked,
+                        color: Colors.redAccent,
+                        size: 64,
+                      ),
                       onPressed: _toggleRecording,
                     ),
                     IconButton(
                       icon: const Icon(Icons.flip_camera_ios,
                           color: Colors.white, size: 28),
-                      onPressed: _switchCamera,
+                      onPressed: _isRecording
+                          ? null
+                          : _switchCamera, // Disable while recording
                     ),
                   ],
                 ),
