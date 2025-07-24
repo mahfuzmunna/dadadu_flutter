@@ -23,7 +23,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(seconds: 20),
+      duration: const Duration(seconds: 5),
       vsync: this,
     )..repeat();
   }

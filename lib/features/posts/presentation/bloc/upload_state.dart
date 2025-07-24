@@ -9,8 +9,12 @@ enum UploadStatus {
   success,
   failure,
 }
+enum UploadViewMode { initial, camera, preview }
 
 class UploadState extends Equatable {
+  /// The current view mode.
+  final UploadViewMode viewMode;
+
   /// The current status of the upload process.
   final UploadStatus status;
 
@@ -33,6 +37,7 @@ class UploadState extends Equatable {
   final String error;
 
   const UploadState({
+    this.viewMode = UploadViewMode.initial,
     this.status = UploadStatus.initial,
     this.videoFile,
     this.thumbnailFile,
@@ -44,6 +49,7 @@ class UploadState extends Equatable {
 
   /// Creates a copy of the current state with updated values.
   UploadState copyWith({
+    UploadViewMode? viewMode,
     UploadStatus? status,
     File? videoFile,
     File? thumbnailFile,
@@ -53,6 +59,7 @@ class UploadState extends Equatable {
     String? error,
   }) {
     return UploadState(
+      viewMode: viewMode ?? this.viewMode,
       status: status ?? this.status,
       videoFile: videoFile ?? this.videoFile,
       thumbnailFile: thumbnailFile ?? this.thumbnailFile,
@@ -65,6 +72,7 @@ class UploadState extends Equatable {
 
   @override
   List<Object?> get props => [
+        viewMode,
         status,
         videoFile,
         thumbnailFile,

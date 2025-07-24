@@ -60,3 +60,7 @@ class _UploadProgressUpdated extends UploadEvent {
   @override
   List<Object> get props => [progress];
 }
+
+class UploadShowCameraView extends UploadEvent {}
+
+class UploadShowInitialView extends UploadEvent {}

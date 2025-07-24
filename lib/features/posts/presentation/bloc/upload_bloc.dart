@@ -14,13 +14,30 @@ class UploadBloc extends Bloc<UploadEvent, UploadState> {
   UploadBloc({required UploadPostUseCase uploadPostUseCase})
       : _uploadPostUseCase = uploadPostUseCase,
         super(const UploadState()) {
-    on<UploadVideoSelected>(_onVideoSelected);
     on<UploadCaptionChanged>(_onCaptionChanged);
     on<UploadIntentChanged>(_onIntentChanged);
     on<UploadSubmitted>(_onSubmitted);
     on<UploadReset>(_onReset);
     on<_UploadProgressUpdated>(_onUploadProgressUpdated);
+    on<UploadVideoSelected>(_onVideoSelected);
+    on<UploadShowCameraView>(
+        (event, emit) => emit(state.copyWith(viewMode: UploadViewMode.camera)));
+    on<UploadShowInitialView>((event, emit) {
+      // When resetting, also clear the files
+      emit(state.copyWith(
+          viewMode: UploadViewMode.initial,
+          videoFile: null,
+          thumbnailFile: null,
+          status: UploadStatus.initial));
+    });
   }
+
+  // Future<void> _onVideoSelected(UploadVideoSelected event, Emitter<UploadState> emit) async {
+  //   // This handler now also changes the view mode to preview
+  //   emit(state.copyWith(status: UploadStatus.loadingThumbnail, viewMode: UploadViewMode.preview));
+  //   // ... rest of the thumbnail generation logic
+  // }
+  // // ...
 
   Future<void> _onVideoSelected(
       UploadVideoSelected event, Emitter<UploadState> emit) async {

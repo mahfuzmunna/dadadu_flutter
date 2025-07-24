@@ -14,19 +14,19 @@ class NowPage extends StatelessWidget {
     // Provide the FeedBloc to the widget tree and immediately load the feed.
     return BlocProvider(
       create: (context) => sl<FeedBloc>()..add(LoadFeed()),
-      child: const _HomePageView(),
+      child: const _NowPageView(),
     );
   }
 }
 
-class _HomePageView extends StatefulWidget {
-  const _HomePageView();
+class _NowPageView extends StatefulWidget {
+  const _NowPageView();
 
   @override
-  State<_HomePageView> createState() => _HomePageViewState();
+  State<_NowPageView> createState() => _NowPageViewState();
 }
 
-class _HomePageViewState extends State<_HomePageView> {
+class _NowPageViewState extends State<_NowPageView> {
   final PageController _pageController = PageController();
   int _currentPageIndex = 0;
 
@@ -49,9 +49,87 @@ class _HomePageViewState extends State<_HomePageView> {
     super.dispose();
   }
 
+  // ✅ NEW: Helper method to show the notifications dialog
+  void _showNotificationsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        // Dummy data for notifications
+        final notifications = [
+          {
+            'user': 'mahfuzmunna',
+            'action': 'liked your video.',
+            'time': '5m ago'
+          },
+          {
+            'user': 'sakib',
+            'action': 'started following you.',
+            'time': '1h ago'
+          },
+          {
+            'user': 'john_doe',
+            'action': 'commented: "Awesome!"',
+            'time': '3h ago'
+          },
+        ];
+
+        return AlertDialog(
+          title: const Text('Notifications'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: notifications.length,
+              itemBuilder: (context, index) {
+                final notification = notifications[index];
+                return ListTile(
+                  leading: const CircleAvatar(child: Icon(Icons.person)),
+                  title: RichText(
+                    text: TextSpan(
+                      style: DefaultTextStyle.of(context).style,
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: notification['user'],
+                            style:
+                                const TextStyle(fontWeight: FontWeight.bold)),
+                        TextSpan(text: ' ${notification['action']}'),
+                      ],
+                    ),
+                  ),
+                  subtitle: Text(notification['time']!),
+                );
+              },
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Dismiss dialog
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Now'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none_rounded),
+            tooltip: 'Notifications',
+            onPressed: () {
+              _showNotificationsDialog(context);
+            },
+          ),
+        ],
+      ),
       body: BlocBuilder<FeedBloc, FeedState>(
         builder: (context, state) {
           // LOADING STATE
