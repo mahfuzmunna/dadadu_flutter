@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-class ScaffoldWithNavBar extends StatelessWidget {
+class ScaffoldWithNavBar extends StatefulWidget {
   final StatefulNavigationShell navigationShell;
 
   const ScaffoldWithNavBar({
@@ -11,107 +11,153 @@ class ScaffoldWithNavBar extends StatelessWidget {
     Key? key,
   }) : super(key: key ?? const ValueKey<String>('ScaffoldWithNavBar'));
 
-  // This method maps the index of the tapped button in the BottomAppBar's Row
-  // to the actual branch index in GoRouter's StatefulNavigationShell.
-  // The 'Upload' button (FAB) is handled separately.
+  @override
+  State<ScaffoldWithNavBar> createState() => _ScaffoldWithNavBarState();
+}
+
+class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 20),
+      vsync: this,
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  // ✅ Logic updated for the new button order
   void _onTap(BuildContext context, int index) {
     // Branch order in AppRouter: 0=Home, 1=Discover, 2=Upload, 3=Friends, 4=Profile
-    // Button order in BottomAppBar: 0=Home, 1=Discover, (FAB), 2=Friends, 3=Profile
+    // Button order in BottomAppBar: 0=Home, 1=Upload, (FAB), 2=Friends, 3=Profile
     int targetBranchIndex;
-    if (index < 2) { // Home (0), Discover (1)
-      targetBranchIndex = index;
-    } else { // Friends (2 -> branch 3), Profile (3 -> branch 4)
-      targetBranchIndex = index + 1;
+    switch (index) {
+      case 0: // Home
+        targetBranchIndex = 0;
+        break;
+      case 1: // Upload
+        targetBranchIndex = 2;
+        break;
+      case 2: // Friends
+        targetBranchIndex = 3;
+        break;
+      case 3: // Profile
+        targetBranchIndex = 4;
+        break;
+      default:
+        targetBranchIndex = 0;
     }
 
-    navigationShell.goBranch(
+    widget.navigationShell.goBranch(
       targetBranchIndex,
-      initialLocation: targetBranchIndex == navigationShell.currentIndex,
+      initialLocation: targetBranchIndex == widget.navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the current selected branch index from GoRouter
-    final int currentBranchIndex = navigationShell.currentIndex;
+    final int currentBranchIndex = widget.navigationShell.currentIndex;
 
-    // Map the current branch index to the index of the corresponding button
-    // in the BottomAppBar's Row (excluding the FAB).
+    // ✅ Logic updated to map branch index back to the visual button index
     int selectedButtonIndex;
-    if (currentBranchIndex == 0) { // Home
-      selectedButtonIndex = 0;
-    } else if (currentBranchIndex == 1) { // Discover
-      selectedButtonIndex = 1;
-    } else if (currentBranchIndex == 3) { // Friends
-      selectedButtonIndex = 2; // Friends is the 3rd button in the Row (index 2)
-    } else if (currentBranchIndex == 4) { // Profile
-      selectedButtonIndex = 3; // Profile is the 4th button in the Row (index 3)
-    } else {
-      selectedButtonIndex = -1; // Upload FAB is selected, or no button is selected
+    switch (currentBranchIndex) {
+      case 0: // Home
+        selectedButtonIndex = 0;
+        break;
+      case 2: // Upload
+        selectedButtonIndex = 1;
+        break;
+      case 3: // Friends
+        selectedButtonIndex = 2;
+        break;
+      case 4: // Profile
+        selectedButtonIndex = 3;
+        break;
+      default: // Discover (FAB is active) or no match
+        selectedButtonIndex = -1;
+        break;
     }
 
     return Scaffold(
-      body: navigationShell, // This renders the content of the currently active branch
-
-      // Floating Action Button for 'Upload'
+      body: widget.navigationShell,
       floatingActionButton: FloatingActionButton(
-        shape: const CircleBorder(), // Makes the FAB circular
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer, // Example color
-        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer, // Icon color
+        shape: const CircleBorder(),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         onPressed: () {
-          // Navigate to the 'Upload' branch (assuming it's branch index 2)
-          navigationShell.goBranch(2);
+          // ✅ FAB now navigates to the 'Discover' branch (branch index 1)
+          widget.navigationShell.goBranch(1);
         },
-        tooltip: 'Upload',
-        elevation: currentBranchIndex == 2 ? 8 : 4, // Higher elevation if Upload is active
-        child: const Icon(Icons.add_a_photo), // Icon for upload
+        tooltip: 'Discover',
+        // ✅ Tooltip updated
+        elevation: currentBranchIndex == 1 ? 12 : 6,
+        // ✅ Elevation check updated
+        child: RotationTransition(
+          turns: _controller,
+          child: const Icon(
+              Icons.public), // The spinning globe is now for Discover
+        ),
       ),
-      // Position the FAB in the center, docked to the BottomAppBar
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
-      // BottomAppBar to create the cutout effect
       bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(), // Creates the semi-circular cutout
-        notchMargin: 8.0, // Space between FAB and BottomAppBar
-        color: Theme.of(context).colorScheme.surfaceContainerHighest, // Background color of the bar
-        elevation: 4.0, // Shadow beneath the bar
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 8.0,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        elevation: 4.0,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
-            // Home Button
+            // Home Button (Unchanged)
             IconButton(
               icon: Icon(
                 selectedButtonIndex == 0 ? Icons.home : Icons.home_outlined,
-                color: selectedButtonIndex == 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: selectedButtonIndex == 0
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              onPressed: () => _onTap(context, 0), // Taps branch 0
+              onPressed: () => _onTap(context, 0),
               tooltip: 'Home',
             ),
-            // Discover Button
+            // ✅ Upload Button (Previously Discover)
             IconButton(
               icon: Icon(
-                selectedButtonIndex == 1 ? Icons.explore : Icons.explore_outlined,
-                color: selectedButtonIndex == 1 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                selectedButtonIndex == 1
+                    ? Icons.add_a_photo
+                    : Icons.add_a_photo_outlined,
+                color: selectedButtonIndex == 1
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              onPressed: () => _onTap(context, 1), // Taps branch 1
-              tooltip: 'Discover',
+              onPressed: () => _onTap(context, 1), // Taps branch 2
+              tooltip: 'Upload',
             ),
-            // Spacer for the FloatingActionButton
-            const SizedBox(width: 48.0), // Adjust width as needed to fit the FAB
-            // Friends Button
+            const SizedBox(width: 48.0), // Spacer for the FAB
+            // Friends Button (Unchanged)
             IconButton(
               icon: Icon(
-                selectedButtonIndex == 2 ? Icons.people : Icons.people_outline, // Note: index 2 here corresponds to branch 3
-                color: selectedButtonIndex == 2 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                selectedButtonIndex == 2 ? Icons.people : Icons.people_outline,
+                color: selectedButtonIndex == 2
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: () => _onTap(context, 2), // Taps branch 3
               tooltip: 'Friends',
             ),
-            // Profile Button
+            // Profile Button (Unchanged)
             IconButton(
               icon: Icon(
-                selectedButtonIndex == 3 ? Icons.person : Icons.person_outlined, // Note: index 3 here corresponds to branch 4
-                color: selectedButtonIndex == 3 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                selectedButtonIndex == 3 ? Icons.person : Icons.person_outlined,
+                color: selectedButtonIndex == 3
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: () => _onTap(context, 3), // Taps branch 4
               tooltip: 'Profile',

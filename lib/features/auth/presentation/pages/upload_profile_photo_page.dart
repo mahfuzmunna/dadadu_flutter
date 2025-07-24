@@ -70,6 +70,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Please select and edit an image first.')));
     }
+    _finalizeOnboarding();
   }
 
   void _finalizeOnboarding() {
