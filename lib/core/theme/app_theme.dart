@@ -1,11 +1,13 @@
 // lib/core/theme/app_theme.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart'; // Import google_fonts package
 
 class AppTheme {
   // Define a single seed color for your app's primary palette
-  static const Color _primarySeed = Color(0xFF673AB7); // A deep purple/violet
+  // static const Color _primarySeed = Color(0xFF673AB7); // A deep purple/violet
+  static const Color _primarySeed = Color(0xFF0061A4); // A deep purple/violet
 
   // Light Color Scheme
   static final ColorScheme _lightColorScheme = ColorScheme.fromSeed(
@@ -47,7 +49,11 @@ class AppTheme {
       colorScheme: _lightColorScheme,
       useMaterial3: true, // Crucial for Material 3
       appBarTheme: AppBarTheme(
-        backgroundColor: _lightColorScheme.primaryContainer,
+        // backgroundColor: _lightColorScheme.primaryContainer,
+        backgroundColor: Colors.transparent,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.light,
+            statusBarIconBrightness: Brightness.dark),
         foregroundColor: _lightColorScheme.onPrimaryContainer,
         elevation: 0,
         centerTitle: true,
@@ -165,8 +171,12 @@ class AppTheme {
       colorScheme: _darkColorScheme,
       useMaterial3: true, // Crucial for Material 3
       appBarTheme: AppBarTheme(
-        backgroundColor: _darkColorScheme.primaryContainer,
+        // backgroundColor: _darkColorScheme.primaryContainer,
+        backgroundColor: Colors.transparent,
         foregroundColor: _darkColorScheme.onPrimaryContainer,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light),
         elevation: 0,
         centerTitle: true,
         titleTextStyle: _buildMontserratTextTheme(baseTheme.textTheme).titleLarge?.copyWith( // Apply Montserrat via helper

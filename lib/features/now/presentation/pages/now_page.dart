@@ -116,7 +116,7 @@ class _NowPageViewState extends State<_NowPageView> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
       appBar: AppBar(
@@ -125,44 +125,8 @@ class _NowPageViewState extends State<_NowPageView> {
           builder: (context, state) {
             final int totalPosts =
                 (state is FeedLoaded) ? state.posts.length : 0;
-            return Chip(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              avatar: Container(
-                width: 10,
-                height: 10,
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.error,
-                  shape: BoxShape.circle,
-                ),
-              ),
-              label: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'NOW',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
-                      fontSize: 16,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-                  if (totalPosts > 0)
-                    Text(
-                      ' ${_currentPageIndex + 1}/$totalPosts',
-                      style: TextStyle(
-                        color: theme.colorScheme.onSurfaceVariant,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                ],
-              ),
-              backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(color: theme.colorScheme.outlineVariant),
-              ),
-            );
+
+            return _buildNowChip(colorScheme, totalPosts);
           },
         ),
         actions: [
@@ -212,7 +176,6 @@ class _NowPageViewState extends State<_NowPageView> {
                     },
                   ),
                 );
-
                 // CORRECT: Do NOT wrap this in a BlocProvider<FeedBloc>.
                 // If you need a bloc for a single item, it should be a PostBloc.
                 // For now, we remove the incorrect provider.
@@ -233,6 +196,87 @@ class _NowPageViewState extends State<_NowPageView> {
           // Fallback for any other state
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  Widget _buildNowChip(ColorScheme colorScheme, int totalPosts) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            // Add an action here, e.g., scroll to the top of the feed
+            debugPrint("Now Chip Tapped!");
+          },
+          borderRadius: BorderRadius.circular(24),
+          // Match the container's border radius
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              // ✅ Gradient updated to use the primary blue color
+              gradient: LinearGradient(
+                colors: [
+                  colorScheme.primary.withOpacity(0.8),
+                  colorScheme.primary,
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(24), // Slightly more rounded
+              boxShadow: [
+                BoxShadow(
+                  color: colorScheme.primary.withOpacity(0.3),
+                  // Shadow matches the blue theme
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ✅ Live indicator dot is now a vibrant white
+                Container(
+                  width: 10,
+                  height: 10,
+                  decoration: BoxDecoration(
+                    color: colorScheme.onPrimary, // Bright white on blue
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: colorScheme.onPrimary.withOpacity(0.7),
+                        blurRadius: 5,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'NOW',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    // ✅ Text color is now onPrimary for high contrast
+                    color: colorScheme.onPrimary,
+                  ),
+                ),
+                if (totalPosts > 0)
+                  Text(
+                    ' ${_currentPageIndex + 1}/$totalPosts',
+                    style: TextStyle(
+                      fontSize: 14,
+                      // ✅ Counter text is slightly transparent for a subtle look
+                      color: colorScheme.onPrimary.withOpacity(0.8),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
