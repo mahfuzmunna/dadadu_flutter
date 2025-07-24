@@ -102,7 +102,6 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
-    - .env
     - assets/icons/logo.jpg
     - assets/icons/logo_v2.png
     - assets/animations/globe.json
