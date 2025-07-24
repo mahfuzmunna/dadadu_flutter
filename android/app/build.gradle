@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    namespace "com.example.start"
-    compileSdk 35  // ← Obligatoire pour les plugins comme image_picker, video_player, etc.
+    namespace "com.dadadu.app"
+    compileSdk 36  // ← Obligatoire pour les plugins comme image_picker, video_player, etc.
     ndkVersion "25.2.9519653"
 
     defaultConfig {
-        applicationId "com.example.start"
+        applicationId "com.dadadu.app"
         minSdk 24
         targetSdk 35  // ← identique à compileSdk
         versionCode flutter.versionCode
