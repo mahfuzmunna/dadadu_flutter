@@ -68,6 +68,15 @@ class AuthSignUpSuccess extends AuthState {
   List<Object?> get props => [user];
 }
 
+class AuthSignInSuccess extends AuthState {
+  final UserEntity user;
+
+  const AuthSignInSuccess({required this.user});
+
+  @override
+  List<Object?> get props => [user];
+}
+
 class FirstRun extends AuthState {
   final UserEntity user;
 

@@ -91,7 +91,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         SignInParams(email: event.email, password: event.password));
     result.fold(
       (failure) => emit(AuthUnauthenticated(message: failure.message)),
-      (_) {}, // Success is handled by the listener
+      // Success is handled by the listener
+      (user) {
+        emit(AuthSignInSuccess(user: user));
+      },
     );
   }
 

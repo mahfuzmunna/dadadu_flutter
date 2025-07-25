@@ -77,3 +77,13 @@ class UpdateUserLocation extends ProfileEvent {
   @override
   List<Object?> get props => [userId, latitude, longitude, locationName];
 }
+
+class UpdateUserMood extends ProfileEvent {
+  final String userId;
+  final String mood;
+
+  const UpdateUserMood({required this.userId, required this.mood});
+
+  @override
+  List<Object> get props => [userId, mood];
+}

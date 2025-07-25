@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:dadadu_app/features/profile/domain/usecases/update_user_location_usecase.dart';
+import 'package:dadadu_app/features/profile/domain/usecases/update_user_mood_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart'; // For @immutable
 
@@ -30,6 +31,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UpdateProfilePhotoUseCase _updateProfilePhotoUseCase;
   final DeleteProfileImageUseCase deleteProfileImageUseCase;
   final UpdateUserLocationUseCase _updateUserLocationUseCase;
+  final UpdateUserMoodUseCase _updateUserMoodUseCase;
 
   ProfileBloc({
     required this.getUserProfileUseCase,
@@ -39,9 +41,11 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required UpdateProfilePhotoUseCase updateProfilePhotoUseCase,
     required this.deleteProfileImageUseCase,
     required UpdateUserLocationUseCase updateUserLocationUseCase,
+    required UpdateUserMoodUseCase updateUserMoodUseCase,
   })  : _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
         _updateUserLocationUseCase = updateUserLocationUseCase,
         _updateProfileUseCase = updateProfileUseCase,
+        _updateUserMoodUseCase = updateUserMoodUseCase,
         super(const ProfileInitial()) {
     on<LoadUserProfile>(_onLoadUserProfile);
     on<UpdateUserProfileData>(_onUpdateUserProfileData);
@@ -49,6 +53,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<UpdateProfilePhoto>(_onUpdateProfilePhoto);
     on<DeleteProfileImage>(_onDeleteProfileImage);
     on<UpdateUserLocation>(_onUpdateUserLocation);
+    on<UpdateUserMood>(_onUpdateUserMood);
   }
 
   Future<void> _onLoadUserProfile(
@@ -169,6 +174,24 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     result.fold(
       (failure) => emit(ProfileError(message: failure.message)),
       (_) => emit(UserLocationUpdateSuccess()),
+    );
+  }
+
+  Future<void> _onUpdateUserMood(
+    UpdateUserMood event,
+    Emitter<ProfileState> emit,
+  ) async {
+    // We don't need a loading state here as it's a quick background update.
+    // The UI will update automatically via the real-time stream.
+    final result = await _updateUserMoodUseCase(
+        UpdateUserMoodParams(userId: event.userId, moodStatus: event.mood));
+
+    result.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (_) {
+        // We don't need to emit a success state because the real-time stream
+        // will automatically push a new ProfileLoaded state, updating the UI.
+      },
     );
   }
 }

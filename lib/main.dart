@@ -33,8 +33,8 @@ void main() async {
 
     runApp(const MyApp());
   } catch (e, stack) {
-    print('FATAL APP STARTUP ERROR: $e');
-    print('STACK TRACE: $stack');
+    debugPrint('FATAL APP STARTUP ERROR: $e');
+    debugPrint('STACK TRACE: $stack');
     runApp(
       MaterialApp(
         home: Scaffold(
@@ -113,7 +113,6 @@ class _MyAppState extends State<MyApp> {
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(builder: (context, themeMode) {
-        final GoRouter router = _router;
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           // Set to false for production

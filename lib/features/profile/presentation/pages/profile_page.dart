@@ -138,6 +138,23 @@ class _ProfileViewState extends State<_ProfileView> {
     );
   }
 
+  IconData getMoodIcon(String? moodStatus) {
+    switch (moodStatus?.toLowerCase()) {
+      case 'happy':
+        return Icons.sentiment_very_satisfied_rounded;
+      case 'sad':
+        return Icons.sentiment_very_dissatisfied_rounded;
+      case 'excited':
+        return Icons.celebration_rounded;
+      case 'calm':
+        return Icons.self_improvement_rounded;
+      case 'angry':
+        return Icons.sentiment_dissatisfied_rounded;
+      default:
+        return Icons
+            .sentiment_neutral_rounded; // Fallback for null or unknown moods
+    }
+  }
   // --- WIDGET BUILDER METHODS ---
 
   Widget _buildProfileHeader(bool isMyProfile) {
@@ -177,9 +194,10 @@ class _ProfileViewState extends State<_ProfileView> {
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: Theme.of(context).colorScheme.secondary,
-                  child: Text(
-                    widget.user.moodStatus ?? '😊',
-                    style: const TextStyle(fontSize: 20),
+                  child: Icon(
+                    getMoodIcon(widget.user.moodStatus),
+                    size: 20,
+                    color: Theme.of(context).colorScheme.onSecondary,
                   ),
                 ),
               ),
@@ -513,6 +531,19 @@ class _ProfileViewState extends State<_ProfileView> {
   }
 
   void _showMoodSelectionBottomSheet(BuildContext context) {
+    // This is the currently authenticated user, whose mood we can change.
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) return;
+    final currentUser = authState.user;
+
+    final moods = {
+      'Happy': '😊',
+      'Sad': '😞',
+      'Excited': '🎉',
+      'Calm': '😌',
+      'Angry': '😠',
+    };
+
     showModalBottomSheet(
       context: context,
       builder: (bc) => Wrap(
@@ -522,16 +553,24 @@ class _ProfileViewState extends State<_ProfileView> {
             child: Text('Select Your Mood',
                 style: Theme.of(context).textTheme.titleLarge),
           ),
-          ListTile(
-            leading: const Text('😊', style: TextStyle(fontSize: 24)),
-            title: const Text('Happy'),
-            onTap: () => Navigator.pop(bc),
-          ),
-          ListTile(
-            leading: const Text('😞', style: TextStyle(fontSize: 24)),
-            title: const Text('Sad'),
-            onTap: () => Navigator.pop(bc),
-          ),
+          ...moods.entries.map((entry) {
+            return ListTile(
+              leading: Text(entry.value, style: const TextStyle(fontSize: 24)),
+              title: Text(entry.key),
+              onTap: () {
+                // ✅ Dispatch the event to the ProfileBloc
+                context.read<ProfileBloc>().add(
+                      UpdateUserMood(userId: currentUser.id, mood: entry.key),
+                    );
+
+                // Show immediate feedback
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Mood updated to ${entry.key}!')),
+                );
+                Navigator.pop(bc);
+              },
+            );
+          }).toList(),
         ],
       ),
     );

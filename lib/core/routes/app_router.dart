@@ -87,7 +87,7 @@ class AppRouter {
             }
 
             // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
-            return UploadPage(); // Or UploadPage, depending on your flow
+            return const UploadPage(); // Or UploadPage, depending on your flow
             // return UploadPage(videoPath: videoPath); // Or UploadPage, depending on your flow
           },
         ),
