@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
+import 'package:dadadu_app/shared/widgets/pulsing_radar_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -239,6 +240,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const PulsingRadarIcon(),
+          const SizedBox(
+            height: 24,
+          ),
           const Text(
             "What's your vibe today?",
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
