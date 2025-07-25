@@ -27,7 +27,7 @@ part 'profile_state.dart';
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final StreamUserProfileUseCase _streamUserProfileUseCase;
   final GetUserProfileDataUseCase getUserProfileUseCase;
-  final UpdateUserProfileUseCase _updateProfileUseCase;
+  final UpdateUserProfileUseCase _updateUserProfileUseCase;
   final GetPostsUseCase getPostsUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final UpdateProfilePhotoUseCase _updateProfilePhotoUseCase;
@@ -40,7 +40,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc({
     required StreamUserProfileUseCase streamUserProfileUseCase,
     required this.getUserProfileUseCase,
-    required UpdateUserProfileUseCase updateProfileUseCase,
+    required UpdateUserProfileUseCase updateUserProfileUseCase,
     required this.getPostsUseCase,
     required this.getCurrentUserUseCase,
     required UpdateProfilePhotoUseCase updateProfilePhotoUseCase,
@@ -50,13 +50,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   })  : _streamUserProfileUseCase = streamUserProfileUseCase,
         _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
         _updateUserLocationUseCase = updateUserLocationUseCase,
-        _updateProfileUseCase = updateProfileUseCase,
+        _updateUserProfileUseCase = updateUserProfileUseCase,
         _updateUserMoodUseCase = updateUserMoodUseCase,
         super(const ProfileInitial()) {
     on<SubscribeToUserProfile>(_onSubscribeToUserProfile);
     on<_UserProfileUpdated>(_onUserProfileUpdated);
     on<LoadUserProfile>(_onLoadUserProfile);
-    on<UpdateUserProfileData>(_onUpdateUserProfileData);
+    on<UpdateProfile>(_onUpdateProfile);
     on<LoadUserPosts>(_onLoadUserPosts);
     on<UpdateProfilePhoto>(_onUpdateProfilePhoto);
     on<DeleteProfileImage>(_onDeleteProfileImage);
@@ -84,18 +84,17 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     return super.close();
   }
 
-  Future<void> _onUpdateUserProfileData(
-      UpdateUserProfileData event, Emitter<ProfileState> emit) async {
-    emit(
-        const ProfileUpdating()); // Or ProfileLoaded.copyWith(isUpdating: true) if you want to keep data
-    final result = await _updateProfileUseCase(UpdateUserProfileParams(
-        event.user)); // event.user is already a UserEntity
+  Future<void> _onUpdateProfile(
+    UpdateProfile event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(const ProfileLoading());
+    final result = await _updateUserProfileUseCase(
+      UpdateUserProfileParams(user: event.user, photoFile: event.photoFile),
+    );
     result.fold(
-      (failure) => emit(ProfileError(message: _mapFailureToMessage(failure))),
-      (_) {
-        // After successful update, reload the profile to get the latest data
-        emit(ProfileUpdateSuccess());
-      },
+      (failure) => emit(ProfileError(message: failure.message)),
+      (_) => emit(ProfileUpdateSuccess()),
     );
   }
 

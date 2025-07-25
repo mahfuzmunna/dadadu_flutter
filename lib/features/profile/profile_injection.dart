@@ -29,7 +29,7 @@ Future<void> profileInjection() async {
   // Profile Feature - Presentation Layer (Bloc)
   sl.registerFactory(() => ProfileBloc(
         getUserProfileUseCase: sl(),
-        updateProfileUseCase: sl(),
+        updateUserProfileUseCase: sl(),
         getPostsUseCase: sl(),
         getCurrentUserUseCase: sl(),
         // From Auth feature, ensure it's registered

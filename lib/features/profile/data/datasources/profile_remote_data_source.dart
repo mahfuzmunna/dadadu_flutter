@@ -11,6 +11,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../upload/data/models/post_model.dart';
 import '../../domain/usecases/update_user_location_usecase.dart';
 import '../../domain/usecases/update_user_mood_usecase.dart';
@@ -18,7 +19,8 @@ import '../../domain/usecases/update_user_mood_usecase.dart';
 abstract class ProfileRemoteDataSource {
   Stream<UserModel> streamUserProfile(String userId);
   Future<UserModel> getUserProfile(String userId);
-  Future<void> updateUserProfile(UserModel user);
+
+  Future<void> updateUserProfile({required UserEntity user, File? photoFile});
   Future<List<PostModel>> getUserPosts(String userId);
 
   Future<void> deleteProfileImage(String userId);
@@ -87,22 +89,53 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     }
   }
 
+  // Separating the updateUserProfile method for clarity
   @override
-  Future<void> updateUserProfile(UserModel user) async {
+  Future<void> updateUserProfile(
+      {required UserEntity user, File? photoFile}) async {
     try {
+      String? newPhotoUrl;
+
+      // Step 1: Upload new photo if it exists
+      if (photoFile != null) {
+        final fileExtension = photoFile.path.split('.').last;
+        final objectKey =
+            'profile_images/${user.id}/${_uuid.v4()}.$fileExtension';
+        final mimeType = lookupMimeType(photoFile.path);
+
+        await _minioClient.putObject(
+          _wasabiBucketName,
+          objectKey,
+          photoFile.openRead().cast<Uint8List>(),
+          size: photoFile.lengthSync(),
+          metadata: {if (mimeType != null) 'Content-Type': mimeType},
+        );
+        newPhotoUrl = 'https://$_bunnyCdnHostname/$objectKey';
+      }
+
+      // Step 2: Prepare the data for the database update
+      final updateData = {
+        'username': user.username,
+        'full_name': user.fullName,
+        'bio': user.bio,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
+
+      // If a new photo was uploaded, add its URL to the update payload
+      if (newPhotoUrl != null) {
+        updateData['profile_photo_url'] = newPhotoUrl;
+      }
+
+      // Step 3: Update the 'profiles' table in Supabase
       await _supabaseClient
-          .from('profiles') // Your users table
-          .update(
-              user.toMap()..['updated_at'] = DateTime.now().toIso8601String())
+          .from('profiles')
+          .update(updateData)
           .eq('id', user.id);
     } on PostgrestException catch (e) {
-      throw ServerException(
-        'Failed to update user profile: ${e.message}',
-        code: e.code ?? 'POSTGREST_ERROR',
-      );
+      throw ServerException('Failed to update profile database: ${e.message}');
     } catch (e) {
-      throw ServerException('An unexpected error occurred: ${e.toString()}',
-          code: 'UNKNOWN_ERROR');
+      throw ServerException(
+          'An unexpected error occurred during profile update: ${e.toString()}');
     }
   }
 

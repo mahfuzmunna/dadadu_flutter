@@ -89,20 +89,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (_formKey.currentState?.validate() ?? false) {
       if (_currentUser == null) return;
 
-      if (_editedImageFile != null) {
-        context.read<ProfileBloc>().add(UpdateProfilePhoto(
-            userId: _currentUser!.id, photoFile: _editedImageFile!));
-      }
-
       final updatedUserData = _currentUser!.copyWith(
         username: _usernameController.text.trim(),
         fullName: _fullNameController.text.trim(),
         bio: _bioController.text.trim(),
       );
 
-      context
-          .read<ProfileBloc>()
-          .add(UpdateUserProfileData(user: updatedUserData));
+      // ✅ Dispatch one single, comprehensive event
+      context.read<ProfileBloc>().add(UpdateProfile(
+            user: updatedUserData,
+            photoFile: _editedImageFile,
+          ));
     }
   }
 
@@ -113,7 +110,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       return const Scaffold(
           body: Center(child: Text('User not authenticated.')));
     }
-    _currentUser = authState.user;
 
     return Scaffold(
       appBar: AppBar(
@@ -123,7 +119,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       body: BlocListener<ProfileBloc, ProfileState>(
         listener: (context, profileState) {
           if (profileState is ProfileUpdateSuccess) {
-            context.read<AuthBloc>().add(const AuthRefreshCurrentUser());
+            // context.read<AuthBloc>().add(const AuthRefreshCurrentUser());
             // Show a success message before popping
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

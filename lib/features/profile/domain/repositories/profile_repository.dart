@@ -6,7 +6,6 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
-import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart'; // Reusing UserEntity for profile data
 import '../../../now/domain/entities/post_entity.dart';
 import '../../data/datasources/profile_remote_data_source.dart';
@@ -18,7 +17,11 @@ abstract class ProfileRepository {
 
   Future<Either<Failure, UserEntity>> getUserProfile(String userId);
 
-  Future<Either<Failure, void>> updateUserProfile(UserEntity user);
+  /// Updates the user's profile data, optionally including a new photo.
+  Future<Either<Failure, void>> updateUserProfile({
+    required UserEntity user,
+    File? photoFile,
+  });
 
   Future<Either<Failure, List<PostEntity>>> getUserPosts(String userId);
 
@@ -57,38 +60,14 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateUserProfile(UserEntity user) async {
+  Future<Either<Failure, void>> updateUserProfile(
+      {required UserEntity user, File? photoFile}) async {
     try {
-      // Assuming UserModel can be created from UserEntity for data layer operations
-      final userModel = UserModel(
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        username: user.username,
-        bio: user.bio,
-        profilePhotoUrl: user.profilePhotoUrl,
-        followersCount: user.followersCount,
-        followingCount: user.followingCount,
-        postCount: user.postCount,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
-        rank: user.rank,
-        referralLink: user.referralLink,
-        moodStatus: user.moodStatus,
-        language: user.language,
-        discoverMode: user.discoverMode,
-        isEmailConfirmed: user.isEmailConfirmed,
-        latitude: user.latitude,
-        longitude: user.longitude,
-        location: user.location,
-      );
-      await remoteDataSource.updateUserProfile(userModel);
+      await remoteDataSource.updateUserProfile(
+          user: user, photoFile: photoFile);
       return const Right(null);
     } on ServerException catch (e) {
-      return Left(ServerFailure(e.message));
-    } catch (e) {
-      return Left(
-          ServerFailure('An unexpected error occurred: ${e.toString()}'));
+      return Left(ServerFailure(e.message, code: e.code));
     }
   }
 

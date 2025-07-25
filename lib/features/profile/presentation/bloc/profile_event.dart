@@ -22,12 +22,13 @@ class LoadUserProfile extends ProfileEvent {
   List<Object?> get props => [userId];
 }
 
-class UpdateUserProfileData extends ProfileEvent {
+class UpdateProfile extends ProfileEvent {
   final UserEntity user;
+  final File? photoFile;
 
-  const UpdateUserProfileData({required this.user});
+  const UpdateProfile({required this.user, this.photoFile});
   @override
-  List<Object> get props => [user];
+  List<Object?> get props => [user, photoFile];
 }
 
 class LoadUserPosts extends ProfileEvent {
