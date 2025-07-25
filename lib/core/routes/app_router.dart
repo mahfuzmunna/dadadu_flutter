@@ -12,7 +12,7 @@ import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page
 import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
-import 'package:dadadu_app/features/discover/presentation/pages/discover_page_s.dart';
+import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
