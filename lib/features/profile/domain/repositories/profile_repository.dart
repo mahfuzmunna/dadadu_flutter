@@ -168,8 +168,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
           final distanceInMeters = Geolocator.distanceBetween(
             params.currentLatitude,
             params.currentLongitude,
-            user.latitude!,
-            user.longitude!,
+            double.parse(user.latitude!),
+            double.parse(user.longitude!),
           );
           final distanceInKm = distanceInMeters / 1000;
 

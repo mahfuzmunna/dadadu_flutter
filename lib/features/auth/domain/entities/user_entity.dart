@@ -19,9 +19,10 @@ class UserEntity extends Equatable {
   final String? language;
   final String? discoverMode;
   final bool? isEmailConfirmed;
-  final double? latitude;
-  final double? longitude;
+  final String? latitude;
+  final String? longitude;
   final String? location;
+  final int? diamonds;
 
   const UserEntity({
     required this.id,
@@ -44,6 +45,7 @@ class UserEntity extends Equatable {
     required this.latitude,
     required this.longitude,
     required this.location,
+    this.diamonds,
   });
 
   @override
@@ -68,6 +70,7 @@ class UserEntity extends Equatable {
         latitude,
         longitude,
         location,
+        diamonds,
       ];
 
   UserEntity copyWith({
@@ -88,9 +91,10 @@ class UserEntity extends Equatable {
     String? language,
     String? discoverMode,
     bool? isEmailConfirmed,
-    double? latitude,
-    double? longitude,
+    String? latitude,
+    String? longitude,
     String? location,
+    int? diamonds,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -113,6 +117,7 @@ class UserEntity extends Equatable {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       location: location ?? this.location,
+      diamonds: diamonds ?? this.diamonds,
     );
   }
 }

@@ -258,10 +258,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 language: '',
                 discoverMode: 'Entertainment',
                 isEmailConfirmed: false,
-                latitude: 0.0,
-                longitude: 0.0,
-                location: '',
-              );
+                  latitude: '0.0',
+                  longitude: '0.0',
+                  location: '',
+                  diamonds: 0);
             }
           } catch (e) {
             debugPrint('Error fetching user profile in AuthStateChange: $e');
@@ -286,10 +286,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               language: '',
               discoverMode: 'Entertainment',
               isEmailConfirmed: false,
-              latitude: 0.0,
-              longitude: 0.0,
-              location: '',
-            );
+                latitude: '0.0',
+                longitude: '0.0',
+                location: '',
+                diamonds: 0);
           }
         }
       }

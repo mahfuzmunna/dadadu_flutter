@@ -23,7 +23,8 @@ class UserModel extends UserEntity {
     required super.isEmailConfirmed,
     required super.latitude,
     required super.longitude,
-    required super.location, // Keep if used for temporary local file selection
+    required super.location,
+    super.diamonds,
   });
 
   // Factory constructor to create UserModel from a Map (Supabase query result)
@@ -49,6 +50,7 @@ class UserModel extends UserEntity {
       latitude: map['latitude'],
       longitude: map['longitude'],
       location: map['location'],
+      diamonds: map['diamonds'],
       // Always null when loaded from DB
     );
   }
@@ -77,8 +79,8 @@ class UserModel extends UserEntity {
       'latitude': latitude,
       'longitude': longitude,
       'location': location,
+      'diamonds': diamonds,
     };
   }
 
-// Optional: create a copyWith method for easier state updates
 }
