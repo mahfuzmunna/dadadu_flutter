@@ -7,7 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For Clipboard
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:share_plus/share_plus.dart'; // For sharing content
+import 'package:share_plus/share_plus.dart';
+
+import '../../../../injection_container.dart' as di; // For sharing content
 
 /// This widget acts as a router.
 /// It decides whether to show the current user's profile (passed via constructor)
@@ -24,79 +26,94 @@ class ProfilePage extends StatelessWidget {
     // If a viewedUser is passed directly, it's the current user's profile.
     // This happens when navigating to '/profile' from the bottom nav bar.
     if (viewedUser != null) {
-      return _ProfileView(user: viewedUser!);
-    }
-
-    // If no user is passed, it means we are viewing someone else's profile.
-    // We use the BlocBuilder to fetch the profile data based on the userId from the route.
-    else {
-      return BlocBuilder<ProfileBloc, ProfileState>(
-        builder: (context, state) {
-          if (state is ProfileLoading || state is ProfileInitial) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          if (state is ProfileError) {
-            return Scaffold(
-              appBar: AppBar(title: const Text('Error')),
-              body: Center(child: Text('Error: ${state.message}')),
-            );
-          }
-          if (state is ProfileLoaded) {
-            return _ProfileView(user: state.user);
-          }
-          // Fallback
-          return const Scaffold(
-            body: Center(child: Text('Something went wrong.')),
-          );
-        },
+      return BlocProvider(
+        create: (context) =>
+            di.sl<ProfileBloc>()..add(SubscribeToUserProfile(viewedUser!.id)),
+        child: const _ProfileView(),
       );
     }
+
+    // If viewedUser is not null, it's the current user's profile tab.
+    // We provide a ProfileBloc and subscribe to the current user's ID.
+
+    final user = viewedUser!;
+    return _ProfileContent(
+        user: user,
+        isMyProfile: true,
+        referralLink: user.referralLink ??
+            'https://dadadu.app/ref?uname=${user.username}');
+  }
+}
+
+class _ProfileView extends StatelessWidget {
+  const _ProfileView();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, state) {
+        if (state is ProfileLoading || state is ProfileInitial) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+        if (state is ProfileError) {
+          return Scaffold(body: Center(child: Text(state.message)));
+        }
+        if (state is ProfileLoaded) {
+          final userToDisplay = state.user;
+          final authState = context.watch<AuthBloc>().state;
+          final bool isMyProfile = (authState is AuthAuthenticated)
+              ? authState.user.id == userToDisplay.id
+              : false;
+          final String referralLink =
+              'https://dadadu.app/invite/${userToDisplay.id.substring(0, 8)}';
+
+          // All UI is now built using the live data from the BLoC state
+          return _ProfileContent(
+              user: userToDisplay,
+              isMyProfile: isMyProfile,
+              referralLink: referralLink);
+        }
+        return const Scaffold(
+            body: Center(child: Text('Something went wrong')));
+      },
+    );
   }
 }
 
 /// This is the actual UI for the profile page.
 /// It's a StatefulWidget to manage its own helper methods and dialogs.
-class _ProfileView extends StatefulWidget {
+class _ProfileContent extends StatefulWidget {
   final UserEntity user;
+  final bool isMyProfile;
+  final String referralLink;
 
-  const _ProfileView({required this.user});
+  const _ProfileContent({
+    required this.user,
+    required this.isMyProfile,
+    required this.referralLink,
+  });
 
   @override
-  State<_ProfileView> createState() => _ProfileViewState();
+  State<_ProfileContent> createState() => _ProfileContentState();
 }
 
-class _ProfileViewState extends State<_ProfileView> {
+class _ProfileContentState extends State<_ProfileContent> {
   @override
   Widget build(BuildContext context) {
-    // Determine if the profile being viewed belongs to the currently authenticated user.
-    final authState = context.watch<AuthBloc>().state;
-    final UserEntity? currentAuthUser =
-        (authState is AuthAuthenticated) ? authState.user : null;
-    final bool isMyProfile = currentAuthUser?.id == widget.user.id;
-
-    // Dummy referral link (replace with actual generated link from your backend/logic)
-    final String referralLink =
-        'https://dadadu.app/invite/${widget.user.id.substring(0, 8)}';
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          isMyProfile ? 'My Profile' : (widget.user.username ?? 'Profile'),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
+        title: Text(widget.isMyProfile
+            ? 'My Profile'
+            : (widget.user.fullName ?? 'Profile')),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: Icon(Icons.settings_rounded,
-                color: Theme.of(context).colorScheme.primary),
-            tooltip: 'Settings',
-            onPressed: () => context.push('/settings'),
-          ),
-          const SizedBox(width: 8),
+          if (widget.isMyProfile)
+            IconButton(
+              icon: Icon(Icons.settings_rounded,
+                  color: Theme.of(context).colorScheme.primary),
+              onPressed: () => context.push('/settings'),
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -105,11 +122,11 @@ class _ProfileViewState extends State<_ProfileView> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // --- Profile Header ---
-            _buildProfileHeader(isMyProfile),
+            _buildProfileHeader(widget.isMyProfile),
             const SizedBox(height: 24),
 
             // --- Mood & Badges Info ---
-            if (isMyProfile) ...[
+            if (widget.isMyProfile) ...[
               _buildMoodAndBadgesSection(),
               const SizedBox(height: 24),
             ],
@@ -119,19 +136,19 @@ class _ProfileViewState extends State<_ProfileView> {
             const SizedBox(height: 32),
 
             // --- Referral Card ---
-            if (isMyProfile) ...[
-              _buildReferralCard(referralLink),
+            if (widget.isMyProfile) ...[
+              _buildReferralCard(widget.referralLink),
               const SizedBox(height: 32),
             ],
 
             // --- Match History ---
-            if (isMyProfile) ...[
+            if (widget.isMyProfile) ...[
               _buildMatchHistory(),
               const SizedBox(height: 32),
             ],
 
             // --- Uploaded Videos ---
-            _buildVideosGrid(isMyProfile),
+            _buildVideosGrid(widget.isMyProfile),
           ],
         ),
       ),
@@ -155,9 +172,11 @@ class _ProfileViewState extends State<_ProfileView> {
             .sentiment_neutral_rounded; // Fallback for null or unknown moods
     }
   }
+
   // --- WIDGET BUILDER METHODS ---
 
   Widget _buildProfileHeader(bool isMyProfile) {
+    final rank = widget.user.rank;
     return Column(
       children: [
         Stack(
@@ -213,20 +232,21 @@ class _ProfileViewState extends State<_ProfileView> {
               ?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
-        if (widget.user.rank.isNotEmpty)
-          Chip(
-            avatar: Icon(Icons.star_rounded,
-                color: Theme.of(context).colorScheme.onSecondaryContainer,
-                size: 18),
-            label: Text(
-              widget.user.rank,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSecondaryContainer),
+        if (rank != null)
+          if (rank.isNotEmpty)
+            Chip(
+              avatar: Icon(Icons.star_rounded,
+                  color: Theme.of(context).colorScheme.onSecondaryContainer,
+                  size: 18),
+              label: Text(
+                rank,
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSecondaryContainer),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             ),
-            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-          ),
         const SizedBox(height: 16),
         _buildDynamicActionButton(isMyProfile),
       ],

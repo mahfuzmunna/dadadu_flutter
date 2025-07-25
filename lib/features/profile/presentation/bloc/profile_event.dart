@@ -87,3 +87,18 @@ class UpdateUserMood extends ProfileEvent {
   @override
   List<Object> get props => [userId, mood];
 }
+
+class SubscribeToUserProfile extends ProfileEvent {
+  final String userId;
+
+  const SubscribeToUserProfile(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}
+
+class _UserProfileUpdated extends ProfileEvent {
+  final UserEntity user;
+
+  const _UserProfileUpdated(this.user);
+}

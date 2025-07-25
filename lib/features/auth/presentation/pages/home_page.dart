@@ -48,8 +48,8 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text('User ID: ${user.id}'),
                   Text('Email: ${user.email ?? 'N/A'}'),
-                  Text(
-                      'Email Confirmed: ${user.isEmailConfirmed ? 'Yes' : 'No'}'),
+                  // Text(
+                  //     'Email Confirmed: ${user.isEmailConfirmed ? 'Yes' : 'No'}'),
                   // Display other user data from UserEntity
                 ] else ...[
                   const Text('Not logged in.', style: TextStyle(fontSize: 24)),

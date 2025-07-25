@@ -1,5 +1,6 @@
 // lib/features/profile/data/datasources/profile_remote_data_source.dart
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import '../../domain/usecases/update_user_location_usecase.dart';
 import '../../domain/usecases/update_user_mood_usecase.dart';
 
 abstract class ProfileRemoteDataSource {
+  Stream<UserModel> streamUserProfile(String userId);
   Future<UserModel> getUserProfile(String userId);
   Future<void> updateUserProfile(UserModel user);
   Future<List<PostModel>> getUserPosts(String userId);
@@ -254,6 +256,29 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Stream<UserModel> streamUserProfile(String userId) {
+    try {
+      // Listen to changes on the 'profiles' table for a specific user ID
+      final stream = _supabaseClient
+          .from('profiles')
+          .stream(primaryKey: ['id']).eq('id', userId);
+
+      // The stream returns a List<Map<String, dynamic>>. We need to transform it.
+      return stream.map((data) {
+        if (data.isEmpty) {
+          // You might want to handle the case where the user profile is deleted
+          throw ServerException('User profile not found in stream.',
+              code: 'USER_NOT_FOUND');
+        }
+        // Return the first (and only) user profile from the list as a UserModel
+        return UserModel.fromMap(data.first);
+      });
+    } catch (e) {
+      throw ServerException('Failed to stream user profile: ${e.toString()}');
     }
   }
 }

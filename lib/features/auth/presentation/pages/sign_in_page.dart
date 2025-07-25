@@ -2,12 +2,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'
     hide AuthState; // Hide AuthState to avoid conflict with bloc
 
 import '../bloc/auth_bloc.dart';
-import 'forgot_password_page.dart';
-import 'sign_up_page.dart'; // NEW: Import for navigation
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -29,9 +28,9 @@ class _SignInPageState extends State<SignInPage> {
 
   void _showSnackBar(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -46,10 +45,7 @@ class _SignInPageState extends State<SignInPage> {
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            _showSnackBar('Logged in successfully!');
-            // Navigation handled by SplashPage listener or root router
-          } else if (state is AuthError) {
+          if (state is AuthError) {
             _showSnackBar('Login failed: ${state.message}');
           } else if (state is AuthUnauthenticated && state.message != null) {
             _showSnackBar(state.message!);
@@ -74,12 +70,12 @@ class _SignInPageState extends State<SignInPage> {
 
                   TextFormField(
                     controller: _emailController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Email',
                       hintText: 'your@example.com',
-                      prefixIcon: const Icon(Icons.email_outlined),
+                      prefixIcon: Icon(Icons.email_outlined),
                       border:
-                          const OutlineInputBorder(), // Material 3 uses OutlineInputBorder by default
+                          OutlineInputBorder(), // Material 3 uses OutlineInputBorder by default
                     ),
                     keyboardType: TextInputType.emailAddress,
                     enabled: !isLoading,
@@ -87,11 +83,11 @@ class _SignInPageState extends State<SignInPage> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                       hintText: 'Enter your password',
-                      prefixIcon: const Icon(Icons.lock_outline),
-                      border: const OutlineInputBorder(),
+                      prefixIcon: Icon(Icons.lock_outline),
+                      border: OutlineInputBorder(),
                     ),
                     obscureText: true,
                     enabled: !isLoading,
@@ -125,8 +121,7 @@ class _SignInPageState extends State<SignInPage> {
                         const SizedBox(height: 12),
                         TextButton(
                           onPressed: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (_) => const ForgotPasswordPage()));
+                            context.push('/forgot-password');
                           },
                           child: const Text('Forgot Password?'),
                         ),
@@ -180,8 +175,7 @@ class _SignInPageState extends State<SignInPage> {
                                     color: colorScheme.onSurfaceVariant)),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (_) => const SignUpPage()));
+                                context.push('/signUp');
                               },
                               child: const Text('Sign Up'),
                             ),

@@ -14,6 +14,8 @@ import '../usecases/update_user_location_usecase.dart';
 import '../usecases/update_user_mood_usecase.dart'; // Assuming PostEntity exists
 
 abstract class ProfileRepository {
+  Either<Failure, Stream<UserEntity>> streamUserProfile(String userId);
+
   Future<Either<Failure, UserEntity>> getUserProfile(String userId);
 
   Future<Either<Failure, void>> updateUserProfile(UserEntity user);
@@ -152,6 +154,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
     try {
       await remoteDataSource.updateUserMood(params);
       return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Either<Failure, Stream<UserEntity>> streamUserProfile(String userId) {
+    try {
+      final userStream = remoteDataSource.streamUserProfile(userId);
+      // The UserModel from the data source is compatible with UserEntity
+      return Right(userStream);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     }

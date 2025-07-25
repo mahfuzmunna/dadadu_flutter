@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:dadadu_app/features/profile/domain/usecases/stream_user_profile_usecase.dart';
 import 'package:dadadu_app/features/profile/domain/usecases/update_user_location_usecase.dart';
 import 'package:dadadu_app/features/profile/domain/usecases/update_user_mood_usecase.dart';
 import 'package:equatable/equatable.dart';
@@ -24,6 +25,7 @@ part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  final StreamUserProfileUseCase _streamUserProfileUseCase;
   final GetUserProfileDataUseCase getUserProfileUseCase;
   final UpdateUserProfileUseCase _updateProfileUseCase;
   final GetPostsUseCase getPostsUseCase;
@@ -33,7 +35,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final UpdateUserLocationUseCase _updateUserLocationUseCase;
   final UpdateUserMoodUseCase _updateUserMoodUseCase;
 
+  StreamSubscription<UserEntity>? _profileSubscription;
+
   ProfileBloc({
+    required StreamUserProfileUseCase streamUserProfileUseCase,
     required this.getUserProfileUseCase,
     required UpdateUserProfileUseCase updateProfileUseCase,
     required this.getPostsUseCase,
@@ -42,11 +47,14 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required this.deleteProfileImageUseCase,
     required UpdateUserLocationUseCase updateUserLocationUseCase,
     required UpdateUserMoodUseCase updateUserMoodUseCase,
-  })  : _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
+  })  : _streamUserProfileUseCase = streamUserProfileUseCase,
+        _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
         _updateUserLocationUseCase = updateUserLocationUseCase,
         _updateProfileUseCase = updateProfileUseCase,
         _updateUserMoodUseCase = updateUserMoodUseCase,
         super(const ProfileInitial()) {
+    on<SubscribeToUserProfile>(_onSubscribeToUserProfile);
+    on<_UserProfileUpdated>(_onUserProfileUpdated);
     on<LoadUserProfile>(_onLoadUserProfile);
     on<UpdateUserProfileData>(_onUpdateUserProfileData);
     on<LoadUserPosts>(_onLoadUserPosts);
@@ -68,6 +76,12 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           emit(ProfileError(message: _mapFailureToMessage(failure))),
       (currentUser) => emit(ProfileLoaded(user: currentUser)),
     );
+  }
+
+  @override
+  Future<void> close() {
+    _profileSubscription?.cancel();
+    return super.close();
   }
 
   Future<void> _onUpdateUserProfileData(
@@ -193,6 +207,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         // will automatically push a new ProfileLoaded state, updating the UI.
       },
     );
+  }
+
+  Future<void> _onSubscribeToUserProfile(
+    SubscribeToUserProfile event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(const ProfileLoading());
+    await _profileSubscription?.cancel();
+
+    final result = await _streamUserProfileUseCase(event.userId);
+
+    result.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (userStream) {
+        _profileSubscription = userStream.listen((user) {
+          add(_UserProfileUpdated(user));
+        });
+      },
+    );
+  }
+
+  void _onUserProfileUpdated(
+      _UserProfileUpdated event, Emitter<ProfileState> emit) {
+    emit(ProfileLoaded(user: event.user));
   }
 }
 

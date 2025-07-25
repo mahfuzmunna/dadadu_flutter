@@ -61,37 +61,14 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   // Stream subscription for deep links
   StreamSubscription? _sub;
-  late final AuthBloc _authBloc;
-  late final FeedBloc _postBloc;
-  late final ProfileBloc _profileBloc;
-
-  late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
-    _authBloc = di.sl<AuthBloc>();
-    _postBloc = di.sl<FeedBloc>();
-    _profileBloc = di.sl<ProfileBloc>();
-
-    debugPrint('MyApp: AuthBloc instance retrieved from DI.');
-    debugPrint('MyApp: HomeFeedBloc instance retrieved from DI.');
-    debugPrint('MyApp: ProfileBloc instance retrieved from DI.');
-
-    _router = AppRouter.router(authBloc: _authBloc);
-    debugPrint('MyApp: GoRouter initialized with AuthBloc.');
-
-    _authBloc.add(const AuthInitialCheckRequested());
   }
-
   @override
   void dispose() {
     _sub?.cancel();
-    _authBloc.close();
-    _postBloc.close();
-    _profileBloc.close();
-    debugPrint('MyApp: AuthBloc disposed.');
-    debugPrint('MyApp: AuthBloc, HomeFeedBloc and ProfileBloc disposed.');
     super.dispose();
   }
 
@@ -102,17 +79,16 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (context) => ThemeCubit()),
-        BlocProvider<AuthBloc>.value(
-          value: _authBloc,
+        BlocProvider(
+          create: (context) =>
+              di.sl<AuthBloc>()..add(const AuthInitialCheckRequested()),
         ),
-        BlocProvider<FeedBloc>.value(
-          value: _postBloc,
-        ),
-        BlocProvider<ProfileBloc>.value(
-          value: _profileBloc,
-        ),
+        BlocProvider(create: (context) => di.sl<FeedBloc>()),
+        BlocProvider(create: (context) => di.sl<ProfileBloc>()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(builder: (context, themeMode) {
+        final GoRouter router =
+            AppRouter.router(authBloc: context.watch<AuthBloc>());
         return MaterialApp.router(
           debugShowCheckedModeBanner: false,
           // Set to false for production
@@ -120,7 +96,7 @@ class _MyAppState extends State<MyApp> {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: themeMode,
-          routerConfig: _router, // Use the configured GoRouter instance
+          routerConfig: router, // Use the configured GoRouter instance
         );
       }),
     );

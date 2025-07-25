@@ -15,6 +15,7 @@ import 'domain/repositories/profile_repository.dart';
 import 'domain/usecases/delete_profile_image_usecase.dart';
 import 'domain/usecases/get_posts_usecase.dart';
 import 'domain/usecases/get_user_profile_data_usecase.dart';
+import 'domain/usecases/stream_user_profile_usecase.dart';
 import 'domain/usecases/update_profile_photo_usecase.dart';
 // Profile Feature Presentation Layer
 import 'domain/usecases/update_user_location_usecase.dart';
@@ -36,6 +37,7 @@ Future<void> profileInjection() async {
         deleteProfileImageUseCase: sl(),
         updateUserLocationUseCase: sl(),
         updateUserMoodUseCase: sl(),
+        streamUserProfileUseCase: sl(),
       ));
 
   // Profile Feature - Domain Layer (Use Cases)
@@ -47,6 +49,7 @@ Future<void> profileInjection() async {
   sl.registerLazySingleton(() => GetLocationNameUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUserLocationUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUserMoodUseCase(sl()));
+  sl.registerLazySingleton(() => StreamUserProfileUseCase(sl()));
 
   sl.registerLazySingleton<LocationRepository>(
       () => LocationRepositoryImpl(remoteDataSource: sl()));

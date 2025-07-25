@@ -163,9 +163,13 @@ class AppRouter {
 
                         // Instead of fetching data here, we provide a ProfileBloc
                         // that will do the fetching for us.
+                        // return BlocProvider<ProfileBloc>(
+                        //   create: (context) => di.sl<ProfileBloc>()
+                        //     ..add(LoadUserProfile(userId: userId)),
+
                         return BlocProvider<ProfileBloc>(
                           create: (context) => di.sl<ProfileBloc>()
-                            ..add(LoadUserProfile(userId: userId)),
+                            ..add(SubscribeToUserProfile(userId)),
                           // The ProfilePage now takes NO arguments for this route.
                           // It will get all its data from the ProfileBloc.
                           child: const ProfilePage(),
@@ -185,46 +189,43 @@ class AppRouter {
         final authState = authBloc.state;
         final currentLocation = state.uri.toString();
 
+        // 1. Define public and onboarding routes
+        const publicRoutes = ['/login', '/signUp', '/forgot-password'];
+        const onboardingRoute = '/upload-profile-photo';
+
+        final isOnPublicRoute = publicRoutes.contains(currentLocation);
+        final isOnOnboardingRoute = currentLocation == onboardingRoute;
+        final isOnSplash = currentLocation == '/';
+
+        // 2. Handle INITIALIZING state
         if (authState is AuthInitial || authState is AuthLoading) {
-          // While checking auth, always show the splash screen.
-          return currentLocation == '/' ? null : '/';
+          // While initializing, only allow the splash screen
+          return isOnSplash ? null : '/';
         }
 
+        // 3. Handle SIGN UP SUCCESS (Onboarding) state
         if (authState is AuthSignUpSuccess) {
-          return currentLocation == '/upload-profile-photo'
-              ? null
-              : '/upload-profile-photo';
+          // If user is in onboarding, they can ONLY be on the onboarding route
+          return isOnOnboardingRoute ? null : onboardingRoute;
         }
 
-        // 2. Handle the initial loading state
-
-        // 3. Handle the Authenticated state
-        final isLoggedIn = authState is AuthAuthenticated;
-        final isAuthRoute = currentLocation == '/login' ||
-            currentLocation == '/signUp' ||
-            currentLocation == '/forgot-password';
-        if (isLoggedIn) {
-          // If the user is logged in but on the splash or an auth route,
-          // redirect them to the home page.
-          if (currentLocation == '/' || isAuthRoute) {
+        // 4. Handle AUTHENTICATED state
+        if (authState is AuthAuthenticated) {
+          // If logged in, they should NOT be on public auth routes, onboarding, or splash
+          if (isOnPublicRoute || isOnOnboardingRoute || isOnSplash) {
             return '/home';
           }
         }
-        // 4. Handle the Unauthenticated state
+
+        // 5. Handle UNAUTHENTICATED state
         else {
-          // If the user is not logged in and is trying to access a protected route
-          // (i.e., any route that ISN'T an auth route), redirect them to the login page.
-          if (!isAuthRoute) {
+          // If logged out, they can ONLY be on public routes
+          if (!isOnPublicRoute) {
             return '/login';
           }
         }
-        if (authState is FirstRun && isLoggedIn) {
-          return currentLocation == '/home' ? null : '/home';
-        }
 
-        // 5. No redirection needed
-        // If none of the above conditions are met, the user is allowed to stay on the current page.
-        // (e.g., logged in and on a protected page, or logged out and on an auth page).
+        // 6. No redirection needed
         return null;
       },
 

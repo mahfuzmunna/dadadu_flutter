@@ -45,10 +45,10 @@ class UserModel extends UserEntity {
       moodStatus: map['mood_status'],
       language: map['language'],
       discoverMode: map['discover_mode'],
-      isEmailConfirmed: false,
-      latitude: 0.0,
-      longitude: 0.0,
-      location: '',
+      isEmailConfirmed: map['is_confirmed_email'],
+      latitude: map['latitude'],
+      longitude: map['longitude'],
+      location: map['location'],
       // Always null when loaded from DB
     );
   }

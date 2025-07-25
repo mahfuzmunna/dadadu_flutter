@@ -4,32 +4,38 @@ part of 'auth_bloc.dart';
 @immutable
 abstract class AuthState extends Equatable {
   const AuthState();
-
   @override
   List<Object?> get props => [];
 }
 
+/// The initial state before any checks have been made.
 class AuthInitial extends AuthState {}
 
+/// State while an async authentication action is in progress.
 class AuthLoading extends AuthState {}
 
+/// State for a fully authenticated user.
 class AuthAuthenticated extends AuthState {
   final UserEntity user;
-
   const AuthAuthenticated({required this.user});
-
   @override
-  List<Object?> get props => [user];
+  List<Object> get props => [user];
 }
 
+/// State for an unauthenticated user, with an optional message for failed logins.
 class AuthUnauthenticated extends AuthState {
-  final String?
-      message; // Optional message for sign up success (e.g., check email)
-
+  final String? message;
   const AuthUnauthenticated({this.message});
+}
 
+/// A special, temporary state for when a user has just signed up
+/// and needs to complete the onboarding (e.g., upload a photo).
+class AuthSignUpSuccess extends AuthState {
+  final UserEntity user;
+
+  const AuthSignUpSuccess({required this.user});
   @override
-  List<Object?> get props => [message];
+  List<Object> get props => [user];
 }
 
 class AuthError extends AuthState {
@@ -57,15 +63,6 @@ class AuthPasswordResetEmailSent extends AuthState {
 
   @override
   List<Object?> get props => [email];
-}
-
-class AuthSignUpSuccess extends AuthState {
-  final UserEntity user;
-
-  const AuthSignUpSuccess({required this.user});
-
-  @override
-  List<Object?> get props => [user];
 }
 
 class AuthSignInSuccess extends AuthState {

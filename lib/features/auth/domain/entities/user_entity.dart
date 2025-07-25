@@ -8,20 +8,20 @@ class UserEntity extends Equatable {
   final String? username;
   final String? bio;
   final String? profilePhotoUrl;
-  final int followersCount;
-  final int followingCount;
+  final int? followersCount;
+  final int? followingCount;
   final int? postCount;
-  final String createdAt;
-  final String updatedAt;
-  final String rank;
-  final String referralLink;
+  final String? createdAt;
+  final String? updatedAt;
+  final String? rank;
+  final String? referralLink;
   final String? moodStatus;
-  final String language;
-  final String discoverMode;
-  final bool isEmailConfirmed;
-  final double latitude;
-  final double longitude;
-  final String location;
+  final String? language;
+  final String? discoverMode;
+  final bool? isEmailConfirmed;
+  final double? latitude;
+  final double? longitude;
+  final String? location;
 
   const UserEntity({
     required this.id,

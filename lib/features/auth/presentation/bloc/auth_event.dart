@@ -10,55 +10,56 @@ abstract class AuthEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Dispatched once at app startup to check the current session.
 class AuthInitialCheckRequested extends AuthEvent {
-  // Renamed from AuthCheckRequested for clarity
   const AuthInitialCheckRequested();
 }
 
+/// Dispatched from the UI when the user tries to sign in.
 class AuthSignInRequested extends AuthEvent {
   final String email;
   final String password;
-
   const AuthSignInRequested({required this.email, required this.password});
-
-  @override
-  List<Object> get props => [email, password]; // These are non-nullable
 }
 
+/// Dispatched from the UI when the user tries to sign up.
 class AuthSignUpRequested extends AuthEvent {
   final String email;
   final String password;
-  final String? fullName; // NEW
-  final String? username; // NEW
-  final String? bio; // NEW
-  final File? profilePhotoFile;
+  final String fullName;
+  final String username;
 
-  const AuthSignUpRequested({
-    required this.email,
-    required this.password,
-    this.fullName,
-    this.username,
-    this.bio,
-    this.profilePhotoFile,
-  });
-
-  @override
-  // Updated to List<Object?> because fullName, username, bio are nullable
-  List<Object?> get props =>
-      [email, password, fullName, username, bio, profilePhotoFile];
+  const AuthSignUpRequested(
+      {required this.email,
+      required this.password,
+      required this.fullName,
+      required this.username});
 }
 
+/// Dispatched from the photo upload page to finalize the sign-up flow.
+class AuthOnboardingComplete extends AuthEvent {
+  final UserEntity user;
+
+  const AuthOnboardingComplete({required this.user});
+}
+
+/// Dispatched from the UI to sign the user out.
+class AuthSignOutRequested extends AuthEvent {
+  const AuthSignOutRequested();
+}
+
+/// Internal event triggered by the Supabase auth state listener.
+class _AuthUserChanged extends AuthEvent {
+  final UserEntity? user;
+
+  const _AuthUserChanged(this.user);
+}
+
+// TO_BE_IMPLEMENTED
 class AuthSignInWithOAuthRequested extends AuthEvent {
   final OAuthProvider provider;
-
   const AuthSignInWithOAuthRequested({required this.provider});
 
-  @override
-  List<Object> get props => [provider]; // This is non-nullable
-}
-
-class AuthSignOutRequested extends AuthEvent {
-  const AuthSignOutRequested(); // No props
 }
 
 class AuthPasswordResetRequested extends AuthEvent {
@@ -83,13 +84,4 @@ class AuthUserChanged extends AuthEvent {
 
 class AuthRefreshCurrentUser extends AuthEvent {
   const AuthRefreshCurrentUser(); // No props, it's just a signal
-}
-
-class AuthOnboardingComplete extends AuthEvent {
-  final UserEntity user;
-
-  const AuthOnboardingComplete({required this.user});
-
-  @override
-  List<Object> get props => [user];
 }
