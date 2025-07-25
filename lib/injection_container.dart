@@ -1,3 +1,4 @@
+import 'package:dadadu_app/features/discover/discover_injection.dart';
 import 'package:get_it/get_it.dart';
 import 'package:minio/minio.dart';
 import 'package:uuid/uuid.dart';
@@ -54,10 +55,7 @@ Future<void> init() async {
 // }
 
 // Add similar injection functions for other features
-Future<void> discoverInjection() async {
-  // sl.registerFactory(() => DiscoverBloc(...));
-  // sl.registerLazySingleton(() => DiscoverRepository(...));
-}
+
 /*Future<void> uploadInjection() async {
   // Bloc
   sl.registerFactory(

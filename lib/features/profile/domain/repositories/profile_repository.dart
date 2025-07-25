@@ -3,10 +3,12 @@
 import 'dart:io';
 
 import 'package:dartz/dartz.dart';
+import 'package:geolocator/geolocator.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart'; // Reusing UserEntity for profile data
+import '../../../discover/domain/usecases/find_users_by_vibe_usecase.dart';
 import '../../../now/domain/entities/post_entity.dart';
 import '../../data/datasources/profile_remote_data_source.dart';
 import '../usecases/update_user_location_usecase.dart';
@@ -36,6 +38,9 @@ abstract class ProfileRepository {
   });
 
   Future<Either<Failure, void>> updateUserMood(UpdateUserMoodParams params);
+
+  Future<Either<Failure, List<UserWithDistance>>> findUsersByVibe(
+      FindUsersByVibeParams params);
 }
 
 class ProfileRepositoryImpl implements ProfileRepository {
@@ -144,6 +149,41 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final userStream = remoteDataSource.streamUserProfile(userId);
       // The UserModel from the data source is compatible with UserEntity
       return Right(userStream);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<UserWithDistance>>> findUsersByVibe(
+      FindUsersByVibeParams params) async {
+    try {
+      // 1. Fetch all users with the matching vibe
+      final users = await remoteDataSource.findUsersByVibe(params.vibe);
+
+      // 2. Calculate distance, filter, and sort on the client-side
+      final List<UserWithDistance> nearbyUsers = [];
+      for (final user in users) {
+        if (user.latitude != null && user.longitude != null) {
+          final distanceInMeters = Geolocator.distanceBetween(
+            params.currentLatitude,
+            params.currentLongitude,
+            user.latitude!,
+            user.longitude!,
+          );
+          final distanceInKm = distanceInMeters / 1000;
+
+          if (distanceInKm <= params.maxDistanceInKm) {
+            nearbyUsers
+                .add(UserWithDistance(user: user, distanceInKm: distanceInKm));
+          }
+        }
+      }
+
+      // 3. Sort the filtered list by distance (ascending)
+      nearbyUsers.sort((a, b) => a.distanceInKm.compareTo(b.distanceInKm));
+
+      return Right(nearbyUsers);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     }

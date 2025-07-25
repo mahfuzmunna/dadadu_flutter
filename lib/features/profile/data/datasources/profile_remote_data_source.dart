@@ -33,6 +33,8 @@ abstract class ProfileRemoteDataSource {
   });
 
   Future<void> updateUserMood(UpdateUserMoodParams params);
+
+  Future<List<UserModel>> findUsersByVibe(String vibe);
 }
 
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -312,6 +314,23 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       });
     } catch (e) {
       throw ServerException('Failed to stream user profile: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<UserModel>> findUsersByVibe(String vibe) async {
+    try {
+      final List<Map<String, dynamic>> response = await _supabaseClient
+          .from('profiles')
+          .select()
+          .eq('discover_mode', vibe); // Filter by the selected vibe
+      // Note: We don't filter by distance here to allow for broader searches if needed.
+      // Filtering is handled efficiently on the client-side in the repository.
+      return response.map((map) => UserModel.fromMap(map)).toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 }

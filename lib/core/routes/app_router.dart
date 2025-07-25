@@ -12,7 +12,7 @@ import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page
 import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
-import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
+import 'package:dadadu_app/features/discover/presentation/pages/discover_page_s.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
@@ -21,9 +21,11 @@ import 'package:dadadu_app/features/settings/presentation/pages/settings_page.da
 // import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/sign_up_page.dart';
+import '../../features/discover/presentation/pages/vibe_users_page.dart';
 import '../../features/now/home_injection.dart' as di;
 import '../../features/posts/presentation/pages/upload_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
@@ -68,6 +70,17 @@ class AppRouter {
             path: '/upload-profile-photo',
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const UploadProfilePhotoPage()),
+        GoRoute(
+          path: '/discover/users', // The path for the new page
+          builder: (context, state) {
+            // We pass the vibe and position as a map in the 'extra' parameter
+            final args = state.extra as Map<String, dynamic>;
+            final vibe = args['vibe'] as String;
+            final position = args['position'] as Position;
+
+            return VibeUsersPage(vibe: vibe, currentPosition: position);
+          },
+        ),
         GoRoute(
             path: '/settings',
             parentNavigatorKey: _rootNavigatorKey,

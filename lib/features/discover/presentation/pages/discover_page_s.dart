@@ -1,16 +1,18 @@
-// lib/features/now/presentation/pages/discover_page.dart
+// lib/features/home/presentation/pages/discover_page.dart
+
 import 'dart:async';
 
-import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/discover/domain/usecases/find_users_by_vibe_usecase.dart';
+import 'package:dadadu_app/features/location/domain/usecases/get_location_name_usecase.dart';
+import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:dadadu_app/injection_container.dart' as di;
 import 'package:dadadu_app/shared/widgets/pulsing_radar_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
-
-import '../../../../injection_container.dart' as di;
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../location/domain/usecases/get_location_name_usecase.dart';
-import '../../../profile/presentation/bloc/profile_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 enum LocationPermissionStatus {
   initial,
@@ -22,54 +24,31 @@ enum LocationPermissionStatus {
 }
 
 class DiscoverPage extends StatefulWidget {
-  DiscoverPage({super.key});
+  const DiscoverPage({super.key});
 
   @override
   State<DiscoverPage> createState() => _DiscoverPageState();
 }
 
-// ✅ REMOVED: SingleTickerProviderStateMixin is no longer needed
 class _DiscoverPageState extends State<DiscoverPage> {
-  // ✅ REMOVED: TabController is no longer needed
-  // late TabController _tabController;
+  LocationPermissionStatus _locationStatus = LocationPermissionStatus.initial;
+  String _locationErrorMessage = "";
+  Position? _currentPosition;
+  bool _isLocationListenerActive = false;
 
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
   final PageController _videoPageController = PageController();
-  int _currentVideoPageIndex = 0;
 
   StreamSubscription<Position>? _positionStreamSubscription;
-  bool _isLocationListenerActive = false;
-  LocationPermissionStatus _locationStatus = LocationPermissionStatus.initial;
-  String _locationErrorMessage = "";
-  String? _selectedVibe;
 
   @override
   void initState() {
     super.initState();
-    // ✅ REMOVED: No need to initialize TabController
-    // _tabController = TabController(length: 2, vsync: this);
-    _checkLocationPermissionAndService();
-    _videoPageController.addListener(() {
-      final newPage = _videoPageController.page?.round();
-      if (newPage != null && newPage != _currentVideoPageIndex) {
-        setState(() {
-          _currentVideoPageIndex = newPage;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
     _positionStreamSubscription?.cancel();
-    // ✅ REMOVED: No need to dispose TabController
-    // _tabController.dispose();
-    _videoPageController.dispose();
-    super.dispose();
+    _checkLocationPermissionAndService();
   }
 
-  // --- Location Handling Methods (No Changes Needed) ---
   Future<void> _checkLocationPermissionAndService() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -78,11 +57,9 @@ class _DiscoverPageState extends State<DiscoverPage> {
       // Test if location services are enabled.
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        setState(() {
-          _locationStatus = LocationPermissionStatus.serviceDisabled;
-          _locationErrorMessage =
-              'Location services are disabled. Please enable them in your device settings.';
-        });
+        if (mounted)
+          setState(
+              () => _locationStatus = LocationPermissionStatus.serviceDisabled);
         return;
       }
 
@@ -90,28 +67,26 @@ class _DiscoverPageState extends State<DiscoverPage> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          setState(() {
-            _locationStatus = LocationPermissionStatus.denied;
-            _locationErrorMessage =
-                'Location permissions are denied. Please grant permission to personalize your experience.';
-          });
+          if (mounted)
+            setState(() => _locationStatus = LocationPermissionStatus.denied);
           return;
         }
       }
-
       if (permission == LocationPermission.deniedForever) {
-        setState(() {
-          _locationStatus = LocationPermissionStatus.deniedForever;
-          _locationErrorMessage =
-              'Location permissions are permanently denied. Please enable them from the app settings.';
-        });
+        if (mounted)
+          setState(
+              () => _locationStatus = LocationPermissionStatus.deniedForever);
         return;
       }
 
       // Permissions are granted, and service is enabled.
-      setState(() {
-        _locationStatus = LocationPermissionStatus.granted;
-      });
+      final position = await Geolocator.getCurrentPosition();
+      if (mounted) {
+        setState(() {
+          _locationStatus = LocationPermissionStatus.granted;
+          _currentPosition = position;
+        });
+      }
       _startLocationUpdates();
       // _getCurrentLocation(); // Optionally get current location after permission
       // _getCurrentLocationAndUpdateProfile();
@@ -184,61 +159,33 @@ class _DiscoverPageState extends State<DiscoverPage> {
     }
   }
 
-  void _openAppSettings() {
-    Geolocator.openAppSettings();
-  }
+  void _openAppSettings() => Geolocator.openAppSettings();
 
-  void _openLocationSettings() {
-    Geolocator.openLocationSettings();
-  }
+  void _openLocationSettings() => Geolocator.openLocationSettings();
 
   // --- Navigation & Other Callbacks (No Changes Needed) ---
   void _navigateToUserProfile(String userId) {
     // ... This entire method remains the same ...
   }
 
-  void _navigateToPostDetail(PostEntity post) {
-    // ... This entire method remains the same ...
-  }
-
-  // --- UI Building Methods ---
-  @override
-  Widget build(BuildContext context) {
-    Widget bodyContent;
-
+  Widget _buildBody() {
     switch (_locationStatus) {
       case LocationPermissionStatus.initial:
-        bodyContent = const Center(child: CircularProgressIndicator());
-        break;
+        return const Center(child: CircularProgressIndicator());
       case LocationPermissionStatus.granted:
-        // ✅ UPDATED LOGIC: If a vibe is selected, show the new content page.
-        // Otherwise, show the vibe selection page.
-        if (_selectedVibe == null) {
-          bodyContent = _buildVibeSelectionPage();
-        } else {
-          bodyContent = _buildVibeContentPage();
-        }
-        break;
+        return _buildVibeSelectionPage();
       default:
-        bodyContent = _buildLocationErrorPage();
-        break;
+        return _buildLocationErrorPage();
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldMessengerKey,
-      // ✅ The AppBar is now simpler and doesn't need a TabBar
       appBar: AppBar(
-        leading: _selectedVibe != null
-            ? IconButton(
-                onPressed: () => setState(() {
-                      _selectedVibe = null;
-                    }),
-                icon: const Icon(Icons.arrow_back_ios_new))
-            : null,
-        title: Text(_selectedVibe ?? 'Discover'),
-        // The back button will appear automatically inside the Vibe Content Page
+        title: const Text('Discover'),
       ),
-      body: bodyContent,
+      body: _buildBody(),
     );
   }
 
@@ -248,14 +195,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const PulsingRadarIcon(),
-          const SizedBox(
-            height: 24,
-          ),
-          const Text(
-            "What's your vibe today?",
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            textAlign: TextAlign.center,
-          ),
+          const SizedBox(height: 24),
+          const Text("What's your vibe today?", style: TextStyle(fontSize: 24)),
           const SizedBox(height: 40),
           _buildVibeButton("Love", Icons.favorite, Colors.pink),
           const SizedBox(height: 20),
@@ -279,9 +220,16 @@ class _DiscoverPageState extends State<DiscoverPage> {
         minimumSize: const Size(250, 60),
       ),
       onPressed: () {
-        setState(() {
-          _selectedVibe = label;
-        });
+        if (_currentPosition != null) {
+          // ✅ Navigate to the new page, passing the vibe and position
+          context.push('/discover/users', extra: {
+            'vibe': label,
+            'position': _currentPosition!,
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Getting your location, please wait...')));
+        }
       },
     );
   }
@@ -327,38 +275,6 @@ class _DiscoverPageState extends State<DiscoverPage> {
     );
   }
 
-  // ✅ NEW WIDGET: This builds the page shown AFTER a vibe is selected.
-  Widget _buildVibeContentPage() {
-    // For demonstration, we'll show a simple placeholder.
-    // You can easily swap these placeholders with your _buildVideoFeed()
-    // and _buildExploreGrid() methods.
-
-    return Column(
-      children: [
-        // Header moved to appbar
-
-        // Content for the vibe
-        Expanded(
-          child: Center(
-            child: Text(
-              'Showing content for $_selectedVibe',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-          ),
-          // EXAMPLE of where your content would go:
-          // child: TabBarView(
-          //   controller: _tabController,
-          //   children: [
-          //     _buildVideoFeed(), // Your existing video feed
-          //     _buildExploreGrid(), // Your existing explore grid
-          //   ],
-          // ),
-        ),
-      ],
-    );
-  }
-
-  // This method is unchanged, ready to be used inside _buildVibeContentPage
   void _showSnackBar(String message, {bool isError = false}) {
     final scaffoldMessenger = _scaffoldMessengerKey.currentState;
     if (scaffoldMessenger == null) return;
@@ -376,16 +292,67 @@ class _DiscoverPageState extends State<DiscoverPage> {
       ),
     );
   }
+}
 
-/*
-  // Your existing (commented out) methods are preserved and can be
-  // placed inside the _buildVibeContentPage method.
-  Widget _buildVideoFeed() {
-    // ...
-  }
+class _UserCard extends StatelessWidget {
+  final UserWithDistance userWithDistance;
 
-  Widget _buildExploreGrid() {
-    // ...
+  const _UserCard({required this.userWithDistance});
+
+  @override
+  Widget build(BuildContext context) {
+    final user = userWithDistance.user;
+    final distance = userWithDistance.distanceInKm.toStringAsFixed(1);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 35,
+              backgroundImage: user.profilePhotoUrl != null
+                  ? CachedNetworkImageProvider(user.profilePhotoUrl!)
+                  : null,
+              child: user.profilePhotoUrl == null
+                  ? const Icon(Icons.person)
+                  : null,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(user.fullName ?? 'No Name',
+                      style: Theme.of(context).textTheme.titleLarge),
+                  if (user.username != null)
+                    Text('@${user.username!}',
+                        style: Theme.of(context).textTheme.bodyMedium),
+                  const SizedBox(height: 8),
+                  if (user.bio != null && user.bio!.isNotEmpty)
+                    Text(user.bio!,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on,
+                          size: 16,
+                          color: Theme.of(context).colorScheme.primary),
+                      const SizedBox(width: 4),
+                      Text(
+                          '$distance km away - ${user.location ?? 'Unknown Location'}',
+                          style: Theme.of(context).textTheme.bodySmall),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-  */
 }
