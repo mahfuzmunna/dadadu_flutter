@@ -3,6 +3,7 @@
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:dadadu_app/shared/widgets/emoji_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For Clipboard
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -155,6 +156,21 @@ class _ProfileContentState extends State<_ProfileContent> {
     );
   }
 
+  String getRankEmoji(String? rank) {
+    switch (rank?.toLowerCase()) {
+      case 'leaf':
+        return '🍃';
+      case 'threeleaf':
+        return '☘️';
+      case 'fiveleaf':
+        return '🌟'; // A star for a higher rank
+      case 'dadalord':
+        return '👑'; // A crown for the highest rank
+      default:
+        return ''; // Return an empty string for unknown ranks
+    }
+  }
+
   IconData getMoodIcon(String? moodStatus) {
     switch (moodStatus?.toLowerCase()) {
       case 'happy':
@@ -235,9 +251,10 @@ class _ProfileContentState extends State<_ProfileContent> {
         if (rank != null)
           if (rank.isNotEmpty)
             Chip(
-              avatar: Icon(Icons.star_rounded,
-                  color: Theme.of(context).colorScheme.onSecondaryContainer,
-                  size: 18),
+              avatar: EmojiIcon(
+                getRankEmoji(rank),
+                size: 16,
+              ),
               label: Text(
                 rank,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
