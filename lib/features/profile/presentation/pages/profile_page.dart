@@ -104,6 +104,8 @@ class _ProfileContentState extends State<_ProfileContent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: _buildDiamondCounter(context, widget.user),
+        leadingWidth: 84,
         title: Text(widget.isMyProfile
             ? 'My Profile'
             : (widget.user.fullName ?? 'Profile')),
@@ -150,6 +152,34 @@ class _ProfileContentState extends State<_ProfileContent> {
 
             // --- Uploaded Videos ---
             _buildVideosGrid(widget.isMyProfile),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ✅ NEW WIDGET: Builds the diamond counter.
+  Widget _buildDiamondCounter(BuildContext context, UserEntity user) {
+    final theme = Theme.of(context);
+    // Add a 'diamonds' field to your UserEntity, e.g., final int diamonds;
+    final int diamondCount = user.postCount ?? 0;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // You can use an emoji or a custom asset image
+            const Text('💎', style: TextStyle(fontSize: 18)),
+            const SizedBox(width: 8),
+            Text(
+              diamondCount.toString(),
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: theme.colorScheme.primary,
+              ),
+            ),
           ],
         ),
       ),
