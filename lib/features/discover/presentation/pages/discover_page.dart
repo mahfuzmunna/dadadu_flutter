@@ -22,7 +22,7 @@ enum LocationPermissionStatus {
 }
 
 class DiscoverPage extends StatefulWidget {
-  const DiscoverPage({super.key});
+  DiscoverPage({super.key});
 
   @override
   State<DiscoverPage> createState() => _DiscoverPageState();
@@ -228,7 +228,14 @@ class _DiscoverPageState extends State<DiscoverPage> {
       key: _scaffoldMessengerKey,
       // ✅ The AppBar is now simpler and doesn't need a TabBar
       appBar: AppBar(
-        title: const Text('Discover'),
+        leading: _selectedVibe != null
+            ? IconButton(
+                onPressed: () => setState(() {
+                      _selectedVibe = null;
+                    }),
+                icon: const Icon(Icons.arrow_back_ios_new))
+            : null,
+        title: Text(_selectedVibe ?? 'Discover'),
         // The back button will appear automatically inside the Vibe Content Page
       ),
       body: bodyContent,
@@ -328,32 +335,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
     return Column(
       children: [
-        // Header for the selected vibe with a back button
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new),
-                onPressed: () {
-                  // This will clear the selected vibe and rebuild the UI
-                  // to show the vibe selection page again.
-                  setState(() {
-                    _selectedVibe = null;
-                  });
-                },
-              ),
-              const SizedBox(width: 16),
-              Text(
-                '$_selectedVibe Vibe',
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall
-                    ?.copyWith(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
+        // Header moved to appbar
 
         // Content for the vibe
         Expanded(

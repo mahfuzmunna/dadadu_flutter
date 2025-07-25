@@ -117,7 +117,7 @@ class AppRouter {
               routes: [
                 GoRoute(
                   path: '/discover',
-                  builder: (context, state) => const DiscoverPage(),
+                  builder: (context, state) => DiscoverPage(),
                 ),
               ],
             ),
