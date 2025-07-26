@@ -8,7 +8,7 @@ import 'package:dadadu_app/features/now/domain/usecases/get_posts_usecase.dart';
 import 'package:dadadu_app/features/now/domain/usecases/get_user_info_usecase.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
-import 'package:dadadu_app/features/posts/domain/usecases/stream_all_posts_usecase.dart';
+import 'package:dadadu_app/features/posts/domain/usecases/stream_feed_usecase.dart';
 import 'package:get_it/get_it.dart';
 
 import '../upload/data/datasources/post_remote_data_source.dart';
@@ -22,7 +22,7 @@ final sl = GetIt.instance;
 Future<void> nowInjection() async {
   // Bloc
   sl.registerFactory(
-    () => FeedBloc(streamAllPostsUseCase: sl()),
+    () => FeedBloc(streamFeedUseCase: sl()),
   );
   sl.registerFactory(
     () => PostBloc(profileRepository: sl(), postRepository: sl()),
@@ -31,7 +31,8 @@ Future<void> nowInjection() async {
   // Use cases
   sl.registerLazySingleton(() => GetPostsUseCase(sl()));
   sl.registerLazySingleton(() => GetUserInfoUseCase(sl()));
-  sl.registerLazySingleton(() => StreamAllPostsUseCase(sl()));
+  sl.registerLazySingleton(() => StreamFeedUseCase(sl()));
+  // sl.registerLazySingleton(() => StreamAllPostsUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<HomeRepository>(
@@ -61,7 +62,7 @@ Future<void> nowInjection() async {
 
 Future<void> feedPostInjection() async {
   // Register new Post related dependencies
-  sl.registerFactory(() => FeedBloc(streamAllPostsUseCase: sl()));
+  sl.registerFactory(() => FeedBloc(streamFeedUseCase: sl()));
 
   sl.registerLazySingleton<PostRepository>(
     () => PostRepositoryImpl(remoteDataSource: sl()),

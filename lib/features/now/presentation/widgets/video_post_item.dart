@@ -15,13 +15,15 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart';
 
 class VideoPostItem extends StatefulWidget {
-  final PostEntity initialPost;
+  final PostEntity post;
+  final VideoPlayerController? controller;
   final bool isCurrentPage;
   final Function(String userId) onUserTapped;
 
   const VideoPostItem({
     super.key,
-    required this.initialPost,
+    required this.post,
+    required this.controller,
     required this.isCurrentPage,
     required this.onUserTapped,
   });
@@ -124,8 +126,7 @@ class _VideoPostItemState extends State<VideoPostItem>
   void _initializeVideo() {
     if (_player?.controller != null) return;
 
-    _player = CachedVideoPlayerPlus.networkUrl(
-        Uri.parse(widget.initialPost.videoUrl));
+    _player = CachedVideoPlayerPlus.networkUrl(Uri.parse(widget.post.videoUrl));
     _initializeVideoPlayerFuture = _player!.initialize().then((_) {
       if (!mounted) return;
       if (_player!.isInitialized) {
@@ -152,7 +153,7 @@ class _VideoPostItemState extends State<VideoPostItem>
           // The UI is built using the most up-to-date data.
           // It starts with the initialPost and updates live when PostLoaded arrives.
           final postToDisplay =
-              (state is PostLoaded) ? state.post : widget.initialPost;
+              (state is PostLoaded) ? state.post : widget.post;
           final author = (state is PostLoaded) ? state.author : null;
 
           return GestureDetector(
@@ -205,8 +206,7 @@ class _VideoPostItemState extends State<VideoPostItem>
           decoration: BoxDecoration(
             color: Colors.black,
             image: DecorationImage(
-              image:
-                  CachedNetworkImageProvider(widget.initialPost.thumbnailUrl),
+              image: CachedNetworkImageProvider(widget.post.thumbnailUrl),
               fit: BoxFit.cover,
             ),
           ),

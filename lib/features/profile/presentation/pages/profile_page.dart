@@ -152,6 +152,9 @@ class _ProfileContentState extends State<_ProfileContent> {
     // Add a 'diamonds' field to your UserEntity, e.g., final int diamonds;
     final int diamondCount = user.diamonds ?? 0;
 
+    if (!widget.isMyProfile)
+      return const SizedBox.shrink(); // Not for other users
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),

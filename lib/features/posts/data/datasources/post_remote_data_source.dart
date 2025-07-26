@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:dadadu_app/core/errors/exceptions.dart';
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:minio/minio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../auth/data/models/user_model.dart';
 import '../../../upload/data/models/post_model.dart';
 
 abstract class PostRemoteDataSource {
@@ -20,6 +22,8 @@ abstract class PostRemoteDataSource {
   });
 
   Stream<List<PostModel>> streamAllPosts();
+
+  Stream<Tuple2<List<PostModel>, Map<String, UserModel>>> streamFeed();
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -107,6 +111,46 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       });
     } catch (e) {
       throw ServerException('Failed to stream posts: ${e.toString()}');
+    }
+  }
+
+  @override
+  Stream<Tuple2<List<PostModel>, Map<String, UserModel>>> streamFeed() {
+    try {
+      final postStream = supabaseClient
+          .from('posts')
+          .stream(primaryKey: ['id']).order('created_at', ascending: false);
+
+      // Use asyncMap to process the posts and fetch their authors
+      return postStream.asyncMap((listOfPostMaps) async {
+        if (listOfPostMaps.isEmpty) {
+          return const Tuple2([], {});
+        }
+
+        final posts =
+            listOfPostMaps.map((map) => PostModel.fromMap(map)).toList();
+
+        // 1. Collect all unique user IDs from the posts
+        final userIds = posts.map((post) => post.userId).toSet().toList();
+
+        // 2. Fetch all required author profiles in a single query
+        final authorMaps = await supabaseClient
+            .from('profiles')
+            .select()
+            .filter('id', 'in', '(${userIds.join(',')})');
+        // .in_('id', userIds);
+
+        // 3. Create a map of authors for easy lookup
+        final authors = {
+          for (var map in authorMaps)
+            map['id'] as String: UserModel.fromMap(map)
+        };
+
+        // 4. Return both the posts and the authors
+        return Tuple2(posts, authors);
+      });
+    } catch (e) {
+      throw ServerException('Failed to stream feed: ${e.toString()}');
     }
   }
 }

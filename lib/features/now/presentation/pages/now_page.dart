@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
@@ -5,8 +8,9 @@ import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:video_player/video_player.dart';
 
-import '../widgets/video_post_item.dart';
+import '../widgets/video_post_item_s.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 
 class NowPage extends StatelessWidget {
@@ -15,9 +19,12 @@ class NowPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Provide the FeedBloc to the widget tree and immediately load the feed.
-    return BlocProvider(
-      // create: (context) => sl<FeedBloc>()..add(LoadFeed()),
-      create: (context) => sl<FeedBloc>()..add(SubscribeToFeed()),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+            create: (context) => sl<FeedBloc>()..add(SubscribeToFeed())),
+        BlocProvider(create: (context) => sl<PostBloc>()),
+      ],
       child: const _NowPageView(),
     );
   }
@@ -30,27 +37,147 @@ class _NowPageView extends StatefulWidget {
   State<_NowPageView> createState() => _NowPageViewState();
 }
 
-class _NowPageViewState extends State<_NowPageView> {
+class _NowPageViewState extends State<_NowPageView>
+    with WidgetsBindingObserver {
   final PageController _pageController = PageController();
+  List<PostEntity> _posts = [];
+  Map<String, UserEntity> _authors = {};
   int _currentPageIndex = 0;
+
+  final int _maxCacheSize =
+      3; // Max controllers to keep in memory (current, previous, next)
+  final Map<String, VideoPlayerController> _controllerCache = LinkedHashMap();
+  final Set<String> _initializingControllers = {};
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pageController.addListener(() {
-      final int nextPageIndex = _pageController.page?.round() ?? 0;
-      if (_currentPageIndex != nextPageIndex) {
-        setState(() {
-          _currentPageIndex = nextPageIndex;
-        });
+      final newPage = _pageController.page?.round() ?? 0;
+      if (newPage != _currentPageIndex) {
+        _onPageChanged(newPage);
       }
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
+    _disposeAllControllers();
     super.dispose();
+  }
+
+  void _onPageChanged(int newPage) {
+    if (_posts.isNotEmpty && _currentPageIndex < _posts.length) {
+      final oldPostId = _posts[_currentPageIndex].id;
+      _controllerCache[oldPostId]?.pause();
+    }
+    setState(() => _currentPageIndex = newPage);
+    _manageControllerCache(newPage);
+  }
+
+  Future<void> _manageControllerCache(int page) async {
+    if (page < 0 || page >= _posts.length) return;
+
+    // Play the current video
+    await _initializeAndPlay(page);
+
+    // Pre-initialize neighbors
+    if (page + 1 < _posts.length) _initializeControllerForIndex(page + 1);
+    if (page - 1 >= 0) _initializeControllerForIndex(page - 1);
+
+    // Dispose of controllers outside the cache window
+    final idsToKeep = {_posts[page].id};
+    if (page > 0) idsToKeep.add(_posts[page - 1].id);
+    if (page < _posts.length - 1) idsToKeep.add(_posts[page + 1].id);
+
+    _controllerCache.keys
+        .where((id) => !idsToKeep.contains(id))
+        .toList()
+        .forEach(_disposeController);
+  }
+
+  Future<void> _initializeAndPlay(int index) async {
+    if (index < 0 || index >= _posts.length) return;
+
+    final post = _posts[index];
+    VideoPlayerController? controller = _controllerCache[post.id];
+
+    if (controller == null) {
+      await _initializeControllerForIndex(index);
+      controller = _controllerCache[post.id];
+    }
+
+    if (controller?.value.isInitialized ?? false) {
+      await controller?.setLooping(true);
+      await controller?.play();
+    }
+    if (mounted) setState(() {});
+  }
+
+  Future<void> _disposeController(String postId) async {
+    final controller = _controllerCache.remove(postId);
+    await controller?.dispose();
+  }
+
+  Future<void> _disposeAllControllers() async {
+    for (final controller in _controllerCache.values) {
+      await controller.dispose();
+    }
+    _controllerCache.clear();
+  }
+
+  Future<void> _initializeControllerForIndex(int index) async {
+    if (index < 0 || index >= _posts.length) return;
+    final post = _posts[index];
+    if (_controllerCache.containsKey(post.id) ||
+        _initializingControllers.contains(post.id)) return;
+
+    _initializingControllers.add(post.id);
+    final controller =
+        VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
+    try {
+      await controller.initialize();
+      if (mounted) {
+        _controllerCache[post.id] = controller;
+      } else {
+        await controller.dispose();
+      }
+    } catch (e) {
+      debugPrint("Error pre-caching video for post ${post.id}: $e");
+    } finally {
+      _initializingControllers.remove(post.id);
+    }
+  }
+
+  Future<void> _playVideo(int index) async {
+    if (index < 0 || index >= _posts.length) return;
+    final post = _posts[index];
+    VideoPlayerController? controller = _controllerCache[post.id];
+
+    if (controller == null) {
+      await _initializeControllerForIndex(index);
+      controller = _controllerCache[post.id];
+    }
+
+    if (controller?.value.isInitialized ?? false) {
+      await controller?.setLooping(true);
+      await controller?.play();
+    }
+    if (mounted) setState(() {});
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_posts.isEmpty) return;
+    final controller = _controllerCache[_posts[_currentPageIndex].id];
+    if (state == AppLifecycleState.paused) {
+      controller?.pause();
+    } else if (state == AppLifecycleState.resumed) {
+      controller?.play();
+    }
   }
 
   // ✅ NEW: Helper method to show the notifications dialog
@@ -131,7 +258,6 @@ class _NowPageViewState extends State<_NowPageView> {
           builder: (context, state) {
             final int totalPosts =
                 (state is FeedLoaded) ? state.posts.length : 0;
-
             return _buildNowChip(colorScheme, totalPosts);
           },
         ),
@@ -150,7 +276,16 @@ class _NowPageViewState extends State<_NowPageView> {
           ),
         ],
       ),
-      body: BlocBuilder<FeedBloc, FeedState>(
+      body: BlocConsumer<FeedBloc, FeedState>(
+        listener: (context, state) {
+          if (state is FeedLoaded) {
+            setState(() {
+              _posts = state.posts;
+              _authors = state.authors;
+            });
+            _manageControllerCache(0);
+          }
+        },
         builder: (context, state) {
           // LOADING STATE
           if (state is FeedLoading || state is FeedInitial) {
@@ -161,28 +296,23 @@ class _NowPageViewState extends State<_NowPageView> {
             return Center(child: Text('Error: ${state.message}'));
           }
           // LOADED STATE
-          if (state is FeedLoaded) {
-            final posts = state.posts;
-
-            if (posts.isEmpty) {
-              return const Center(
-                  child: Text('No videos yet. Why not upload one?'));
-            }
+          if (_posts.isNotEmpty) {
             return PageView.builder(
               controller: _pageController,
               scrollDirection: Axis.vertical,
-              itemCount: posts.length,
+              itemCount: _posts.length,
               itemBuilder: (context, index) {
-                final PostEntity post = posts[index];
-                return BlocProvider<PostBloc>(
-                  create: (context) => sl<PostBloc>()..add(LoadPost(post.id)),
-                  child: VideoPostItem(
-                    initialPost: post,
-                    isCurrentPage: index == _currentPageIndex,
+                final post = _posts[index];
+                final author = _authors[post.userId];
+                return VideoPostItem(
+                  key: ValueKey(post.id),
+                  post: post,
+                  author: author,
+                  controller: _controllerCache[post.id],
+                  isCurrentPage: index == _currentPageIndex,
                     onUserTapped: (userId) {
                       context.push('/profile/$userId');
                     },
-                  ),
                 );
               },
             );
