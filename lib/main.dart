@@ -12,6 +12,7 @@ import 'package:dadadu_app/injection_container.dart' as di;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/theme/app_theme.dart';
@@ -87,16 +88,18 @@ class _MyAppState extends State<MyApp> {
         BlocProvider(create: (context) => di.sl<ProfileBloc>()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(builder: (context, themeMode) {
-        final GoRouter router =
-            AppRouter.router(authBloc: context.watch<AuthBloc>());
-        return MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          // Set to false for production
-          title: 'Dadadu App',
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: themeMode,
-          routerConfig: router, // Use the configured GoRouter instance
+        final router = AppRouter.router(authBloc: context.watch<AuthBloc>());
+        return Provider<GoRouter>.value(
+          value: router,
+          child: MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            // Set to false for production
+            title: 'Dadadu',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            routerConfig: router, // Use the configured GoRouter instance
+          ),
         );
       }),
     );

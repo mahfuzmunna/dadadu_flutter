@@ -121,8 +121,6 @@ class _NowPageViewState extends State<_NowPageView> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final bool isPageActive =
-        StatefulNavigationShell.of(context).currentIndex == 0;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -181,7 +179,6 @@ class _NowPageViewState extends State<_NowPageView> {
                   child: VideoPostItem(
                     initialPost: post,
                     isCurrentPage: index == _currentPageIndex,
-                    isPageActive: isPageActive,
                     onUserTapped: (userId) {
                       context.push('/profile/$userId');
                     },

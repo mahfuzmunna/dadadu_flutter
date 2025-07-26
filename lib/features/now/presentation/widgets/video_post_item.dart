@@ -6,6 +6,8 @@ import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
@@ -15,13 +17,11 @@ import '../../../upload/domain/entities/post_entity.dart';
 class VideoPostItem extends StatefulWidget {
   final PostEntity initialPost;
   final bool isCurrentPage;
-  final bool isPageActive;
   final Function(String userId) onUserTapped;
 
   const VideoPostItem({
     super.key,
     required this.initialPost,
-    required this.isPageActive,
     required this.isCurrentPage,
     required this.onUserTapped,
   });
@@ -35,20 +35,46 @@ class _VideoPostItemState extends State<VideoPostItem>
   CachedVideoPlayerPlus? _player;
   Future<void>? _initializeVideoPlayerFuture;
   bool _hasError = false;
+  late GoRouter _router;
+  bool _isNowPageActive = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeVideo();
+
+    _router = Provider.of<GoRouter>(context, listen: false);
+    _router.routerDelegate.addListener(_handleRouteChange);
+  }
+
+  void _handleRouteChange() {
+    // Get the current top-level route
+    final String topRoute =
+        _router.routerDelegate.currentConfiguration.fullPath ?? '';
+    final bool isActive = (topRoute == '/home');
+
+    if (_isNowPageActive != isActive) {
+      setState(() {
+        _isNowPageActive = isActive;
+      });
+      // If the page is no longer active, pause the video
+      if (!isActive) {
+        _player?.controller.pause();
+      } else {
+        // If the page becomes active again, play the video if it's the current one
+        if (widget.isCurrentPage) {
+          _player?.controller.play();
+        }
+      }
+    }
   }
 
   @override
   void didUpdateWidget(covariant VideoPostItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if ((widget.isCurrentPage && widget.isPageActive) !=
-        (oldWidget.isCurrentPage && oldWidget.isPageActive)) {
-      if (widget.isCurrentPage && widget.isPageActive) {
+    if (widget.isCurrentPage != oldWidget.isCurrentPage) {
+      if (widget.isCurrentPage && _isNowPageActive) {
         _player?.controller.play();
       } else {
         _player?.controller.pause();
@@ -72,12 +98,14 @@ class _VideoPostItemState extends State<VideoPostItem>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (!mounted ||
         _player?.controller == null ||
-        !_player!.controller.value.isInitialized) return;
+        !_player!.controller.value.isInitialized) {
+      return;
+    }
     if (state == AppLifecycleState.paused) {
       _player!.controller.pause();
     } else if (state == AppLifecycleState.resumed) {
       // Only resume playing if it's the current video on the active page
-      if (widget.isCurrentPage && widget.isPageActive) {
+      if (widget.isCurrentPage && _isNowPageActive) {
         _player!.controller.play();
       } else {
         _player!.controller.pause();
@@ -88,7 +116,7 @@ class _VideoPostItemState extends State<VideoPostItem>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _player?.controller.pause();
+    _router.routerDelegate.removeListener(_handleRouteChange);
     _player?.controller.dispose();
     super.dispose();
   }
@@ -102,7 +130,7 @@ class _VideoPostItemState extends State<VideoPostItem>
       if (!mounted) return;
       if (_player!.isInitialized) {
         _player!.controller.setLooping(true);
-        if (widget.isCurrentPage && widget.isPageActive) {
+        if (widget.isCurrentPage && _isNowPageActive) {
           _player!.controller.play();
         }
       } else {
