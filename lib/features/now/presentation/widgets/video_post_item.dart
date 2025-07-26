@@ -6,6 +6,7 @@ import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../upload/domain/entities/post_entity.dart';
@@ -249,7 +250,7 @@ class _VideoPostItemState extends State<VideoPostItem>
     return Column(
       children: [
         _buildActionButton(
-          icon: Icons.favorite,
+          icon: Icons.diamond_outlined,
           label: post.diamonds.toString(),
           onPressed: () {
             context.read<PostBloc>().add(IncrementLike(post.id));
@@ -257,36 +258,49 @@ class _VideoPostItemState extends State<VideoPostItem>
         ),
         const SizedBox(height: 20),
         _buildActionButton(
-          icon: Icons.comment,
+          icon: Icons.comment_rounded,
           label: post.comments.toString(),
           onPressed: () {},
         ),
         const SizedBox(height: 20),
         _buildActionButton(
-          icon: Icons.share,
+          icon: Icons.share_rounded,
           label: 'Share',
-          onPressed: () {},
+          onPressed: () {
+            Share.share(
+                'Check out this video on Dadadu! https://dadadu.app/${post.id.substring(0, 8)}');
+          },
         ),
       ],
     );
   }
 
-  Widget _buildActionButton(
-      {required IconData icon,
-      required String label,
-      required VoidCallback onPressed}) {
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
     return Column(
       children: [
         IconButton(
-          icon: Icon(icon,
-              color: Colors.white,
-              size: 30,
-              shadows: const [Shadow(color: Colors.black)]),
           onPressed: onPressed,
+          style: IconButton.styleFrom(
+            backgroundColor: Colors.black.withOpacity(0.4),
+            foregroundColor: Colors.white,
+            iconSize: 30,
+            padding: const EdgeInsets.all(12),
+          ),
+          icon: Icon(icon),
         ),
-        Text(label,
-            style: const TextStyle(
-                color: Colors.white, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            shadows: [Shadow(blurRadius: 2, color: Colors.black87)],
+          ),
+        ),
       ],
     );
   }
