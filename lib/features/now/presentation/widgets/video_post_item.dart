@@ -94,35 +94,39 @@ class _VideoPostItemState extends State<VideoPostItem>
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PostBloc, PostState>(
-      builder: (context, state) {
-        // The UI is built using the most up-to-date data.
-        // It starts with the initialPost and updates live when PostLoaded arrives.
-        final postToDisplay =
-            (state is PostLoaded) ? state.post : widget.initialPost;
-        final author = (state is PostLoaded) ? state.author : null;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+    return Padding(
+      padding: EdgeInsets.only(top: statusBarHeight * 0.275),
+      child: BlocBuilder<PostBloc, PostState>(
+        builder: (context, state) {
+          // The UI is built using the most up-to-date data.
+          // It starts with the initialPost and updates live when PostLoaded arrives.
+          final postToDisplay =
+              (state is PostLoaded) ? state.post : widget.initialPost;
+          final author = (state is PostLoaded) ? state.author : null;
 
-        return GestureDetector(
-          onTap: () {
-            if (_videoController?.controller.value.isInitialized ?? false) {
-              _videoController!.controller.value.isPlaying
-                  ? _videoController!.controller.pause()
-                  : _videoController!.controller.play();
-            }
-          },
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Video Player Background
-              _buildVideoPlayer(),
-              // Gradient Overlay for text readability
-              _buildGradientOverlay(),
-              // UI Elements (Author, Caption, Actions)
-              _buildPostOverlay(context, postToDisplay!, author),
-            ],
-          ),
-        );
-      },
+          return GestureDetector(
+            onTap: () {
+              if (_videoController?.controller.value.isInitialized ?? false) {
+                _videoController!.controller.value.isPlaying
+                    ? _videoController!.controller.pause()
+                    : _videoController!.controller.play();
+              }
+            },
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                // Video Player Background
+                _buildVideoPlayer(),
+                // Gradient Overlay for text readability
+                _buildGradientOverlay(),
+                // UI Elements (Author, Caption, Actions)
+                _buildPostOverlay(context, postToDisplay!, author),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

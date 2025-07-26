@@ -122,6 +122,7 @@ class _NowPageViewState extends State<_NowPageView> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         centerTitle: false,
         excludeHeaderSemantics: true,
@@ -140,6 +141,11 @@ class _NowPageViewState extends State<_NowPageView> {
             onPressed: () {
               _showNotificationsDialog(context);
             },
+            style: IconButton.styleFrom(
+              foregroundColor: Colors.white,
+              shadowColor: Colors.black.withOpacity(0.5),
+              elevation: 4,
+            ),
           ),
         ],
       ),
@@ -263,7 +269,7 @@ class _NowPageViewState extends State<_NowPageView> {
                     color: colorScheme.onPrimary,
                   ),
                 ),
-                if (totalPosts > 0)
+                if (totalPosts < 0)
                   Text(
                     ' ${_currentPageIndex + 1}/$totalPosts',
                     style: TextStyle(
