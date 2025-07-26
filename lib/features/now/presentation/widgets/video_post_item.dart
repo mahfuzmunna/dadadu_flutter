@@ -189,7 +189,7 @@ class _VideoPostItemState extends State<VideoPostItem>
   Widget _buildPostOverlay(
       BuildContext context, PostEntity post, UserEntity? author) {
     return Padding(
-      padding: const EdgeInsets.all(16.0).copyWith(bottom: 32.0),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 28),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -198,7 +198,7 @@ class _VideoPostItemState extends State<VideoPostItem>
             children: [
               // Left side: Author Info & Caption
               Expanded(
-                child: _buildPostInfo(post, author),
+                child: _buildPostInfo(context, post, author),
               ),
               // Right side: Action Buttons
               _buildActionButtons(context, post),
@@ -209,39 +209,90 @@ class _VideoPostItemState extends State<VideoPostItem>
     );
   }
 
-  Widget _buildPostInfo(PostEntity post, UserEntity? author) {
+  Widget _buildPostInfo(
+      BuildContext context, PostEntity post, UserEntity? author) {
+    final textTheme = Theme.of(context).textTheme;
+    const shadow =
+        Shadow(blurRadius: 4, color: Colors.black54, offset: Offset(0, 1));
+
     return Column(
+      mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // --- Author Info ---
         GestureDetector(
           onTap: () => (author != null) ? widget.onUserTapped(author.id) : null,
           child: Row(
             children: [
-              CircleAvatar(
-                radius: 20,
-                backgroundImage: author?.profilePhotoUrl != null
-                    ? CachedNetworkImageProvider(author!.profilePhotoUrl!)
-                    : null,
-                child: author?.profilePhotoUrl == null
-                    ? const Icon(Icons.person)
-                    : null,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: CircleAvatar(
+                  radius: 22,
+                  backgroundImage: author?.profilePhotoUrl != null &&
+                          author!.profilePhotoUrl!.isNotEmpty
+                      ? CachedNetworkImageProvider(author.profilePhotoUrl!)
+                      : null,
+                  child: (author?.profilePhotoUrl == null ||
+                          author!.profilePhotoUrl!.isEmpty)
+                      ? const Icon(Icons.person, size: 22)
+                      : null,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
-                author?.username ?? 'Loading...',
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16),
+                author?.username ?? 'loading...',
+                style: textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  shadows: [shadow],
+                ),
               ),
+              const SizedBox(width: 8),
+              // Follow Chip
+              if (author != null) // Only show if author is loaded
+                const Chip(
+                  label: Text('Follow'),
+                  labelStyle:
+                      TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  padding: EdgeInsets.zero,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity(horizontal: 0.0, vertical: -4),
+                ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
-        Text(post.caption,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(color: Colors.white)),
+        const SizedBox(height: 12),
+
+        // --- Caption ---
+        Text(
+          post.caption,
+          maxLines: 3,
+          overflow: TextOverflow.ellipsis,
+          style: textTheme.bodyMedium?.copyWith(
+            color: Colors.white,
+            shadows: [shadow],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // --- Sound/Music Info ---
+        Row(
+          children: [
+            const Icon(Icons.music_note, color: Colors.white, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              'Original Sound - ${author?.username ?? '...'}',
+              style: textTheme.bodySmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                shadows: [shadow],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
