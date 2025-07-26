@@ -162,7 +162,7 @@ class _ProfileContentState extends State<_ProfileContent> {
   Widget _buildDiamondCounter(BuildContext context, UserEntity user) {
     final theme = Theme.of(context);
     // Add a 'diamonds' field to your UserEntity, e.g., final int diamonds;
-    final int diamondCount = user.postCount ?? 0;
+    final int diamondCount = user.diamonds ?? 0;
 
     return Center(
       child: Padding(

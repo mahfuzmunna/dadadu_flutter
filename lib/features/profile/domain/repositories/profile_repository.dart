@@ -9,7 +9,7 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart'; // Reusing UserEntity for profile data
 import '../../../discover/domain/usecases/find_users_by_vibe_usecase.dart';
-import '../../../now/domain/entities/post_entity.dart';
+import '../../../upload/domain/entities/post_entity.dart';
 import '../../data/datasources/profile_remote_data_source.dart';
 import '../usecases/update_user_location_usecase.dart';
 import '../usecases/update_user_mood_usecase.dart'; // Assuming PostEntity exists

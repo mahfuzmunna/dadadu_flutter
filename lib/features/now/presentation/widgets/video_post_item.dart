@@ -9,11 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
 
 class VideoPostItem extends StatefulWidget {
+  final PostEntity initialPost;
   final bool isCurrentPage;
   final Function(String userId) onUserTapped;
 
   const VideoPostItem({
     super.key,
+    required this.initialPost,
     required this.isCurrentPage,
     required this.onUserTapped,
   });
@@ -37,13 +39,14 @@ class _VideoPostItemState extends State<VideoPostItem>
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
+    _initializeVideo();
   }
 
   // This method now takes the PostEntity to initialize the correct video
-  void _initializeVideo(PostEntity post) {
+  void _initializeVideo() {
     // If controller exists and is for the same video, do nothing.
-    if (_videoController != null &&
-        _videoController!.dataSource == post.videoUrl) {
+    if (_videoController?.controller != null &&
+        _videoController!.dataSource == widget.initialPost.videoUrl) {
       // If it became the current page, ensure it plays
       if (widget.isCurrentPage &&
           !_videoController!.controller.value.isPlaying) {
@@ -57,8 +60,8 @@ class _VideoPostItemState extends State<VideoPostItem>
     _videoController?.dispose();
 
     _hasError = false;
-    _videoController =
-        CachedVideoPlayerPlus.networkUrl(Uri.parse(post.videoUrl));
+    _videoController = CachedVideoPlayerPlus.networkUrl(
+        Uri.parse(widget.initialPost.videoUrl));
 
     _initializeVideoPlayerFuture =
         _videoController!.controller.initialize().then((_) {
@@ -107,7 +110,9 @@ class _VideoPostItemState extends State<VideoPostItem>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_videoController == null ||
-        !_videoController!.controller.value.isInitialized) return;
+        !_videoController!.controller.value.isInitialized) {
+      return;
+    }
     if (state == AppLifecycleState.paused) {
       _videoController!.controller.pause();
     } else if (state == AppLifecycleState.resumed) {
@@ -154,7 +159,7 @@ class _VideoPostItemState extends State<VideoPostItem>
           final author = state.author;
 
           // Crucial: Initialize the video player when we have the post data.
-          _initializeVideo(post!);
+          _initializeVideo();
 
           return FutureBuilder(
             future: _initializeVideoPlayerFuture,
@@ -247,7 +252,7 @@ class _VideoPostItemState extends State<VideoPostItem>
           _AuthorInfo(author: author, onUserTapped: widget.onUserTapped),
           const SizedBox(height: 8),
           Text(
-            post.description,
+            post.caption,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(

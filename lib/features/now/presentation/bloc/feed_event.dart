@@ -8,11 +8,10 @@ abstract class FeedEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadFeed extends FeedEvent {}
+class SubscribeToFeed extends FeedEvent {}
 
 class _FeedUpdated extends FeedEvent {
   final List<PostEntity> posts;
-
   const _FeedUpdated(this.posts);
 
   @override

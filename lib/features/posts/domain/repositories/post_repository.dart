@@ -4,6 +4,7 @@ import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/exceptions.dart';
+import '../../../upload/domain/entities/post_entity.dart';
 import '../../data/datasources/post_remote_data_source.dart';
 
 abstract class PostRepository {
@@ -15,6 +16,8 @@ abstract class PostRepository {
     required String userId,
     Function(double progress)? onUploadProgress,
   });
+
+  Either<Failure, Stream<List<PostEntity>>> streamAllPosts();
 // ... other repository methods
 }
 
@@ -67,5 +70,13 @@ class PostRepositoryImpl implements PostRepository {
     }
   }
 
-// ... implement other repository methods here
+  @override
+  Either<Failure, Stream<List<PostEntity>>> streamAllPosts() {
+    try {
+      final postStream = remoteDataSource.streamAllPosts();
+      return Right(postStream);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
 }

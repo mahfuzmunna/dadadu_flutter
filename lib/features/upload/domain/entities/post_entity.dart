@@ -7,7 +7,7 @@ class PostEntity extends Equatable {
   final String userId;
   final String videoUrl;
   final String thumbnailUrl;
-  final String description;
+  final String caption;
   final String tag;
   final int diamonds;
   final int comments;
@@ -22,7 +22,7 @@ class PostEntity extends Equatable {
     required this.userId,
     required this.videoUrl,
     required this.thumbnailUrl,
-    required this.description,
+    required this.caption,
     required this.tag,
     required this.diamonds,
     required this.comments,
@@ -39,7 +39,7 @@ class PostEntity extends Equatable {
         userId,
         videoUrl,
         thumbnailUrl,
-        description,
+        caption,
         tag,
         diamonds,
         comments,

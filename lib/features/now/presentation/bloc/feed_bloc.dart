@@ -2,31 +2,37 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:dadadu_app/features/posts/domain/usecases/stream_all_posts_usecase.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
-import 'package:dadadu_app/features/upload/domain/repositories/post_repository.dart';
 import 'package:equatable/equatable.dart';
 
 part 'feed_event.dart';
 part 'feed_state.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
-  final PostRepository _postRepository;
-  StreamSubscription<List<PostEntity>>? _postsSubscription;
+  final StreamAllPostsUseCase _streamAllPostsUseCase;
+  StreamSubscription<List<PostEntity>>? _feedSubscription;
 
-  FeedBloc({required PostRepository postRepository})
-      : _postRepository = postRepository,
+  FeedBloc({required StreamAllPostsUseCase streamAllPostsUseCase})
+      : _streamAllPostsUseCase = streamAllPostsUseCase,
         super(FeedInitial()) {
-    on<LoadFeed>(_onLoadFeed);
+    on<SubscribeToFeed>(_onSubscribeToFeed);
     on<_FeedUpdated>(_onFeedUpdated);
   }
 
-  Future<void> _onLoadFeed(LoadFeed event, Emitter<FeedState> emit) async {
+  Future<void> _onSubscribeToFeed(
+      SubscribeToFeed event, Emitter<FeedState> emit) async {
     emit(FeedLoading());
-    _postsSubscription?.cancel(); // Cancel any existing subscription
-    _postsSubscription = _postRepository.getPostsStream().listen(
-          (posts) => add(_FeedUpdated(posts)),
-          onError: (error) => emit(FeedError(message: error.toString())),
-        );
+    _feedSubscription?.cancel(); // Cancel any existing subscription
+    final result = await _streamAllPostsUseCase(null);
+    result.fold(
+      (failure) => emit(FeedError(message: failure.message)),
+      (feedStream) {
+        _feedSubscription = feedStream.listen((posts) {
+          add(_FeedUpdated(posts));
+        });
+      },
+    );
   }
 
   void _onFeedUpdated(_FeedUpdated event, Emitter<FeedState> emit) {
@@ -35,7 +41,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
   @override
   Future<void> close() {
-    _postsSubscription?.cancel();
+    _feedSubscription?.cancel();
     return super.close();
   }
 }

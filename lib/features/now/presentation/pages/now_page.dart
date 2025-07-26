@@ -1,10 +1,12 @@
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
-import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'video_post_item.dart';
+// import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 
 class NowPage extends StatelessWidget {
   const NowPage({super.key});
@@ -13,7 +15,8 @@ class NowPage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Provide the FeedBloc to the widget tree and immediately load the feed.
     return BlocProvider(
-      create: (context) => sl<FeedBloc>()..add(LoadFeed()),
+      // create: (context) => sl<FeedBloc>()..add(LoadFeed()),
+      create: (context) => sl<FeedBloc>()..add(SubscribeToFeed()),
       child: const _NowPageView(),
     );
   }
@@ -121,6 +124,7 @@ class _NowPageViewState extends State<_NowPageView> {
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
+        excludeHeaderSemantics: true,
         title: BlocBuilder<FeedBloc, FeedState>(
           builder: (context, state) {
             final int totalPosts =
@@ -142,7 +146,7 @@ class _NowPageViewState extends State<_NowPageView> {
       body: BlocBuilder<FeedBloc, FeedState>(
         builder: (context, state) {
           // LOADING STATE
-          if (state is FeedLoading) {
+          if (state is FeedLoading || state is FeedInitial) {
             return const Center(child: CircularProgressIndicator());
           }
           // ERROR STATE
@@ -151,7 +155,7 @@ class _NowPageViewState extends State<_NowPageView> {
           }
           // LOADED STATE
           if (state is FeedLoaded) {
-            final List<PostEntity> posts = state.posts;
+            final posts = state.posts;
 
             if (posts.isEmpty) {
               return const Center(
@@ -165,9 +169,18 @@ class _NowPageViewState extends State<_NowPageView> {
               itemBuilder: (context, index) {
                 final PostEntity post = posts[index];
 
+                // return VideoPostItem(
+                //     isCurrentPage: index == _currentPageIndex,
+                //     onUserTapped: (userId) {
+                //       ScaffoldMessenger.of(context).showSnackBar(
+                //         SnackBar(content: Text('Tapped on user: $userId')),
+                //       );
+                //     },
+                //   );
                 return BlocProvider<PostBloc>(
                   create: (context) => sl<PostBloc>()..add(LoadPost(post.id)),
                   child: VideoPostItem(
+                    initialPost: post,
                     isCurrentPage: index == _currentPageIndex,
                     onUserTapped: (userId) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -176,19 +189,6 @@ class _NowPageViewState extends State<_NowPageView> {
                     },
                   ),
                 );
-                // CORRECT: Do NOT wrap this in a BlocProvider<FeedBloc>.
-                // If you need a bloc for a single item, it should be a PostBloc.
-                // For now, we remove the incorrect provider.
-                /*return VideoPostItem(
-                  post: post,
-                  postUser: post.author,
-                  isCurrentPage: index == _currentPageIndex,
-                  onUserTapped: (userId) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Tapped on user: $userId')),
-                    );
-                  },
-                );*/
               },
             );
           }

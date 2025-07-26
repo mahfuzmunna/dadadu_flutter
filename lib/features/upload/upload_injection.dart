@@ -4,7 +4,6 @@ import '../../config/app_config.dart';
 import '../../injection_container.dart';
 import 'data/datasources/post_remote_data_source.dart';
 import 'data/datasources/post_remote_data_source_impl.dart';
-import 'data/repositories/post_repository_impl.dart';
 import 'domain/repositories/post_repository.dart';
 import 'domain/usecases/upload_post_usecase.dart';
 

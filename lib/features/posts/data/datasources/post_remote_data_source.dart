@@ -7,6 +7,8 @@ import 'package:minio/minio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../upload/data/models/post_model.dart';
+
 abstract class PostRemoteDataSource {
   Future<void> uploadPost({
     required File videoFile,
@@ -16,6 +18,8 @@ abstract class PostRemoteDataSource {
     required String userId,
     Function(double progress)? onUploadProgress,
   });
+
+  Stream<List<PostModel>> streamAllPosts();
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -69,6 +73,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         'thumbnail_url': thumbnailUrl,
         'caption': caption,
         'intent': intent,
+        'created_at': DateTime.now().toIso8601String(),
       });
       onUploadProgress?.call(1.0); // 100% progress
     } catch (e) {
@@ -86,5 +91,22 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       metadata: {if (mimeType != null) 'Content-Type': mimeType},
     );
     return 'https://$cdnHostname/$key';
+  }
+
+  @override
+  Stream<List<PostModel>> streamAllPosts() {
+    try {
+      // Use .stream() to listen to the entire 'posts' table, ordered by creation time.
+      final stream = supabaseClient
+          .from('posts')
+          .stream(primaryKey: ['id']).order('created_at', ascending: false);
+
+      // Transform the raw data into a Stream of PostModels
+      return stream.map((data) {
+        return data.map((map) => PostModel.fromMap(map)).toList();
+      });
+    } catch (e) {
+      throw ServerException('Failed to stream posts: ${e.toString()}');
+    }
   }
 }
