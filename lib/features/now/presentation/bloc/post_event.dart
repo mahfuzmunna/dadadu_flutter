@@ -31,9 +31,8 @@ class IncrementLike extends PostEvent {
 /// An internal event used to push updates from the realtime stream into the bloc.
 class _PostUpdated extends PostEvent {
   final PostEntity post;
-  final UserModel? author;
 
-  const _PostUpdated({required this.post, this.author});
+  const _PostUpdated({required this.post});
 
   @override
   List<Object> get props => [post];

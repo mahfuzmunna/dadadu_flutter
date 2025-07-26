@@ -6,8 +6,8 @@ import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/features/upload/domain/repositories/post_repository.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 
-import '../../../auth/data/models/user_model.dart';
 import '../../../profile/domain/repositories/profile_repository.dart';
 
 part 'post_event.dart';
@@ -31,54 +31,64 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
   /// Handles loading and subscribing to a post.
   Future<void> _onLoadPost(LoadPost event, Emitter<PostState> emit) async {
+    debugPrint(
+        "--- [PostBloc] Start _onLoadPost for Post ID: ${event.postId} ---");
     await _postSubscription?.cancel();
     emit(PostLoading());
+    debugPrint("[PostBloc] Emitted: PostLoading");
     final initialPostResult = await _postRepository.getPostById(event.postId);
+    debugPrint("[PostBloc] Fetched initial post data.");
 
-    initialPostResult.fold((failure) => emit(PostError(failure.message)),
-        (post) async {
-      try {
-        emit(PostLoaded(post: post, author: null));
-        final authorResult =
-            await _profileRepository.getUserProfile(post.userId);
+    await initialPostResult.fold(
+      (failure) async {
+        debugPrint("[PostBloc] Post fetch FAILED: ${failure.message}");
+        emit(PostError(failure.message));
+      },
+      (post) async {
+        debugPrint(
+            "[PostBloc] Post fetch SUCCESS: '${post.caption}'. Now fetching author...");
+        try {
+          final authorResult =
+              await _profileRepository.getUserProfile(post.userId);
+          debugPrint("[PostBloc] Fetched author data.");
 
-        authorResult.fold(
-          (failure) => emit(PostError(failure.message)),
-          (author) {
-            emit((state as PostLoaded).copyWith(author: author));
-            // Subscribe to the stream of changes for the specific post.
-            _postSubscription =
-                _postRepository.subscribeToPostChanges(event.postId).listen(
-              (post) {
-                // When new data arrives from the stream, add an internal event.
-                add(_PostUpdated(post: post));
-              },
-              onError: (error) {
-                // If the stream has an error, emit the error state.
-                emit(PostError('Failed to load post updates: $error'));
-              },
-            );
-          },
-        );
-      } catch (e) {
-        emit(PostError(e.toString()));
-      }
-    });
+          authorResult.fold(
+            (failure) {
+              debugPrint("[PostBloc] Author fetch FAILED: ${failure.message}");
+              emit(PostError(failure.message));
+            },
+            (author) {
+              debugPrint(
+                  "[PostBloc] Author fetch SUCCESS: ${author.username}. Emitting complete PostLoaded state.");
+              emit(PostLoaded(post: post, author: author));
+              debugPrint(
+                  "[PostBloc] Emitted: PostLoaded with author: ${author.username}");
+
+              debugPrint(
+                  "[PostBloc] Subscribing to real-time updates for post ${event.postId}...");
+              _postSubscription = _postRepository
+                  .subscribeToPostChanges(event.postId)
+                  .listen((updatedPost) {
+                debugPrint(
+                    "[PostBloc] Real-time update received for post ${updatedPost.id}. Diamonds: ${updatedPost.diamonds}");
+                add(_PostUpdated(post: updatedPost));
+              });
+            },
+          );
+        } catch (e) {
+          debugPrint(
+              "[PostBloc] CATCH BLOCK ERROR in author fetch: ${e.toString()}");
+          emit(PostError(e.toString()));
+        }
+      },
+    );
   }
 
   /// Handles the event when a user likes a post.
   void _onIncrementLike(IncrementLike event, Emitter<PostState> emit) async {
-    // We don't need to emit a state here. We just call the repository
-    // to perform the action. The realtime stream from `_onLoadPost` will
-    // automatically push the updated post data, which triggers `_PostUpdated`
-    // and rebuilds the UI with the new like count.
     final result = await _postRepository.incrementDiamond(event.postId);
-
-    // Optionally, handle the failure case to show a snackbar or log the error.
     result.fold(
       (failure) {
-        // You could emit a temporary error state or log this.
-        print('Failed to increment like: ${failure.message}');
       },
       (_) {
         // Success is handled by the stream.
@@ -88,7 +98,10 @@ class PostBloc extends Bloc<PostEvent, PostState> {
 
   /// Handles pushing the updated post from the stream into the state.
   void _onPostUpdated(_PostUpdated event, Emitter<PostState> emit) {
-    emit(PostLoaded(post: event.post, author: event.author));
+    if (state is PostLoaded) {
+      final currentState = state as PostLoaded;
+      emit(currentState.copyWith(post: event.post));
+    }
   }
 
   @override

@@ -76,11 +76,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           .eq('id', userId)
           .single();
 
-      if (response == null) {
-        throw ServerException('User profile not found: No data returned.',
-            code: 'USER_NOT_FOUND');
-      }
-
       return UserModel.fromMap(response);
     } on PostgrestException catch (e) {
       throw ServerException('Failed to get user profile: ${e.message}',
