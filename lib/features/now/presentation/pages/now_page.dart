@@ -5,7 +5,7 @@ import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'video_post_item.dart';
+import '../widgets/video_post_item.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 
 class NowPage extends StatelessWidget {

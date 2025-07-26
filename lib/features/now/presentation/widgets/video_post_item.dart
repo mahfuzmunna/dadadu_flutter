@@ -1,12 +1,14 @@
 // lib/features/now/presentation/widgets/video_post_item.dart
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
-import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../../upload/domain/entities/post_entity.dart';
 
 class VideoPostItem extends StatefulWidget {
   final PostEntity initialPost;
@@ -25,84 +27,26 @@ class VideoPostItem extends StatefulWidget {
 }
 
 class _VideoPostItemState extends State<VideoPostItem>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with WidgetsBindingObserver {
   CachedVideoPlayerPlus? _videoController;
   Future<void>? _initializeVideoPlayerFuture;
   bool _hasError = false;
-  late AnimationController _fadeAnimationController;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _fadeAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
     _initializeVideo();
-  }
-
-  // This method now takes the PostEntity to initialize the correct video
-  void _initializeVideo() {
-    // If controller exists and is for the same video, do nothing.
-    if (_videoController?.controller != null &&
-        _videoController!.dataSource == widget.initialPost.videoUrl) {
-      // If it became the current page, ensure it plays
-      if (widget.isCurrentPage &&
-          !_videoController!.controller.value.isPlaying) {
-        _videoController!.controller.play();
-        _fadeAnimationController.forward();
-      }
-      return;
-    }
-
-    // Dispose old controller if it exists
-    _videoController?.dispose();
-
-    _hasError = false;
-    _videoController = CachedVideoPlayerPlus.networkUrl(
-        Uri.parse(widget.initialPost.videoUrl));
-
-    _initializeVideoPlayerFuture =
-        _videoController!.controller.initialize().then((_) {
-      if (!mounted || _videoController == null) return;
-
-      if (_videoController!.controller.value.isInitialized) {
-        _videoController!.controller.setLooping(true);
-        _videoController!.controller.setVolume(1.0);
-        if (widget.isCurrentPage) {
-          _videoController!.controller.play();
-          _fadeAnimationController.forward();
-        }
-      } else {
-        if (mounted) setState(() => _hasError = true);
-      }
-    }).catchError((error) {
-      if (mounted) setState(() => _hasError = true);
-    });
-
-    // Trigger a rebuild to show the FutureBuilder for the new future
-    if (mounted) setState(() {});
   }
 
   @override
   void didUpdateWidget(covariant VideoPostItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // This logic now only handles playing/pausing based on page visibility.
-    // Initialization is handled by the BlocBuilder.
     if (widget.isCurrentPage != oldWidget.isCurrentPage) {
       if (widget.isCurrentPage) {
-        if (_videoController != null &&
-            _videoController!.controller.value.isInitialized) {
-          _videoController!.controller.play();
-          _fadeAnimationController.forward();
-        }
+        _videoController?.controller.play();
       } else {
-        if (_videoController != null &&
-            _videoController!.controller.value.isInitialized) {
-          _videoController!.controller.pause();
-          _fadeAnimationController.reverse();
-        }
+        _videoController?.controller.pause();
       }
     }
   }
@@ -110,9 +54,7 @@ class _VideoPostItemState extends State<VideoPostItem>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_videoController == null ||
-        !_videoController!.controller.value.isInitialized) {
-      return;
-    }
+        !_videoController!.controller.value.isInitialized) return;
     if (state == AppLifecycleState.paused) {
       _videoController!.controller.pause();
     } else if (state == AppLifecycleState.resumed) {
@@ -125,99 +67,97 @@ class _VideoPostItemState extends State<VideoPostItem>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _videoController?.dispose();
-    _fadeAnimationController.dispose();
+    _videoController?.controller.dispose();
     super.dispose();
+  }
+
+  void _initializeVideo() {
+    if (_videoController?.controller != null) return;
+
+    _videoController = CachedVideoPlayerPlus.networkUrl(
+        Uri.parse(widget.initialPost.videoUrl));
+    _initializeVideoPlayerFuture = _videoController!.initialize().then((_) {
+      if (!mounted) return;
+      if (_videoController!.controller.value.isInitialized) {
+        _videoController!.controller.setLooping(true);
+        if (widget.isCurrentPage) {
+          _videoController!.controller.play();
+        }
+      } else {
+        if (mounted) setState(() => _hasError = true);
+      }
+      if (mounted) setState(() {});
+    }).catchError((error) {
+      if (mounted) setState(() => _hasError = true);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<PostBloc, PostState>(
       builder: (context, state) {
-        // Handle Loading and Initial States
-        if (state is PostLoading || state is PostInitial) {
-          return const Center(child: CircularProgressIndicator());
-        }
+        // The UI is built using the most up-to-date data.
+        // It starts with the initialPost and updates live when PostLoaded arrives.
+        final postToDisplay =
+            (state is PostLoaded) ? state.post : widget.initialPost;
+        final author = (state is PostLoaded) ? state.author : null;
 
-        // Handle Error State
-        if (state is PostError) {
+        return GestureDetector(
+          onTap: () {
+            if (_videoController?.controller.value.isInitialized ?? false) {
+              _videoController!.controller.value.isPlaying
+                  ? _videoController!.controller.pause()
+                  : _videoController!.controller.play();
+            }
+          },
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Video Player Background
+              _buildVideoPlayer(),
+              // Gradient Overlay for text readability
+              _buildGradientOverlay(),
+              // UI Elements (Author, Caption, Actions)
+              _buildPostOverlay(context, postToDisplay!, author),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildVideoPlayer() {
+    return FutureBuilder(
+      future: _initializeVideoPlayerFuture,
+      builder: (context, snapshot) {
+        if (_hasError) {
+          return Container(
+            color: Colors.black,
+            child: const Center(
+                child: Icon(Icons.error_outline, color: Colors.red, size: 48)),
+          );
+        }
+        if (snapshot.connectionState == ConnectionState.done &&
+            (_videoController?.controller.value.isInitialized ?? false)) {
           return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                'Could not load post: ${state.message}',
-                style: const TextStyle(color: Colors.white),
-                textAlign: TextAlign.center,
-              ),
+            child: AspectRatio(
+              aspectRatio: _videoController!.controller.value.aspectRatio,
+              child: VideoPlayer(_videoController!.controller),
             ),
           );
         }
-
-        // Handle Loaded State
-        if (state is PostLoaded) {
-          final post = state.post;
-          final author = state.author;
-
-          // Crucial: Initialize the video player when we have the post data.
-          _initializeVideo();
-
-          return FutureBuilder(
-            future: _initializeVideoPlayerFuture,
-            builder: (context, snapshot) {
-              if (_hasError) {
-                return const Center(
-                    child:
-                        Icon(Icons.error_outline, color: Colors.red, size: 48));
-              }
-
-              final isPlayerReady = _videoController != null &&
-                  snapshot.connectionState == ConnectionState.done &&
-                  _videoController!.controller.value.isInitialized;
-
-              if (isPlayerReady) {
-                return GestureDetector(
-                  onTap: () {
-                    if (_videoController!.controller.value.isPlaying) {
-                      _videoController!.controller.pause();
-                    } else {
-                      _videoController!.controller.play();
-                    }
-                  },
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      Positioned.fill(
-                        child: FadeTransition(
-                          opacity: _fadeAnimationController,
-                          child: FittedBox(
-                            fit: BoxFit.cover,
-                            child: SizedBox(
-                              width:
-                                  _videoController!.controller.value.size.width,
-                              height: _videoController!
-                                  .controller.value.size.height,
-                              child: VideoPlayer(_videoController!.controller),
-                            ),
-                          ),
-                        ),
-                      ),
-                      _buildGradientOverlay(),
-                      _buildPostInfo(post!, author),
-                      _buildActionButtons(context, post),
-                    ],
-                  ),
-                );
-              } else {
-                return Container(
-                  color: Colors.black,
-                  child: const Center(child: CircularProgressIndicator()),
-                );
-              }
-            },
-          );
-        }
-
-        return const SizedBox.shrink();
+        // While waiting for initialization, show the thumbnail as a background
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.black,
+            image: DecorationImage(
+              image:
+                  CachedNetworkImageProvider(widget.initialPost.thumbnailUrl),
+              fit: BoxFit.cover,
+            ),
+          ),
+          child: const Center(child: CircularProgressIndicator()),
+        );
       },
     );
   }
@@ -230,119 +170,120 @@ class _VideoPostItemState extends State<VideoPostItem>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
+              Colors.black.withOpacity(0.3),
               Colors.transparent,
-              Colors.black.withOpacity(0.1),
-              Colors.black.withOpacity(0.5),
+              Colors.black.withOpacity(0.5)
             ],
-            stops: const [0.5, 0.7, 1.0],
+            stops: const [0.0, 0.4, 1.0],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildPostOverlay(
+      BuildContext context, PostEntity post, UserEntity? author) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0).copyWith(bottom: 32.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              // Left side: Author Info & Caption
+              Expanded(
+                child: _buildPostInfo(post, author),
+              ),
+              // Right side: Action Buttons
+              _buildActionButtons(context, post),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildPostInfo(PostEntity post, UserEntity? author) {
-    return Positioned(
-      bottom: 20,
-      left: 15,
-      right: 90,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _AuthorInfo(author: author, onUserTapped: widget.onUserTapped),
-          const SizedBox(height: 8),
-          Text(
-            post.caption,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-                color: Colors.white,
-                shadows: [Shadow(blurRadius: 4.0, color: Colors.black)]),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: () => (author != null) ? widget.onUserTapped(author.id) : null,
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundImage: author?.profilePhotoUrl != null
+                    ? CachedNetworkImageProvider(author!.profilePhotoUrl!)
+                    : null,
+                child: author?.profilePhotoUrl == null
+                    ? const Icon(Icons.person)
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                author?.username ?? 'Loading...',
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 8),
+        Text(post.caption,
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: Colors.white)),
+      ],
     );
   }
 
   Widget _buildActionButtons(BuildContext context, PostEntity post) {
-    return Positioned(
-      bottom: 20,
-      right: 10,
-      child: Column(
-        children: [
-          // The 'Like' button now dispatches an event to the PostBloc
-          _buildActionButton(Icons.diamond, post.diamonds.toString(), () {
+    return Column(
+      children: [
+        _buildActionButton(
+          icon: Icons.favorite,
+          label: post.diamonds.toString(),
+          onPressed: () {
             context.read<PostBloc>().add(IncrementLike(post.id));
-          }),
-          const SizedBox(height: 16),
-          _buildActionButton(Icons.comment, post.comments.toString(), () {}),
-          const SizedBox(height: 16),
-          _buildActionButton(Icons.share, 'Share', () {}),
-        ],
-      ),
+          },
+        ),
+        const SizedBox(height: 20),
+        _buildActionButton(
+          icon: Icons.comment,
+          label: post.comments.toString(),
+          onPressed: () {},
+        ),
+        const SizedBox(height: 20),
+        _buildActionButton(
+          icon: Icons.share,
+          label: 'Share',
+          onPressed: () {},
+        ),
+      ],
     );
   }
 
   Widget _buildActionButton(
-      IconData icon, String label, VoidCallback onPressed) {
+      {required IconData icon,
+      required String label,
+      required VoidCallback onPressed}) {
     return Column(
       children: [
         IconButton(
-          icon: Icon(icon, color: Colors.white, size: 30),
+          icon: Icon(icon,
+              color: Colors.white,
+              size: 30,
+              shadows: const [Shadow(color: Colors.black)]),
           onPressed: onPressed,
         ),
-        Text(label, style: const TextStyle(color: Colors.white, fontSize: 12)),
-      ],
-    );
-  }
-}
-
-// This sub-widget remains the same and is a great pattern.
-class _AuthorInfo extends StatelessWidget {
-  final UserEntity? author;
-  final Function(String userId) onUserTapped;
-
-  const _AuthorInfo({required this.author, required this.onUserTapped});
-
-  @override
-  Widget build(BuildContext context) {
-    if (author == null) {
-      return const Row(
-        children: [
-          CircleAvatar(radius: 20, backgroundColor: Colors.grey),
-          SizedBox(width: 8),
-          Text('loading...', style: TextStyle(color: Colors.white70)),
-        ],
-      );
-    }
-
-    return GestureDetector(
-      onTap: () => onUserTapped(author!.id),
-      child: Row(
-        children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundImage: author!.profilePhotoUrl != null &&
-                    author!.profilePhotoUrl!.isNotEmpty
-                ? NetworkImage(author!.profilePhotoUrl!)
-                : null,
-            child: author!.profilePhotoUrl == null ||
-                    author!.profilePhotoUrl!.isEmpty
-                ? const Icon(Icons.person)
-                : null,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            author!.username as String,
+        Text(label,
             style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              shadows: [Shadow(blurRadius: 4.0, color: Colors.black)],
-            ),
-          ),
-        ],
-      ),
+                color: Colors.white, fontWeight: FontWeight.bold)),
+      ],
     );
   }
 }
