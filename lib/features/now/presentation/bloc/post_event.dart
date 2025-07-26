@@ -18,14 +18,15 @@ class LoadPost extends PostEvent {
   List<Object> get props => [postId];
 }
 
-/// A public event dispatched when a user likes a post.
-class IncrementLike extends PostEvent {
+/// A public event dispatched when a user sends diamonds or unsend to a post.
+class SendDiamond extends PostEvent {
   final String postId;
+  final String userId;
 
-  const IncrementLike(this.postId);
+  const SendDiamond(this.postId, this.userId);
 
   @override
-  List<Object> get props => [postId];
+  List<Object> get props => [postId, userId];
 }
 
 /// An internal event used to push updates from the realtime stream into the bloc.

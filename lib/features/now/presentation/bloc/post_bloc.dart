@@ -25,7 +25,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         _profileRepository = profileRepository,
         super(PostInitial()) {
     on<LoadPost>(_onLoadPost);
-    on<IncrementLike>(_onIncrementLike);
+    on<SendDiamond>(_onSendDiamond);
     on<_PostUpdated>(_onPostUpdated);
   }
 
@@ -85,8 +85,9 @@ class PostBloc extends Bloc<PostEvent, PostState> {
   }
 
   /// Handles the event when a user likes a post.
-  void _onIncrementLike(IncrementLike event, Emitter<PostState> emit) async {
-    final result = await _postRepository.incrementDiamond(event.postId);
+  void _onSendDiamond(SendDiamond event, Emitter<PostState> emit) async {
+    final result = await _postRepository.sendDiamond(
+        postId: event.postId, userId: event.userId);
     result.fold(
       (failure) {
       },

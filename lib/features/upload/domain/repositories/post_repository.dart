@@ -37,9 +37,8 @@ abstract class PostRepository {
     required String userId,
   });
 
-  Future<Either<Failure, PostEntity>> incrementDiamond(String postId);
-
-  Future<Either<Failure, PostEntity>> decrementDiamond(String postId);
+  Future<Either<Failure, void>> sendDiamond(
+      {required String postId, required String userId});
 }
 
 class PostRepositoryImpl implements PostRepository {
@@ -137,14 +136,13 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
-  Future<Either<Failure, PostEntity>> decrementDiamond(String postId) {
-    // TODO: implement decrementDiamond
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, PostEntity>> incrementDiamond(String postId) {
-    // TODO: implement incrementDiamond
-    throw UnimplementedError();
+  Future<Either<Failure, void>> sendDiamond(
+      {required String postId, required String userId}) async {
+    try {
+      await remoteDataSource.sendDiamond(postId: postId, userId: userId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
   }
 }

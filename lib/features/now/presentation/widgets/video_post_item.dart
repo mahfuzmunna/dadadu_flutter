@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart';
 
 class VideoPostItem extends StatefulWidget {
@@ -306,7 +307,12 @@ class _VideoPostItemState extends State<VideoPostItem>
           icon: Icons.diamond_outlined,
           label: post.diamonds.toString(),
           onPressed: () {
-            context.read<PostBloc>().add(IncrementLike(post.id));
+            final authState = context.read<AuthBloc>().state;
+            if (authState is AuthAuthenticated) {
+              context
+                  .read<PostBloc>()
+                  .add(SendDiamond(post.id, authState.user.id));
+            }
           },
         ),
         const SizedBox(height: 20),
