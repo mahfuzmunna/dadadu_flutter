@@ -121,6 +121,8 @@ class _NowPageViewState extends State<_NowPageView> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final bool isPageActive =
+        StatefulNavigationShell.of(context).currentIndex == 0;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -168,27 +170,18 @@ class _NowPageViewState extends State<_NowPageView> {
               return const Center(
                   child: Text('No videos yet. Why not upload one?'));
             }
-
             return PageView.builder(
               controller: _pageController,
               scrollDirection: Axis.vertical,
               itemCount: posts.length,
               itemBuilder: (context, index) {
                 final PostEntity post = posts[index];
-
-                // return VideoPostItem(
-                //     isCurrentPage: index == _currentPageIndex,
-                //     onUserTapped: (userId) {
-                //       ScaffoldMessenger.of(context).showSnackBar(
-                //         SnackBar(content: Text('Tapped on user: $userId')),
-                //       );
-                //     },
-                //   );
                 return BlocProvider<PostBloc>(
                   create: (context) => sl<PostBloc>()..add(LoadPost(post.id)),
                   child: VideoPostItem(
                     initialPost: post,
                     isCurrentPage: index == _currentPageIndex,
+                    isPageActive: isPageActive,
                     onUserTapped: (userId) {
                       context.push('/profile/$userId');
                     },

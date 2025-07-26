@@ -27,12 +27,12 @@ dependencies:
   image_picker: ^1.1.2
   image_editor_plus: ^1.0.6
   chewie: ^1.12.1
-  video_player: ^2.10.0
   video_thumbnail: ^0.5.3
   video_trimmer: ^5.0.0
   flutter_sound: ^9.2.13
   just_audio: ^0.9.34
-  cached_video_player_plus: ^4.0.1 # for better performance and caching
+  cached_video_player_plus: ^4.0.3 # for better performance and caching
+  video_player: ^2.10.0
 
   # UI/UX
   google_fonts: ^5.1.0

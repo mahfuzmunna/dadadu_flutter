@@ -15,11 +15,13 @@ import '../../../upload/domain/entities/post_entity.dart';
 class VideoPostItem extends StatefulWidget {
   final PostEntity initialPost;
   final bool isCurrentPage;
+  final bool isPageActive;
   final Function(String userId) onUserTapped;
 
   const VideoPostItem({
     super.key,
     required this.initialPost,
+    required this.isPageActive,
     required this.isCurrentPage,
     required this.onUserTapped,
   });
@@ -30,7 +32,7 @@ class VideoPostItem extends StatefulWidget {
 
 class _VideoPostItemState extends State<VideoPostItem>
     with WidgetsBindingObserver {
-  CachedVideoPlayerPlus? _videoController;
+  CachedVideoPlayerPlus? _player;
   Future<void>? _initializeVideoPlayerFuture;
   bool _hasError = false;
 
@@ -44,24 +46,41 @@ class _VideoPostItemState extends State<VideoPostItem>
   @override
   void didUpdateWidget(covariant VideoPostItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isCurrentPage != oldWidget.isCurrentPage) {
-      if (widget.isCurrentPage) {
-        _videoController?.controller.play();
+    if ((widget.isCurrentPage && widget.isPageActive) !=
+        (oldWidget.isCurrentPage && oldWidget.isPageActive)) {
+      if (widget.isCurrentPage && widget.isPageActive) {
+        _player?.controller.play();
       } else {
-        _videoController?.controller.pause();
+        _player?.controller.pause();
       }
     }
   }
 
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (_player == null || !_player!.controller.value.isInitialized) return;
+  //   if (state == AppLifecycleState.paused) {
+  //     _player!.controller.pause();
+  //   } else if (state == AppLifecycleState.resumed) {
+  //     if (widget.isCurrentPage && widget.isPageActive) {
+  //       _player!.controller.play();
+  //     }
+  //   }
+  // }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_videoController == null ||
-        !_videoController!.controller.value.isInitialized) return;
+    if (!mounted ||
+        _player?.controller == null ||
+        !_player!.controller.value.isInitialized) return;
     if (state == AppLifecycleState.paused) {
-      _videoController!.controller.pause();
+      _player!.controller.pause();
     } else if (state == AppLifecycleState.resumed) {
-      if (widget.isCurrentPage) {
-        _videoController!.controller.play();
+      // Only resume playing if it's the current video on the active page
+      if (widget.isCurrentPage && widget.isPageActive) {
+        _player!.controller.play();
+      } else {
+        _player!.controller.pause();
       }
     }
   }
@@ -69,21 +88,22 @@ class _VideoPostItemState extends State<VideoPostItem>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _videoController?.controller.dispose();
+    _player?.controller.pause();
+    _player?.controller.dispose();
     super.dispose();
   }
 
   void _initializeVideo() {
-    if (_videoController?.controller != null) return;
+    if (_player?.controller != null) return;
 
-    _videoController = CachedVideoPlayerPlus.networkUrl(
+    _player = CachedVideoPlayerPlus.networkUrl(
         Uri.parse(widget.initialPost.videoUrl));
-    _initializeVideoPlayerFuture = _videoController!.initialize().then((_) {
+    _initializeVideoPlayerFuture = _player!.initialize().then((_) {
       if (!mounted) return;
-      if (_videoController!.controller.value.isInitialized) {
-        _videoController!.controller.setLooping(true);
-        if (widget.isCurrentPage) {
-          _videoController!.controller.play();
+      if (_player!.isInitialized) {
+        _player!.controller.setLooping(true);
+        if (widget.isCurrentPage && widget.isPageActive) {
+          _player!.controller.play();
         }
       } else {
         if (mounted) setState(() => _hasError = true);
@@ -109,10 +129,10 @@ class _VideoPostItemState extends State<VideoPostItem>
 
           return GestureDetector(
             onTap: () {
-              if (_videoController?.controller.value.isInitialized ?? false) {
-                _videoController!.controller.value.isPlaying
-                    ? _videoController!.controller.pause()
-                    : _videoController!.controller.play();
+              if (_player?.isInitialized ?? false) {
+                _player!.controller.value.isPlaying
+                    ? _player!.controller.pause()
+                    : _player!.controller.play();
               }
             },
             child: Stack(
@@ -144,11 +164,11 @@ class _VideoPostItemState extends State<VideoPostItem>
           );
         }
         if (snapshot.connectionState == ConnectionState.done &&
-            (_videoController?.controller.value.isInitialized ?? false)) {
+            (_player?.isInitialized ?? false)) {
           return Center(
             child: AspectRatio(
-              aspectRatio: _videoController!.controller.value.aspectRatio,
-              child: VideoPlayer(_videoController!.controller),
+              aspectRatio: _player!.controller.value.aspectRatio,
+              child: VideoPlayer(_player!.controller),
             ),
           );
         }
