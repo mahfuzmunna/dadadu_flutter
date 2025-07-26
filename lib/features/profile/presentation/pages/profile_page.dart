@@ -18,31 +18,19 @@ import '../../../../injection_container.dart' as di; // For sharing content
 class ProfilePage extends StatelessWidget {
   /// This is used ONLY when viewing the currently logged-in user's profile.
   /// When viewing another user, this will be null.
-  final UserEntity? viewedUser;
+  final String userId;
 
-  const ProfilePage({super.key, this.viewedUser});
+  const ProfilePage({super.key, required this.userId});
 
   @override
   Widget build(BuildContext context) {
     // If a viewedUser is passed directly, it's the current user's profile.
     // This happens when navigating to '/profile' from the bottom nav bar.
-    if (viewedUser != null) {
       return BlocProvider(
         create: (context) =>
-            di.sl<ProfileBloc>()..add(SubscribeToUserProfile(viewedUser!.id)),
-        child: const _ProfileView(),
+          di.sl<ProfileBloc>()..add(SubscribeToUserProfile(userId)),
+      child: const _ProfileView(),
       );
-    }
-
-    // If viewedUser is not null, it's the current user's profile tab.
-    // We provide a ProfileBloc and subscribe to the current user's ID.
-
-    final user = viewedUser!;
-    return _ProfileContent(
-        user: user,
-        isMyProfile: true,
-        referralLink: user.referralLink ??
-            'https://dadadu.app/ref?uname=${user.username}');
   }
 }
 

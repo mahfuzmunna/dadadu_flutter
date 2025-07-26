@@ -4,6 +4,7 @@ import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../widgets/video_post_item.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
@@ -189,9 +190,7 @@ class _NowPageViewState extends State<_NowPageView> {
                     initialPost: post,
                     isCurrentPage: index == _currentPageIndex,
                     onUserTapped: (userId) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Tapped on user: $userId')),
-                      );
+                      context.push('/profile/$userId');
                     },
                   ),
                 );

@@ -221,7 +221,9 @@ class _VideoPostItemState extends State<VideoPostItem>
       children: [
         // --- Author Info ---
         GestureDetector(
-          onTap: () => (author != null) ? widget.onUserTapped(author.id) : null,
+          onTap: () {
+            (author != null) ? widget.onUserTapped(author.id) : null;
+          },
           child: Row(
             children: [
               Container(

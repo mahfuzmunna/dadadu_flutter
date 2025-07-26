@@ -162,7 +162,7 @@ class AppRouter {
                     final authState = context.read<AuthBloc>().state;
                     if (authState is AuthAuthenticated) {
                       // Pass the currently logged-in user to the ProfilePage
-                      return ProfilePage(viewedUser: authState.user);
+                      return ProfilePage(userId: authState.user.id);
                     }
                     // Fallback or loading state if needed
                     return const Center(child: CircularProgressIndicator());
@@ -185,7 +185,7 @@ class AppRouter {
                             ..add(SubscribeToUserProfile(userId)),
                           // The ProfilePage now takes NO arguments for this route.
                           // It will get all its data from the ProfileBloc.
-                          child: const ProfilePage(),
+                          child: ProfilePage(userId: userId),
                         );
                       },
                     ),
