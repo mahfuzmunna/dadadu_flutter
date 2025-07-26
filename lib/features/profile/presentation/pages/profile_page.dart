@@ -1,5 +1,6 @@
 // lib/features/profile/presentation/pages/profile_page.dart
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -10,7 +11,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../../injection_container.dart' as di; // For sharing content
+import '../../../../injection_container.dart' as di;
+import '../../../now/presentation/bloc/feed_bloc.dart';
+import '../../../upload/domain/entities/post_entity.dart'; // For sharing content
 
 /// This widget acts as a router.
 /// It decides whether to show the current user's profile (passed via constructor)
@@ -26,11 +29,16 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // If a viewedUser is passed directly, it's the current user's profile.
     // This happens when navigating to '/profile' from the bottom nav bar.
-      return BlocProvider(
-        create: (context) =>
-          di.sl<ProfileBloc>()..add(SubscribeToUserProfile(userId)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+            create: (context) => di.sl<FeedBloc>()..add(SubscribeToFeed())),
+        BlocProvider(
+            create: (context) =>
+                di.sl<ProfileBloc>()..add(SubscribeToUserProfile(userId)))
+      ],
       child: const _ProfileView(),
-      );
+    );
   }
 }
 
@@ -88,6 +96,11 @@ class _ProfileContent extends StatefulWidget {
 }
 
 class _ProfileContentState extends State<_ProfileContent> {
+  List<PostEntity> _posts = [];
+  List<PostEntity> _usersPosts = [];
+
+  Map<String, UserEntity> _authors = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,39 +122,51 @@ class _ProfileContentState extends State<_ProfileContent> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // --- Profile Header ---
-            _buildProfileHeader(widget.isMyProfile),
-            const SizedBox(height: 24),
-
-            // --- Mood & Badges Info ---
-            if (widget.isMyProfile) ...[
-              _buildMoodAndBadgesSection(),
+        child: BlocConsumer<FeedBloc, FeedState>(listener: (context, state) {
+          if (state is FeedLoaded) {
+            setState(() {
+              _posts = state.posts;
+              _authors = state.authors;
+            });
+          }
+        }, builder: (context, state) {
+          if (state is FeedLoaded) {
+            _usersPosts = state.posts
+                .where((post) => post.userId == widget.user.id)
+                .toList();
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // --- Profile Header ---
+              _buildProfileHeader(widget.isMyProfile),
               const SizedBox(height: 24),
-            ],
-
-            // --- Stats ---
-            _buildStatsRow(),
-            const SizedBox(height: 32),
-
-            // --- Referral Card ---
-            if (widget.isMyProfile) ...[
-              _buildReferralCard(widget.referralLink),
+              // --- Mood & Badges Info ---
+              if (widget.isMyProfile) ...[
+                _buildMoodAndBadgesSection(),
+                const SizedBox(height: 24),
+              ],
+              // --- Stats ---
+              _buildStatsRow(),
               const SizedBox(height: 32),
-            ],
 
-            // --- Match History ---
-            if (widget.isMyProfile) ...[
-              _buildMatchHistory(),
-              const SizedBox(height: 32),
-            ],
+              // --- Referral Card ---
+                  if (widget.isMyProfile) ...[
+                    _buildReferralCard(widget.referralLink),
+                    const SizedBox(height: 32),
+                  ],
 
-            // --- Uploaded Videos ---
-            _buildVideosGrid(widget.isMyProfile),
-          ],
-        ),
+              // --- Match History ---
+              if (widget.isMyProfile) ...[
+                _buildMatchHistory(),
+                const SizedBox(height: 32),
+              ],
+              // --- Uploaded Videos ---
+              _buildVideosGrid(
+                  isMyProfile: widget.isMyProfile, usersPosts: _usersPosts),
+            ],
+          );
+        }),
       ),
     );
   }
@@ -506,19 +531,20 @@ class _ProfileContentState extends State<_ProfileContent> {
     );
   }
 
-  Widget _buildVideosGrid(bool isMyProfile) {
+  Widget _buildVideosGrid(
+      {required bool isMyProfile, required List<PostEntity> usersPosts}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Uploaded Videos (${widget.user.postCount})',
+          'Uploaded Videos (${usersPosts.length})',
           style: Theme.of(context)
               .textTheme
               .titleLarge
               ?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        if (widget.user.postCount == 0)
+        if (usersPosts.isEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 40.0),
             child: Center(
@@ -540,7 +566,7 @@ class _ProfileContentState extends State<_ProfileContent> {
               mainAxisSpacing: 10,
               childAspectRatio: 0.7,
             ),
-            itemCount: widget.user.postCount,
+            itemCount: usersPosts.length,
             itemBuilder: (context, index) {
               return Card(
                 clipBehavior: Clip.antiAlias,
@@ -550,10 +576,44 @@ class _ProfileContentState extends State<_ProfileContent> {
                   onTap: () {
                     /* Navigate to video player */
                   },
-                  child: Container(
-                    color: Theme.of(context).colorScheme.surfaceContainerHigh,
-                    child: const Center(
-                        child: Icon(Icons.play_circle_outline, size: 40)),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    // Make the stack's children fill the card
+                    children: [
+                      // 1. The Thumbnail Image
+                      CachedNetworkImage(
+                        imageUrl: usersPosts[index].thumbnailUrl,
+                        fit: BoxFit.cover,
+                        // Ensures the image covers the card area
+                        // Placeholder while the image is loading
+                        placeholder: (context, url) => Container(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh,
+                          child:
+                              const Center(child: CircularProgressIndicator()),
+                        ),
+                        // Widget to show if the image fails to load
+                        errorWidget: (context, url, error) => Container(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHigh,
+                          child: const Center(
+                              child: Icon(Icons.broken_image_outlined)),
+                        ),
+                      ),
+                      // 2. The Play Icon Overlay
+                      Center(
+                        child: Icon(
+                          Icons.play_circle_filled_rounded,
+                          color: Colors.white.withOpacity(0.8),
+                          size: 50,
+                          shadows: const [
+                            Shadow(color: Colors.black45, blurRadius: 10)
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );

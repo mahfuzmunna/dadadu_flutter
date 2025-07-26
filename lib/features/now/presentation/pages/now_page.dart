@@ -152,22 +152,6 @@ class _NowPageViewState extends State<_NowPageView>
     }
   }
 
-  Future<void> _playVideo(int index) async {
-    if (index < 0 || index >= _posts.length) return;
-    final post = _posts[index];
-    VideoPlayerController? controller = _controllerCache[post.id];
-
-    if (controller == null) {
-      await _initializeControllerForIndex(index);
-      controller = _controllerCache[post.id];
-    }
-
-    if (controller?.value.isInitialized ?? false) {
-      await controller?.setLooping(true);
-      await controller?.play();
-    }
-    if (mounted) setState(() {});
-  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -248,6 +232,7 @@ class _NowPageViewState extends State<_NowPageView>
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -276,51 +261,53 @@ class _NowPageViewState extends State<_NowPageView>
           ),
         ],
       ),
-      body: BlocConsumer<FeedBloc, FeedState>(
-        listener: (context, state) {
-          if (state is FeedLoaded) {
-            setState(() {
-              _posts = state.posts;
-              _authors = state.authors;
-            });
-            _manageControllerCache(0);
-          }
-        },
-        builder: (context, state) {
-          // LOADING STATE
-          if (state is FeedLoading || state is FeedInitial) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          // ERROR STATE
-          if (state is FeedError) {
-            return Center(child: Text('Error: ${state.message}'));
-          }
-          // LOADED STATE
-          if (_posts.isNotEmpty) {
-            return PageView.builder(
-              controller: _pageController,
-              scrollDirection: Axis.vertical,
-              itemCount: _posts.length,
-              itemBuilder: (context, index) {
-                final post = _posts[index];
-                final author = _authors[post.userId];
-                return VideoPostItem(
-                  key: ValueKey(post.id),
-                  post: post,
-                  author: author,
-                  controller: _controllerCache[post.id],
-                  isCurrentPage: index == _currentPageIndex,
+      body: Padding(
+        padding: EdgeInsets.only(top: statusBarHeight),
+        child: BlocConsumer<FeedBloc, FeedState>(
+          listener: (context, state) {
+            if (state is FeedLoaded) {
+              setState(() {
+                _posts = state.posts;
+                _authors = state.authors;
+              });
+              _manageControllerCache(0);
+            }
+          },
+          builder: (context, state) {
+            // LOADING STATE
+            if (state is FeedLoading || state is FeedInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            // ERROR STATE
+            if (state is FeedError) {
+              return Center(child: Text('Error: ${state.message}'));
+            }
+            // LOADED STATE
+            if (_posts.isNotEmpty) {
+              return PageView.builder(
+                controller: _pageController,
+                scrollDirection: Axis.vertical,
+                itemCount: _posts.length,
+                itemBuilder: (context, index) {
+                  final post = _posts[index];
+                  final author = _authors[post.userId];
+                  return VideoPostItem(
+                    key: ValueKey(post.id),
+                    post: post,
+                    author: author,
+                    controller: _controllerCache[post.id],
+                    isCurrentPage: index == _currentPageIndex,
                     onUserTapped: (userId) {
                       context.push('/profile/$userId');
                     },
-                );
-              },
-            );
-          }
-
-          // Fallback for any other state
-          return const SizedBox.shrink();
-        },
+                  );
+                },
+              );
+            }
+            // Fallback for any other state
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }
