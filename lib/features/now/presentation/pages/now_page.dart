@@ -44,6 +44,7 @@ class _NowPageViewState extends State<_NowPageView>
   List<PostEntity> _posts = [];
   Map<String, UserEntity> _authors = {};
   int _currentPageIndex = 0;
+  bool _hasNewNotifications = true;
 
   final int _maxCacheSize =
       3; // Max controllers to keep in memory (current, previous, next)
@@ -167,6 +168,9 @@ class _NowPageViewState extends State<_NowPageView>
 
   // ✅ NEW: Helper method to show the notifications dialog
   void _showNotificationsDialog(BuildContext context) {
+    setState(() {
+      _hasNewNotifications = false;
+    });
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -251,12 +255,14 @@ class _NowPageViewState extends State<_NowPageView>
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: IconButton(
-              icon: const Icon(Icons.notifications_none_rounded),
+              icon: Badge(
+                // This makes the dot appear or disappear
+                isLabelVisible: _hasNewNotifications,
+                // Leaving the label null creates the small red dot
+                child: const Icon(Icons.notifications_none_rounded),
+              ),
               tooltip: 'Notifications',
-              onPressed: () {
-                _showNotificationsDialog(context);
-              },
-              // Style for a modern, adaptive look
+              onPressed: () => _showNotificationsDialog(context),
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black.withOpacity(0.4),
                 foregroundColor: Colors.white,
