@@ -147,7 +147,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 const SizedBox(height: 24),
               ],
               // --- Stats ---
-              _buildStatsRow(),
+              _buildStatsRow(_usersPosts.length),
               const SizedBox(height: 32),
 
               // --- Referral Card ---
@@ -177,8 +177,9 @@ class _ProfileContentState extends State<_ProfileContent> {
     // Add a 'diamonds' field to your UserEntity, e.g., final int diamonds;
     final int diamondCount = user.diamonds ?? 0;
 
-    if (!widget.isMyProfile)
+    if (!widget.isMyProfile) {
       return const SizedBox.shrink(); // Not for other users
+    }
 
     return Center(
       child: Padding(
@@ -397,7 +398,7 @@ class _ProfileContentState extends State<_ProfileContent> {
     );
   }
 
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(int postsCount) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
@@ -574,7 +575,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                     borderRadius: BorderRadius.circular(12)),
                 child: InkWell(
                   onTap: () {
-                    /* Navigate to video player */
+                    context.push('/users-video');
                   },
                   child: Stack(
                     fit: StackFit.expand,

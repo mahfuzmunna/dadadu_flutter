@@ -17,6 +17,7 @@ import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
+import 'package:dadadu_app/features/profile/presentation/pages/user_video_page.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
 // import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
 import 'package:flutter/material.dart';
@@ -108,6 +109,11 @@ class AppRouter {
           path: '/editProfile',
           builder: (BuildContext context, GoRouterState state) =>
               const EditProfilePage(),
+        ),
+        GoRoute(
+          path: '/users-video',
+          builder: (BuildContext context, GoRouterState state) =>
+              const UsersVideoPage(),
         ),
 
         // --- ShellRoute for the main app content with a bottom navigation bar ---

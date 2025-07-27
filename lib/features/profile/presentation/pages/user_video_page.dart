@@ -1,18 +1,21 @@
+import 'dart:collection';
+
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
-import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
-import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
-import '../widgets/video_post_item.dart';
+import '../../../../injection_container.dart';
+import '../../../now/presentation/bloc/feed_bloc.dart';
+import '../../../now/presentation/bloc/post_bloc.dart';
+import '../../../now/presentation/widgets/video_post_item.dart';
+
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 
-class NowPage extends StatelessWidget {
-  const NowPage({super.key});
+class UsersVideoPage extends StatelessWidget {
+  const UsersVideoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,28 +26,30 @@ class NowPage extends StatelessWidget {
             create: (context) => sl<FeedBloc>()..add(SubscribeToFeed())),
         BlocProvider(create: (context) => sl<PostBloc>()),
       ],
-      child: const _NowPageView(),
+      child: const _UsersVideoPageView(),
     );
   }
 }
 
-class _NowPageView extends StatefulWidget {
-  const _NowPageView();
+class _UsersVideoPageView extends StatefulWidget {
+  const _UsersVideoPageView();
 
   @override
-  State<_NowPageView> createState() => _NowPageViewState();
+  State<_UsersVideoPageView> createState() => _UsersVideoPageViewState();
 }
 
-class _NowPageViewState extends State<_NowPageView>
+class _UsersVideoPageViewState extends State<_UsersVideoPageView>
     with WidgetsBindingObserver {
   final PageController _pageController = PageController();
   List<PostEntity> _posts = [];
+  List<PostEntity> _usersPosts = [];
+
   Map<String, UserEntity> _authors = {};
   int _currentPageIndex = 0;
 
   final int _maxCacheSize =
       3; // Max controllers to keep in memory (current, previous, next)
-  final Map<String, VideoPlayerController> _controllerCache = {};
+  final Map<String, VideoPlayerController> _controllerCache = LinkedHashMap();
   final Set<String> _initializingControllers = {};
 
   @override
@@ -136,7 +141,6 @@ class _NowPageViewState extends State<_NowPageView>
     _initializingControllers.add(post.id);
     final controller =
         VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
-    // final controller = VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
     try {
       await controller.initialize();
       if (mounted) {
@@ -150,7 +154,6 @@ class _NowPageViewState extends State<_NowPageView>
       _initializingControllers.remove(post.id);
     }
   }
-
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -283,6 +286,10 @@ class _NowPageViewState extends State<_NowPageView>
             }
             // LOADED STATE
             if (_posts.isNotEmpty) {
+              // _usersPosts = _posts
+              //     .where((post) => post.userId == )
+              //     .toList();
+
               return PageView.builder(
                 controller: _pageController,
                 scrollDirection: Axis.vertical,

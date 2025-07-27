@@ -189,7 +189,7 @@ class VideoPostItem extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         _buildActionButton(
-          icon: Icons.favorite,
+          icon: Icons.diamond_outlined,
           label: post.diamonds.toString(),
           onPressed: () {
             // context.read<PostBloc>().add(IncrementLike(post.id));
@@ -197,12 +197,12 @@ class VideoPostItem extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         _buildActionButton(
-            icon: Icons.comment,
+            icon: Icons.comment_bank_outlined,
             label: post.comments.toString(),
             onPressed: () {}),
         const SizedBox(height: 20),
         _buildActionButton(
-            icon: Icons.share,
+            icon: Icons.share_outlined,
             label: 'Share',
             onPressed: () {
               Share.share('Check out this video! ${post.caption}');
