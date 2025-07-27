@@ -165,7 +165,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
       final outputVideoPath =
           '${tempDir.path}/watermarked_${widget.post.id}.mp4';
 
-      // 3. Use the video_watermark package to add the image
+      // 3. Using ffmpeg to watermark the video
 
       final ffmpegCommand = '-y -i "$filePath" -i "${watermarkFile.path}" '
           '-filter_complex "overlay=(main_w-overlay_w)/2:main_h-overlay_h-290" '
@@ -188,24 +188,6 @@ class _VideoPostItemState extends State<VideoPostItem> {
     } catch (e) {
       throw Exception('Erreur création watermark: $e');
     }
-
-    // final videoWatermark = VideoWatermark(
-    //   sourceVideoPath: filePath,
-    //   watermark: Watermark(
-    //     image: WatermarkSource.file(watermarkImagePath),
-    //     watermarkSize: WatermarkSize(93.5, 35.3),
-    //     watermarkAlignment: WatermarkAlignment.bottomLeft,
-    //   ),
-    //   savePath: outputVideoPath,
-    //   onSave: (path) {
-    //     debugPrint("Watermarked video saved to: $path");
-    //   },
-    // );
-    //
-    // // 4. Generate the watermarked video
-    // await videoWatermark.generateVideo();
-    //
-    // return outputVideoPath;
   }
 
   void _showSnackBar(String message, {bool isError = false}) {

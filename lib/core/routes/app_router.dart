@@ -28,7 +28,7 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/pages/sign_up_page.dart';
 import '../../features/discover/presentation/pages/vibe_users_page.dart';
 import '../../features/now/now_injection.dart' as di;
-import '../../features/posts/presentation/pages/upload_page.dart';
+import '../../features/posts/presentation/pages/upload_page_s.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 

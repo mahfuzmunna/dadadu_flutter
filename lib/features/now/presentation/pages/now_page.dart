@@ -7,6 +7,7 @@ import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../injection_container.dart' as di;
@@ -43,12 +44,15 @@ class _NowPageViewState extends State<_NowPageView>
   final PageController _pageController = PageController();
   List<PostEntity> _posts = [];
   Map<String, UserEntity> _authors = {};
+  late GoRouter _router;
+  bool _isPageActive = true;
   int _currentPageIndex = 0;
   bool _hasNewNotifications = true;
 
   final int _maxCacheSize =
       3; // Max controllers to keep in memory (current, previous, next)
   final Map<String, VideoPlayerController> _controllerCache = {};
+  String? _currentPostId;
   final Set<String> _initializingControllers = {};
 
   @override
@@ -61,6 +65,40 @@ class _NowPageViewState extends State<_NowPageView>
         _onPageChanged(newPage);
       }
     });
+
+    // Use addPostFrameCallback to ensure context is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      // Get the GoRouter instance provided at the root of your app
+      _router = Provider.of<GoRouter>(context, listen: false);
+      // Add the listener
+      _router.routerDelegate.addListener(_handleRouteChange);
+    });
+  }
+
+  /// This function runs every time the route changes.
+  void _handleRouteChange() {
+    if (!mounted) return;
+
+    // Get the current primary route (e.g., '/home', '/discover')
+    final String topRoute =
+        _router.routerDelegate.currentConfiguration.fullPath ?? '';
+    final bool isActive =
+        (topRoute == '/home'); // '/home' is the path for your NowPage
+
+    if (_isPageActive != isActive) {
+      setState(() {
+        _isPageActive = isActive;
+      });
+      // If the page is no longer the active tab, pause the video.
+      if (!isActive && _currentPostId != null) {
+        _controllerCache[_currentPostId]?.pause();
+      } else {
+        // If the page becomes active again, play the video if it's the current one.
+        if (_isPageActive && _currentPostId != null) {
+          _controllerCache[_currentPostId]?.play();
+        }
+      }
+    }
   }
 
   @override
@@ -106,7 +144,7 @@ class _NowPageViewState extends State<_NowPageView>
 
     final post = _posts[index];
     VideoPlayerController? controller = _controllerCache[post.id];
-
+    _currentPostId = post.id;
     if (controller == null) {
       await _initializeControllerForIndex(index);
       controller = _controllerCache[post.id];
