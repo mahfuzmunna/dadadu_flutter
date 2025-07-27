@@ -8,6 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../../injection_container.dart' as di;
+import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../widgets/video_post_item.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 
@@ -151,7 +153,6 @@ class _NowPageViewState extends State<_NowPageView>
     }
   }
 
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (_posts.isEmpty) return;
@@ -290,16 +291,18 @@ class _NowPageViewState extends State<_NowPageView>
                 itemBuilder: (context, index) {
                   final post = _posts[index];
                   final author = _authors[post.userId];
-                  return VideoPostItem(
-                    key: ValueKey(post.id),
-                    post: post,
-                    author: author,
-                    controller: _controllerCache[post.id],
-                    isCurrentPage: index == _currentPageIndex,
-                    onUserTapped: (userId) {
-                      context.push('/profile/$userId');
-                    },
-                  );
+                  return BlocProvider<ProfileBloc>(
+                      create: (context) => di.sl<ProfileBloc>()
+                        ..add(SubscribeToUserProfile(author!.id)),
+                      child: VideoPostItem(
+                          key: ValueKey(post.id),
+                          post: post,
+                          author: author,
+                          controller: _controllerCache[post.id],
+                          isCurrentPage: index == _currentPageIndex,
+                          onUserTapped: (userId) {
+                            context.push('/profile/$userId');
+                          }));
                 },
               );
             }
