@@ -406,8 +406,7 @@ class _ProfileContentState extends State<_ProfileContent> {
             '${widget.user.followersCount}', 'Followers'),
         _buildStatColumn(context, Icons.person_add_alt_1_rounded,
             '${widget.user.followingCount}', 'Following'),
-        _buildStatColumn(context, Icons.ondemand_video_rounded,
-            '${widget.user.postCount}', 'Videos'),
+        _buildStatColumn(context, Icons.ondemand_video_rounded, '$postsCount', 'Videos'),
       ],
     );
   }
