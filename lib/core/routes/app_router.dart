@@ -15,11 +15,12 @@ import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
+import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/user_video_page_s.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
-// import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
+// import 'package:dadadu_app/features/upload/presentation/pages/create_post_camera_page.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -28,7 +29,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/pages/sign_up_page.dart';
 import '../../features/discover/presentation/pages/vibe_users_page.dart';
 import '../../features/now/now_injection.dart' as di;
-import '../../features/posts/presentation/pages/upload_page_s.dart';
+import '../../features/posts/presentation/pages/create_post_camera_page.dart';
+import '../../features/posts/presentation/pages/create_post_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/upload/presentation/pages/camera_screen.dart';
 
@@ -101,7 +103,24 @@ class AppRouter {
             }
 
             // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
-            return const UploadPage(); // Or UploadPage, depending on your flow
+            return CreatePostPage(
+                videoPath: videoPath); // Or UploadPage, depending on your flow
+            // return UploadPage(videoPath: videoPath); // Or UploadPage, depending on your flow
+          },
+        ),
+        GoRoute(
+          path: '/videoEditor',
+          builder: (context, state) {
+            final String? videoPath = state.extra as String?;
+            if (videoPath == null) {
+              return const Center(
+                  child: Text('Error: No video path provided!'));
+            }
+
+            // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
+            return VideoEditorPage(
+                videoFilePath:
+                    videoPath); // Or UploadPage, depending on your flow
             // return UploadPage(videoPath: videoPath); // Or UploadPage, depending on your flow
           },
         ),
@@ -152,9 +171,9 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/upload',
-                    builder: (context, state) => const UploadPage()
-                    // redirect: (context, state) => '/camera',
+                    path: '/createPostCamera',
+                    builder: (context, state) => const CreatePostCameraPage()
+                    // redirect: (context, state) => '/createPostCamera',
                     ),
               ],
             ),

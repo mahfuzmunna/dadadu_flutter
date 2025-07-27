@@ -37,7 +37,8 @@ class _TrimmerScreenState extends State<TrimmerScreen> {
       endValue: _endValue,
       onSave: (outputPath) {
         if (outputPath != null && mounted) {
-          Navigator.of(context).pop(outputPath); // Return the new path
+          Navigator.of(context).pushNamed('/createPost',
+              arguments: outputPath); // Return the new path
         }
       },
     );

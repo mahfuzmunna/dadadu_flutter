@@ -1,23 +1,26 @@
 // lib/features/upload/presentation/pages/upload_page.dart
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
+import 'package:dadadu_app/features/posts/presentation/pages/trimmer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class UploadPage extends StatefulWidget {
-  const UploadPage({super.key});
+class CreatePostCameraPage extends StatefulWidget {
+  const CreatePostCameraPage({super.key});
 
   @override
-  State<UploadPage> createState() => _UploadPageState();
+  State<CreatePostCameraPage> createState() => _CreatePostCameraPageState();
 }
 
-class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
+class _CreatePostCameraPageState extends State<CreatePostCameraPage>
+    with WidgetsBindingObserver {
   CameraController? _cameraController;
   List<CameraDescription> _cameras = [];
   int _selectedCameraIndex = 0;
@@ -171,12 +174,22 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     final XFile? video =
         await ImagePicker().pickVideo(source: ImageSource.gallery);
     if (video != null && mounted) {
-      _navigateToCreatePost(video.path);
+      // _navigateToCreatePost(video.path);
+
+      final trimmedPath = await Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: (_) => TrimmerScreen(videoFile: File(video.path))),
+      );
+      // if(mounted) {
+      //   if (trimmedPath != null && context.mounted) {
+      //     context.read<UploadBloc>().add(UploadVideoSelected(File(trimmedPath)));
+      //   }
+      // }
     }
   }
 
   void _navigateToCreatePost(String videoPath) {
-    context.push('/createPost', extra: videoPath);
+    context.push('/videoEditor', extra: videoPath);
   }
 
   @override
