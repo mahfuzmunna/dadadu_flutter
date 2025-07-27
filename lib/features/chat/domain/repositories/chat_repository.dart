@@ -1,4 +1,6 @@
+import 'package:dadadu_app/core/errors/exceptions.dart';
 import 'package:dadadu_app/core/errors/failures.dart';
+import 'package:dadadu_app/features/chat/data/datasources/chat_remote_data_source.dart';
 import 'package:dadadu_app/features/chat/domain/entities/chat_message_entity.dart';
 import 'package:dartz/dartz.dart';
 
@@ -10,4 +12,48 @@ abstract class ChatRepository {
       {required String roomId,
       required String content,
       required String senderId});
+}
+
+class ChatRepositoryImpl implements ChatRepository {
+  final ChatRemoteDataSource remoteDataSource;
+
+  ChatRepositoryImpl({required this.remoteDataSource});
+
+  @override
+  Either<Failure, Stream<List<ChatMessageEntity>>> streamMessages(
+      String roomId) {
+    try {
+      // Call the data source to get the stream.
+      // Since ChatMessageModel extends ChatMessageEntity, the stream is compatible.
+      final messagesStream = remoteDataSource.streamMessages(roomId);
+
+      // On success, return the stream wrapped in a Right.
+      return Right(messagesStream);
+    } on ServerException catch (e) {
+      // If the data source throws a ServerException, convert it to a ServerFailure.
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> sendMessage({
+    required String roomId,
+    required String content,
+    required String senderId,
+  }) async {
+    try {
+      // Call the data source to send the message.
+      await remoteDataSource.sendMessage(
+        roomId: roomId,
+        content: content,
+        senderId: senderId,
+      );
+
+      // On success, return Right(null).
+      return const Right(null);
+    } on ServerException catch (e) {
+      // If the data source throws a ServerException, convert it to a ServerFailure.
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
 }

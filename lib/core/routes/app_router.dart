@@ -28,6 +28,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/sign_up_page.dart';
+import '../../features/chat/presentation/pages/chat_page.dart';
 import '../../features/discover/presentation/pages/vibe_users_page.dart';
 import '../../features/now/now_injection.dart' as di;
 import '../../features/posts/presentation/pages/create_post_camera_page.dart';
@@ -114,6 +115,16 @@ class AppRouter {
             final draft = args['draft'] as PostDraft;
 
             return VideoEditorPage(videoFilePath: videoPath, draft: draft);
+          },
+        ),
+
+        GoRoute(
+          path: '/chat/:roomId',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) {
+            // Extract the roomId from the path parameters
+            final String roomId = state.pathParameters['roomId']!;
+            return ChatPage(roomId: roomId);
           },
         ),
         GoRoute(
