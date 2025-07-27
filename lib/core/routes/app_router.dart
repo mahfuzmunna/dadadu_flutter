@@ -11,9 +11,9 @@ import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // A
 import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo_page.dart';
+import 'package:dadadu_app/features/chat/presentation/pages/chats_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
-import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
 import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';
@@ -173,8 +173,8 @@ class AppRouter {
             StatefulShellBranch(
               routes: [
                 GoRoute(
-                  path: '/friends',
-                  builder: (context, state) => const FriendsPage(),
+                  path: '/chats',
+                  builder: (context, state) => const ChatsPage(),
                 ),
               ],
             ),

@@ -157,13 +157,15 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
             // Friends Button (Unchanged)
             IconButton(
               icon: Icon(
-                selectedButtonIndex == 2 ? Icons.people : Icons.people_outline,
+                selectedButtonIndex == 2
+                    ? Icons.messenger_outline
+                    : Icons.messenger_outline_outlined,
                 color: selectedButtonIndex == 2
                     ? Theme.of(context).colorScheme.primary
                     : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               onPressed: () => _onTap(context, 2), // Taps branch 3
-              tooltip: 'Friends',
+              tooltip: 'Chats',
             ),
             // Profile Button (Unchanged)
             IconButton(

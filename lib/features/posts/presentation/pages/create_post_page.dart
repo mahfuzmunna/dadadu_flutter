@@ -315,7 +315,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
               icon: Icon(Icons.business_center_outlined)),
           ButtonSegment(
               value: 'Entertainment',
-              label: Text('Fun'),
+              label: Text('Entertainment'),
               icon: Icon(Icons.movie_outlined)),
         ],
         selected: {_selectedIntent},
