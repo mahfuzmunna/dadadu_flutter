@@ -6,9 +6,8 @@ import 'package:equatable/equatable.dart';
 
 class SendMessageUseCase implements UseCase<void, SendMessageParams> {
   final ChatRepository repository;
-  final String senderId;
 
-  SendMessageUseCase(this.repository, this.senderId);
+  SendMessageUseCase(this.repository);
 
   @override
   Future<Either<Failure, void>> call(SendMessageParams params) async {

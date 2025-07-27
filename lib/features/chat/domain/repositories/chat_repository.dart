@@ -4,9 +4,13 @@ import 'package:dadadu_app/features/chat/data/datasources/chat_remote_data_sourc
 import 'package:dadadu_app/features/chat/domain/entities/chat_message_entity.dart';
 import 'package:dartz/dartz.dart';
 
+import '../entities/chat_room_entity.dart';
+
 abstract class ChatRepository {
   Either<Failure, Stream<List<ChatMessageEntity>>> streamMessages(
       String roomId);
+
+  Either<Failure, Stream<List<ChatRoomEntity>>> streamChatRooms();
 
   Future<Either<Failure, void>> sendMessage(
       {required String roomId,
@@ -53,6 +57,17 @@ class ChatRepositoryImpl implements ChatRepository {
       return const Right(null);
     } on ServerException catch (e) {
       // If the data source throws a ServerException, convert it to a ServerFailure.
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Either<Failure, Stream<List<ChatRoomEntity>>> streamChatRooms() {
+    try {
+      // The data source returns a stream of models, which are compatible with entities.
+      final roomsStream = remoteDataSource.streamChatRooms();
+      return Right(roomsStream);
+    } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     }
   }

@@ -1,3 +1,4 @@
+import 'package:dadadu_app/features/chat/chat_injection.dart';
 import 'package:dadadu_app/features/comments/comments_injection.dart';
 import 'package:dadadu_app/features/discover/discover_injection.dart';
 import 'package:get_it/get_it.dart';
@@ -34,7 +35,7 @@ Future<void> init() async {
   await commentsInjection();
   await discoverInjection();
   await uploadInjection();
-  await friendsInjection();
+  await chatInjection();
   await profileInjection();
 }
 
@@ -83,6 +84,3 @@ Future<void> init() async {
         () => UploadPostRemoteDataSourceImpl(sl(), sl()), // Pass FirebaseStorage and FirebaseFirestore
   );
 }*/
-Future<void> friendsInjection() async {
-  // sl.registerFactory(() => FriendsBloc(...));
-}
