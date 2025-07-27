@@ -33,6 +33,8 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
   bool _showZoomIndicator = false;
   Timer? _zoomIndicatorTimer;
 
+  FlashMode _flashMode = FlashMode.off;
+
   @override
   void initState() {
     super.initState();
@@ -106,6 +108,22 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     if (_cameras.length > 1) {
       _selectedCameraIndex = (_selectedCameraIndex + 1) % _cameras.length;
       _onNewCameraSelected(_cameras[_selectedCameraIndex]);
+    }
+  }
+
+  Future<void> _toggleFlashMode() async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized)
+      return;
+
+    final nextMode =
+        FlashMode.values[(_flashMode.index + 1) % FlashMode.values.length];
+    try {
+      await _cameraController!.setFlashMode(nextMode);
+      setState(() {
+        _flashMode = nextMode;
+      });
+    } on CameraException catch (e) {
+      debugPrint('Error setting flash mode: $e');
     }
   }
 
@@ -292,12 +310,27 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
         child: Column(
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                _buildControlButton(
+                  icon: Icons.close_rounded,
+                  onPressed: () => context.go('/home'), // Navigate home
+                ),
                 _buildTimerChip(),
+                _buildControlButton(
+                  icon: _getFlashIcon(),
+                  onPressed: _isRecording ? null : _toggleFlashMode,
+                ),
               ],
             ),
+            const SizedBox(height: 32),
             const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildTimeSelectorChip(),
+              ],
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -318,6 +351,19 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
         ),
       ),
     );
+  }
+
+  IconData _getFlashIcon() {
+    switch (_flashMode) {
+      case FlashMode.auto:
+        return Icons.flash_auto_rounded;
+      case FlashMode.always:
+        return Icons.flash_on_rounded;
+      case FlashMode.torch:
+        return Icons.highlight_rounded;
+      case FlashMode.off:
+        return Icons.flash_off_rounded;
+    }
   }
 
   Widget _buildTimerChip() {
@@ -361,18 +407,40 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     );
   }
 
+  Widget _buildTimeSelectorChip() {
+    final bool isSelected = true;
+
+    return Chip(
+      // The main text content of the chip
+      label: const Text(
+        '20s',
+        style: TextStyle(fontWeight: FontWeight.bold),
+      ),
+
+      shape: const StadiumBorder(),
+      // Gives it the modern pill shape
+      side: BorderSide(
+        color: isSelected
+            ? Colors.transparent
+            : Theme.of(context).colorScheme.outline,
+      ),
+      elevation: 2,
+      shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.2),
+    );
+  }
+
   Widget _buildControlButton(
       {required IconData icon, VoidCallback? onPressed}) {
     return IconButton(
       onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white, size: 32),
+      icon: Icon(icon, color: Colors.white, size: 30),
       style: IconButton.styleFrom(
-        backgroundColor: Colors.black.withOpacity(0.4),
+        backgroundColor: Colors.black.withOpacity(0.5),
         shape: const CircleBorder(),
         padding: const EdgeInsets.all(16),
-        side: BorderSide(color: Colors.white.withOpacity(0.2), width: 2),
+        side: BorderSide(color: Colors.white.withOpacity(0.2), width: 1),
         elevation: 4,
-        shadowColor: Colors.black.withOpacity(0.5),
+        shadowColor: Colors.black.withOpacity(0.4),
       ),
     );
   }
