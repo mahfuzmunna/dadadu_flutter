@@ -17,7 +17,7 @@ import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
-import 'package:dadadu_app/features/profile/presentation/pages/user_video_page.dart';
+import 'package:dadadu_app/features/profile/presentation/pages/user_video_page_s.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
 // import 'package:dadadu_app/features/upload/presentation/pages/upload_page_s.dart'; // If you're using this
 import 'package:flutter/material.dart';
@@ -110,11 +110,6 @@ class AppRouter {
           builder: (BuildContext context, GoRouterState state) =>
               const EditProfilePage(),
         ),
-        GoRoute(
-          path: '/users-video',
-          builder: (BuildContext context, GoRouterState state) =>
-              const UsersVideoPage(),
-        ),
 
         // --- ShellRoute for the main app content with a bottom navigation bar ---
         StatefulShellRoute.indexedStack(
@@ -128,6 +123,19 @@ class AppRouter {
                 GoRoute(
                   path: '/home',
                   builder: (context, state) => const NowPage(),
+                  routes: [
+                    GoRoute(
+                      path: ':postId',
+                      builder: (BuildContext context, GoRouterState state) {
+                        final String postId = state.pathParameters['postId']!;
+                        return BlocProvider<ProfileBloc>(
+                          create: (context) => di.sl<ProfileBloc>()
+                            ..add(SubscribeToUserProfile(postId)),
+                          child: UsersVideoPage(postId: postId),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

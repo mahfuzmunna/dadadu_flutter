@@ -574,7 +574,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                     borderRadius: BorderRadius.circular(12)),
                 child: InkWell(
                   onTap: () {
-                    context.push('/users-video');
+                    context.push('/home/${usersPosts[index].id}');
                   },
                   child: Stack(
                     fit: StackFit.expand,
