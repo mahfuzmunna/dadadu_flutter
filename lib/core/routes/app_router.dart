@@ -15,6 +15,7 @@ import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/friends/presentation/pages/friends_page.dart';
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
+import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
 import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
@@ -96,32 +97,23 @@ class AppRouter {
         GoRoute(
           path: '/createPost',
           builder: (context, state) {
-            final String? videoPath = state.extra as String?;
-            if (videoPath == null) {
-              return const Center(
-                  child: Text('Error: No video path provided!'));
-            }
-
-            // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
+            final args = state.extra as Map<String, dynamic>;
+            final videoPath = args['videoPath'] as String;
+            final draft = args['draft'] as PostDraft;
             return CreatePostPage(
-                videoPath: videoPath); // Or UploadPage, depending on your flow
-            // return UploadPage(videoPath: videoPath); // Or UploadPage, depending on your flow
+              videoPath: videoPath,
+              initialDraft: draft,
+            );
           },
         ),
         GoRoute(
           path: '/videoEditor',
           builder: (context, state) {
-            final String? videoPath = state.extra as String?;
-            if (videoPath == null) {
-              return const Center(
-                  child: Text('Error: No video path provided!'));
-            }
+            final args = state.extra as Map<String, dynamic>;
+            final videoPath = args['videoPath'] as String;
+            final draft = args['draft'] as PostDraft;
 
-            // return CreatePostPage(videoPath: videoPath); // Assuming you want CreatePostPage
-            return VideoEditorPage(
-                videoFilePath:
-                    videoPath); // Or UploadPage, depending on your flow
-            // return UploadPage(videoPath: videoPath); // Or UploadPage, depending on your flow
+            return VideoEditorPage(videoFilePath: videoPath, draft: draft);
           },
         ),
         GoRoute(

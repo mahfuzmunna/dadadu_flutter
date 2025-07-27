@@ -2,14 +2,16 @@
 
 import 'dart:io';
 
+import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_trimmer/video_trimmer.dart';
 
 class VideoEditorPage extends StatefulWidget {
   final String videoFilePath;
+  final PostDraft? draft;
 
-  const VideoEditorPage({super.key, required this.videoFilePath});
+  const VideoEditorPage({super.key, required this.videoFilePath, this.draft});
 
   @override
   State<VideoEditorPage> createState() => _VideoEditorPageState();
@@ -48,7 +50,10 @@ class _VideoEditorPageState extends State<VideoEditorPage> {
       endValue: _endValue,
       onSave: (outputPath) {
         if (outputPath != null && mounted) {
-          context.push('/createPost', extra: outputPath);
+          context.push('/createPost', extra: {
+            'videoPath': outputPath,
+            'draft': widget.draft ?? const PostDraft(),
+          });
         }
       },
     );

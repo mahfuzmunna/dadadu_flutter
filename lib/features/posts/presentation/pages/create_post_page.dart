@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
@@ -10,8 +11,10 @@ import 'package:video_thumbnail/video_thumbnail.dart';
 
 class CreatePostPage extends StatefulWidget {
   final String videoPath;
+  final PostDraft initialDraft;
 
-  const CreatePostPage({super.key, required this.videoPath});
+  const CreatePostPage(
+      {super.key, required this.videoPath, required this.initialDraft});
 
   @override
   State<CreatePostPage> createState() => _CreatePostPageState();
@@ -20,7 +23,7 @@ class CreatePostPage extends StatefulWidget {
 class _CreatePostPageState extends State<CreatePostPage> {
   // This controller is used to get video duration for thumbnail generation
   late VideoPlayerController _videoController;
-  final TextEditingController _captionController = TextEditingController();
+  late TextEditingController _captionController;
 
   List<Uint8List> _thumbnails = [];
   Uint8List? _selectedThumbnail;
@@ -30,6 +33,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
   @override
   void initState() {
     super.initState();
+    _captionController =
+        TextEditingController(text: widget.initialDraft.caption);
+    _selectedIntent = widget.initialDraft.intent;
+    _selectedThumbnail = widget.initialDraft.selectedThumbnail;
     _initialize();
   }
 
@@ -61,6 +68,13 @@ class _CreatePostPageState extends State<CreatePostPage> {
         }
       }
 
+      if (mounted && _thumbnails.isNotEmpty && _selectedThumbnail == null) {
+        setState(() {
+          _selectedThumbnail = _thumbnails.first;
+        });
+      }
+      ;
+
       if (mounted && generatedThumbnails.isNotEmpty) {
         setState(() {
           _thumbnails = generatedThumbnails;
@@ -81,6 +95,19 @@ class _CreatePostPageState extends State<CreatePostPage> {
     _videoController.dispose();
     _captionController.dispose();
     super.dispose();
+  }
+
+  void _goBackToEditor() {
+    if (context.canPop()) {
+      // ✅ Create an updated draft with the current UI state
+      final updatedDraft = PostDraft(
+        caption: _captionController.text,
+        intent: _selectedIntent,
+        selectedThumbnail: _selectedThumbnail,
+      );
+      // ✅ Pass the updated draft back when popping
+      context.pop(updatedDraft);
+    }
   }
 
   void _publishPost() {
@@ -157,12 +184,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
 
   Widget _buildThumbnailPreview() {
     return GestureDetector(
-      onTap: () {
-        // Navigate back to the video editor page
-        if (context.canPop()) {
-          context.pop();
-        }
-      },
+      onTap: _goBackToEditor,
       child: Card(
         elevation: 4,
         shadowColor: Theme.of(context).colorScheme.shadow.withOpacity(0.2),

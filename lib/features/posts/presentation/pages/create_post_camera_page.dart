@@ -1,16 +1,17 @@
 // lib/features/upload/presentation/pages/upload_page.dart
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
-import 'package:dadadu_app/features/posts/presentation/pages/trimmer_screen.dart';
+import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+import '../../domain/entities/post_draft.dart';
 
 class CreatePostCameraPage extends StatefulWidget {
   const CreatePostCameraPage({super.key});
@@ -142,7 +143,7 @@ class _CreatePostCameraPageState extends State<CreatePostCameraPage>
         _isRecording = false;
         _recordSeconds = 0;
       });
-      if (mounted) _navigateToCreatePost(file.path);
+      if (mounted) _navigateToEditor(file.path);
     } else {
       // Lock orientation during recording to prevent issues
       final orientation = MediaQuery.of(context).orientation;
@@ -178,7 +179,7 @@ class _CreatePostCameraPageState extends State<CreatePostCameraPage>
 
       final trimmedPath = await Navigator.of(context).push(
         MaterialPageRoute(
-            builder: (_) => TrimmerScreen(videoFile: File(video.path))),
+            builder: (_) => VideoEditorPage(videoFilePath: video.path)),
       );
       // if(mounted) {
       //   if (trimmedPath != null && context.mounted) {
@@ -188,8 +189,12 @@ class _CreatePostCameraPageState extends State<CreatePostCameraPage>
     }
   }
 
-  void _navigateToCreatePost(String videoPath) {
-    context.push('/videoEditor', extra: videoPath);
+  void _navigateToEditor(String videoPath) {
+    // ✅ Pass the initial empty draft
+    context.push('/videoEditor', extra: {
+      'videoPath': videoPath,
+      'draft': const PostDraft(),
+    });
   }
 
   @override
