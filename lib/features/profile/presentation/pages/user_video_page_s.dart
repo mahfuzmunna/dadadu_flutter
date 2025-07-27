@@ -48,7 +48,6 @@ class _UsersVideoViewState extends State<_UsersVideoView>
   late PageController _pageController = PageController();
   late PostEntity initialPost;
   List<PostEntity> _usersPosts = [];
-  String? authorFullName;
   Map<String, UserEntity> _authors = {};
   int _currentPageIndex = 0;
 
@@ -231,14 +230,14 @@ class _UsersVideoViewState extends State<_UsersVideoView>
       appBar: AppBar(
         // centerTitle: false,
         excludeHeaderSemantics: true,
-        title: BlocBuilder<ProfileBloc, ProfileState>(
-          builder: (context, state) {
-            if (state is ProfileLoaded) {
-              final author = state.user;
-            }
-            return _buildNowChip(authorFullName!, colorScheme);
-          },
-        ),
+        // title: BlocBuilder<ProfileBloc, ProfileState>(
+        //   builder: (context, state) {
+        //     if (state is ProfileLoaded) {
+        //       final author = state.user;
+        //     }
+        //     return _buildNowChip(authorFullName!, colorScheme);
+        //   },
+        // ),
         // actions: [
         //   IconButton(
         //     icon: const Icon(Icons.notifications_none_rounded),
@@ -308,12 +307,11 @@ class _UsersVideoViewState extends State<_UsersVideoView>
                         ..add(SubscribeToUserProfile(author!.id)),
                       child: BlocBuilder<ProfileBloc, ProfileState>(
                           builder: (context, state) {
-                        if (state is ProfileLoaded) {
-                          setState(() {
-                            authorFullName = state.user.fullName;
-                          });
-                        }
-                        ;
+                        // if (state is ProfileLoaded) {
+                        //   setState(() {
+                        //     authorFullName = state.user.fullName;
+                        //   });
+                        // };
                         return VideoPostItem(
                             key: ValueKey(post.id),
                             post: post,
