@@ -8,7 +8,9 @@ import 'package:minio/minio.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../core/errors/failures.dart';
 import '../../../auth/data/models/user_model.dart';
+import '../../../auth/domain/entities/user_entity.dart';
 import '../../../upload/data/models/post_model.dart';
 
 abstract class PostRemoteDataSource {
@@ -24,6 +26,10 @@ abstract class PostRemoteDataSource {
   Stream<List<PostModel>> streamAllPosts();
 
   Stream<Tuple2<List<PostModel>, Map<String, UserModel>>> streamFeed();
+
+  Future<List<Map<String, dynamic>>> getPostComments(String postId);
+
+  Future<Either<Failure, List<UserEntity>>> getUsersByIds(List<String> userIds);
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -151,6 +157,43 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       });
     } catch (e) {
       throw ServerException('Failed to stream feed: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getPostComments(String postId) async {
+    try {
+      final response = await supabaseClient
+          .from('posts')
+          .select('comments')
+          .eq('id', postId)
+          .single();
+
+      // The comments are returned as a List<dynamic> which we cast
+      return List<Map<String, dynamic>>.from(response['comments'] ?? []);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<UserEntity>>> getUsersByIds(
+      List<String> userIds) async {
+    try {
+      final authorMaps = await supabaseClient
+          .from('profiles')
+          .select()
+          .filter('id', 'in', '(${userIds.join(',')})');
+
+      return Right(authorMaps.map((map) => UserModel.fromMap(map)).toList());
+    } on PostgrestException catch (e) {
+      throw ServerException('Failed to get user profile: ${e.message}',
+          code: e.code ?? 'POSTGREST_ERROR');
+    } catch (e) {
+      throw ServerException('An unexpected error occurred: ${e.toString()}',
+          code: 'UNKNOWN_ERROR');
     }
   }
 }

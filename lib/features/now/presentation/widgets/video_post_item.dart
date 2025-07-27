@@ -8,7 +8,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../../../injection_container.dart';
+import '../../../comments/presentation/bloc/comments_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart';
+import 'comments_view.dart';
 
 class VideoPostItem extends StatelessWidget {
   final PostEntity post;
@@ -207,8 +210,11 @@ class VideoPostItem extends StatelessWidget {
         const SizedBox(height: 20),
         _buildActionButton(
             icon: Icons.comment_bank_outlined,
-            label: post.comments.toString(),
-            onPressed: () {}),
+            label:
+                post.comments != null ? post.comments!.length.toString() : '0',
+            onPressed: () {
+              _showCommentsBottomSheet(context, post.id);
+            }),
         const SizedBox(height: 20),
         _buildActionButton(
             icon: Icons.file_download_rounded, label: 'Save', onPressed: () {}),
@@ -220,6 +226,23 @@ class VideoPostItem extends StatelessWidget {
               Share.share('Check out this video! ${post.caption}');
             }),
       ],
+    );
+  }
+
+// This method now shows a bottom sheet with the comments UI
+  void _showCommentsBottomSheet(BuildContext context, String postId) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.6,
+        maxChildSize: 0.9,
+        builder: (context, scrollController) => BlocProvider(
+          create: (context) => sl<CommentsBloc>()..add(LoadComments(postId)),
+          child: CommentsView(scrollController: scrollController),
+        ),
+      ),
     );
   }
 

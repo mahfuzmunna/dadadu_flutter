@@ -5,6 +5,8 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/exceptions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
+import '../../../comments/data/models/comment_model.dart';
+import '../../../comments/domain/entities/comment_entity.dart';
 import '../../../upload/domain/entities/post_entity.dart';
 import '../../data/datasources/post_remote_data_source.dart';
 
@@ -22,7 +24,8 @@ abstract class PostRepository {
 
   Either<Failure, Stream<Tuple2<List<PostEntity>, Map<String, UserEntity>>>>
       streamFeed();
-// ... other repository methods
+
+  Future<Either<Failure, List<CommentEntity>>> getPostComments(String postId);
 }
 
 class PostRepositoryImpl implements PostRepository {
@@ -90,6 +93,38 @@ class PostRepositoryImpl implements PostRepository {
     try {
       final feedStream = remoteDataSource.streamFeed();
       return Right(feedStream);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<CommentEntity>>> getPostComments(
+      String postId) async {
+    try {
+      final commentMaps = await remoteDataSource.getPostComments(postId);
+      List<CommentModel> comments =
+          commentMaps.map((map) => CommentModel.fromMap(map)).toList();
+
+      // Fetch author details for all comments in one go
+      if (comments.isNotEmpty) {
+        final userIds = comments.map((c) => c.userId).toSet().toList();
+        // Assume you have a method in ProfileRepository to get multiple users
+        final authorsResult = await remoteDataSource.getUsersByIds(userIds);
+
+        authorsResult.fold(
+          (failure) => null,
+          // Could log this error, but proceed without authors
+          (authors) {
+            final authorMap = {for (var author in authors) author.id: author};
+            comments = comments.map((comment) {
+              return comment.copyWith(author: authorMap[comment.userId]);
+            }).toList();
+          },
+        );
+      }
+
+      return Right(comments);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     }

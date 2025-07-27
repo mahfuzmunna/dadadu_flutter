@@ -1,3 +1,4 @@
+import 'package:dadadu_app/features/comments/domain/entities/comment_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class PostEntity extends Equatable {
@@ -8,14 +9,15 @@ class PostEntity extends Equatable {
   final String videoUrl;
   final String thumbnailUrl;
   final String caption;
-  final String tag;
+  final String? tag;
   final int diamonds;
-  final int comments;
+  final List<CommentEntity>? comments;
   final String? createdAt;
-  final bool isDisabled;
+  final bool? isDisabled;
   final int visibilityLevel;
   final int views;
   final String? location;
+  final String? soundTitle;
 
   const PostEntity({
     required this.id,
@@ -31,6 +33,7 @@ class PostEntity extends Equatable {
     required this.visibilityLevel,
     required this.views,
     required this.location,
+    required this.soundTitle,
   });
 
   @override
@@ -48,5 +51,6 @@ class PostEntity extends Equatable {
         visibilityLevel,
         views,
         location,
+        soundTitle,
       ];
 }

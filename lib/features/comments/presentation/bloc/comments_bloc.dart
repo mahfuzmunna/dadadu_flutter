@@ -1,0 +1,39 @@
+import 'package:bloc/bloc.dart';
+import 'package:dadadu_app/features/comments/domain/entities/comment_entity.dart';
+import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usecase.dart';
+import 'package:equatable/equatable.dart';
+
+part 'comments_event.dart';
+part 'comments_state.dart';
+
+class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
+  final GetPostCommentsUseCase _getPostCommentsUseCase;
+
+  CommentsBloc({required GetPostCommentsUseCase getPostCommentsUseCase})
+      : _getPostCommentsUseCase = getPostCommentsUseCase,
+        super(CommentsInitial()) {
+    on<LoadComments>(_onLoadComments);
+  }
+
+  Future<void> _onLoadComments(
+    LoadComments event,
+    Emitter<CommentsState> emit,
+  ) async {
+    emit(CommentsLoading());
+    final result = await _getPostCommentsUseCase(event.postId);
+    result.fold(
+      (failure) => emit(CommentsError(failure.message)),
+      (comments) {
+        // Sort for "Recent" tab
+        final recentComments = List<CommentEntity>.from(comments)
+          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+        // Sort for "Popular" tab
+        final popularComments = List<CommentEntity>.from(comments)
+          ..sort((a, b) => b.likes.compareTo(a.likes));
+
+        emit(CommentsLoaded(recent: recentComments, popular: popularComments));
+      },
+    );
+  }
+}

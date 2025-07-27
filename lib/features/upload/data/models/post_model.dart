@@ -1,6 +1,9 @@
 // lib/features/upload/data/models/post_model.dart
 
+import 'package:dadadu_app/features/comments/domain/entities/comment_entity.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
+
+import '../../../comments/data/models/comment_model.dart';
 
 class PostModel extends PostEntity {
   const PostModel({
@@ -11,29 +14,39 @@ class PostModel extends PostEntity {
     required super.caption,
     required super.tag,
     super.diamonds = 0,
-    super.comments = 0,
+    super.comments,
     required super.createdAt,
     super.isDisabled = false,
     super.visibilityLevel = 0,
     super.views = 0,
     super.location,
+    super.soundTitle,
   });
 
   factory PostModel.fromMap(Map<String, dynamic> map) {
+    List<CommentModel> parsedComments = [];
+    if (map['comments'] != null && map['comments'] is List) {
+      parsedComments = (map['comments'] as List)
+          .map((commentMap) =>
+              CommentModel.fromMap(commentMap as Map<String, dynamic>))
+          .toList();
+    }
+
     return PostModel(
       id: map['id'] as String,
       userId: map['user_id'] as String,
       videoUrl: map['video_url'] as String,
       thumbnailUrl: map['thumbnail_url'] as String,
       caption: map['caption'] as String,
-      tag: map['tag'] as String,
+      tag: map['tag'] as String?,
       diamonds: map['diamonds'] as int,
-      comments: map['comments'] as int,
+      comments: parsedComments,
       createdAt: map['created_at'] as String,
-      isDisabled: map['disabled'] as bool,
+      isDisabled: map['is_disabled'] as bool,
       visibilityLevel: map['visibility_level'] as int,
       views: map['views'] as int,
       location: map['location'] as String,
+      soundTitle: map['sound_title'] as String,
     );
   }
 
@@ -47,13 +60,15 @@ class PostModel extends PostEntity {
       'caption': caption,
       'tag': tag,
       'diamonds': diamonds,
-      'comments': comments,
-      // Convert DateTime back to an ISO 8601 string for Supabase.
+      'comments': comments
+          ?.map((comment) => (comment as CommentModel).toMap())
+          .toList(),
       'created_at': createdAt,
       'disabled': isDisabled,
       'visibility_level': visibilityLevel,
       'views': views,
       'location': location,
+      'sound_title': soundTitle,
     };
   }
 
@@ -66,12 +81,13 @@ class PostModel extends PostEntity {
     String? caption,
     String? tag,
     int? diamonds,
-    int? comments,
+    List<CommentEntity>? comments,
     String? createdAt,
     bool? isDisabled,
     int? visibilityLevel,
     int? views,
     String? location,
+    String? soundTitle,
   }) {
     return PostModel(
       id: id ?? this.id,
@@ -87,6 +103,7 @@ class PostModel extends PostEntity {
       visibilityLevel: visibilityLevel ?? this.visibilityLevel,
       views: views ?? this.views,
       location: location ?? this.location,
+      soundTitle: soundTitle ?? this.soundTitle,
     );
   }
 }
