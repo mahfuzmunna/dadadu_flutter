@@ -248,16 +248,22 @@ class _NowPageViewState extends State<_NowPageView>
           },
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_rounded),
-            tooltip: 'Notifications',
-            onPressed: () {
-              _showNotificationsDialog(context);
-            },
-            style: IconButton.styleFrom(
-              foregroundColor: Colors.white,
-              shadowColor: Colors.black.withOpacity(0.5),
-              elevation: 4,
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.notifications_none_rounded),
+              tooltip: 'Notifications',
+              onPressed: () {
+                _showNotificationsDialog(context);
+              },
+              // Style for a modern, adaptive look
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black.withOpacity(0.4),
+                foregroundColor: Colors.white,
+                shape: const CircleBorder(),
+                elevation: 4,
+                shadowColor: Colors.black.withOpacity(0.5),
+              ),
             ),
           ),
         ],

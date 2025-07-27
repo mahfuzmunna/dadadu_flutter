@@ -230,6 +230,23 @@ class _UsersVideoViewState extends State<_UsersVideoView>
       appBar: AppBar(
         // centerTitle: false,
         excludeHeaderSemantics: true,
+        leading: Padding(
+          padding: const EdgeInsets.all(8.0),
+          // Add padding for better placement
+          child: IconButton(
+            onPressed: () => context.pop(),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            // Style for a modern, adaptive look
+            style: IconButton.styleFrom(
+              backgroundColor: Colors.black.withOpacity(0.4),
+              foregroundColor: Colors.white,
+              shape: const CircleBorder(),
+              elevation: 4,
+              shadowColor: Colors.black.withOpacity(0.5),
+            ),
+            tooltip: 'Back',
+          ),
+        ),
         // title: BlocBuilder<ProfileBloc, ProfileState>(
         //   builder: (context, state) {
         //     if (state is ProfileLoaded) {
