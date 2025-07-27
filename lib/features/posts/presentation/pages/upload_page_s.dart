@@ -1,9 +1,11 @@
 // lib/features/upload/presentation/pages/upload_page.dart
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -24,10 +26,19 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
   int _recordSeconds = 0;
   Timer? _timer;
 
+  double _currentZoomLevel = 1.0;
+  double _minZoomLevel = 1.0;
+  double _maxZoomLevel = 1.0;
+  double _baseZoomLevel = 1.0;
+  bool _showZoomIndicator = false;
+  Timer? _zoomIndicatorTimer;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     _initialize();
   }
 
@@ -36,6 +47,7 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _cameraController?.dispose();
     _timer?.cancel();
+    SystemChrome.setPreferredOrientations(DeviceOrientation.values);
     super.dispose();
   }
 
@@ -61,7 +73,6 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
         await _onNewCameraSelected(_cameras.first);
       }
     } else {
-      // Handle permission denied state
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text('Camera and microphone permissions are required.')));
@@ -81,6 +92,10 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 
     try {
       await newController.initialize();
+
+      _maxZoomLevel = await newController.getMaxZoomLevel();
+      _minZoomLevel = await newController.getMinZoomLevel();
+
       if (mounted) setState(() => _isCameraInitialized = true);
     } on CameraException catch (e) {
       debugPrint('Error initializing camera: $e');
@@ -98,6 +113,8 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     if (!_isCameraInitialized) return;
 
     if (_isRecording) {
+      // Unlock orientation when recording stops
+      SystemChrome.setPreferredOrientations(DeviceOrientation.values);
       final file = await _cameraController!.stopVideoRecording();
       _timer?.cancel();
       setState(() {
@@ -106,6 +123,17 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
       });
       if (mounted) _navigateToCreatePost(file.path);
     } else {
+      // Lock orientation during recording to prevent issues
+      final orientation = MediaQuery.of(context).orientation;
+      if (orientation == Orientation.landscape) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight
+        ]);
+      } else {
+        SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+      }
+
       await _cameraController!.startVideoRecording();
       setState(() => _isRecording = true);
       _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -130,7 +158,6 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
   }
 
   void _navigateToCreatePost(String videoPath) {
-    // Assuming you have a route like '/createPost' that accepts the video path
     context.push('/createPost', extra: videoPath);
   }
 
@@ -142,62 +169,151 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
     );
   }
 
+  void _handleScaleStart(ScaleStartDetails details) {
+    _baseZoomLevel = _currentZoomLevel;
+  }
+
+  Future<void> _handleScaleUpdate(ScaleUpdateDetails details) async {
+    if (_cameraController == null || _isRecording) return;
+
+    // Calculate the new zoom level and clamp it within the supported range
+    final double newZoomLevel =
+        (_baseZoomLevel * details.scale).clamp(_minZoomLevel, _maxZoomLevel);
+
+    if (newZoomLevel != _currentZoomLevel) {
+      await _cameraController!.setZoomLevel(newZoomLevel);
+      setState(() {
+        _currentZoomLevel = newZoomLevel;
+        _showZoomIndicator = true;
+      });
+
+      // Hide the zoom indicator after a short delay
+      _zoomIndicatorTimer?.cancel();
+      _zoomIndicatorTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _showZoomIndicator = false);
+      });
+    }
+  }
+
   Widget _buildBody() {
     if (!_isCameraInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
-    return Stack(
-      children: [
-        // Full-screen Camera Preview
-        Positioned.fill(
-          child: AspectRatio(
-            aspectRatio: _cameraController!.value.aspectRatio,
-            child: CameraPreview(_cameraController!),
+
+    // ✅ FIX: Calculate the scale to fill the screen without distortion.
+    final size = MediaQuery.of(context).size;
+    final deviceRatio = size.width / size.height;
+    final previewRatio = _cameraController!.value.aspectRatio;
+
+    // We use a scale factor to fill the screen, "cropping" the excess.
+    // This is the same technique native camera apps use.
+    var scale = 1 / (_cameraController!.value.aspectRatio * size.aspectRatio);
+
+    // ✅ Check if the current camera is the front camera.
+    final bool isFrontCamera = _cameraController!.description.lensDirection ==
+        CameraLensDirection.front;
+
+    // ✅ NEW: Use OrientationBuilder to react to screen rotation
+    return OrientationBuilder(builder: (context, orientation) {
+      return Stack(
+        children: [
+          // Full-screen Camera Preview
+          Positioned.fill(
+            child: GestureDetector(
+              onScaleStart: _handleScaleStart,
+              onScaleUpdate: _handleScaleUpdate,
+              // ✅ This FittedBox and RotatedBox combination handles all aspect ratios
+              child: Transform.scale(
+                scale: scale,
+                alignment: Alignment.center,
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: isFrontCamera
+                      ? (Matrix4.rotationY(math.pi * 2))
+                      : Matrix4.identity(),
+                  child: CameraPreview(_cameraController!),
+                ),
+              ),
+            ),
+          ),
+          // UI Controls Overlay
+          _buildControlsOverlay(),
+          _buildZoomIndicator(),
+        ],
+      );
+    });
+  }
+
+// ✅ NEW: Helper to determine the correct rotation for the preview
+  int _getQuarterTurns() {
+    final orientation = _cameraController!.description.sensorOrientation;
+    switch (orientation) {
+      case 90:
+        return 0;
+      case 180:
+        return 3;
+      case 270:
+        return 2;
+      default: // 0
+        return 1;
+    }
+  }
+
+  Widget _buildZoomIndicator() {
+    return Positioned(
+      top: 100,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: _showZoomIndicator ? 1.0 : 0.0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.5),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              '${_currentZoomLevel.toStringAsFixed(1)}x',
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
         ),
-        // UI Controls Overlay
-        _buildControlsOverlay(),
-      ],
+      ),
     );
   }
 
   Widget _buildControlsOverlay() {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
         child: Column(
           children: [
-            // Top controls: Timer and Camera Switch
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _buildTimerChip(),
-                IconButton(
-                  onPressed: _isRecording ? null : _switchCamera,
-                  icon: const Icon(Icons.flip_camera_ios_rounded,
-                      color: Colors.white),
-                  style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.4)),
-                ),
               ],
             ),
             const Spacer(),
-            // Bottom controls: Gallery and Record Button
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                IconButton(
+                _buildControlButton(
+                  icon: Icons.photo_library_rounded,
                   onPressed: _isRecording ? null : _pickFromGallery,
-                  icon: const Icon(Icons.photo_library_rounded,
-                      color: Colors.white, size: 32),
-                  style: IconButton.styleFrom(
-                      backgroundColor: Colors.black.withOpacity(0.4)),
                 ),
                 _buildRecordButton(),
-                // Placeholder for balance
+                _buildControlButton(
+                  icon: Icons.flip_camera_ios_rounded,
+                  onPressed: _isRecording ? null : _switchCamera,
+                ),
               ],
             ),
+            const SizedBox(height: 30),
           ],
         ),
       ),
@@ -206,20 +322,58 @@ class _UploadPageState extends State<UploadPage> with WidgetsBindingObserver {
 
   Widget _buildTimerChip() {
     if (!_isRecording) return const SizedBox.shrink();
-    return Chip(
-      avatar: Container(
-        width: 10,
-        height: 10,
-        decoration: const BoxDecoration(
-            color: Colors.redAccent, shape: BoxShape.circle),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(20),
       ),
-      label: Text(
-        '0:${_recordSeconds.toString().padLeft(2, '0')} / 0:20',
-        style:
-            const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Glowing red dot
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: Colors.redAccent,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.redAccent.withOpacity(0.7),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '0:${_recordSeconds.toString().padLeft(2, '0')}',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              fontFeatures: [FontFeature.tabularFigures()],
+            ),
+          ),
+        ],
       ),
-      backgroundColor: Colors.black.withOpacity(0.4),
-      side: BorderSide.none,
+    );
+  }
+
+  Widget _buildControlButton(
+      {required IconData icon, VoidCallback? onPressed}) {
+    return IconButton(
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.white, size: 32),
+      style: IconButton.styleFrom(
+        backgroundColor: Colors.black.withOpacity(0.4),
+        shape: const CircleBorder(),
+        padding: const EdgeInsets.all(16),
+        side: BorderSide(color: Colors.white.withOpacity(0.2), width: 2),
+        elevation: 4,
+        shadowColor: Colors.black.withOpacity(0.5),
+      ),
     );
   }
 
