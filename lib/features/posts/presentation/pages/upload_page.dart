@@ -100,6 +100,7 @@ class __UploadViewState extends State<_UploadView> {
           if (state.status == UploadStatus.success) {
             ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text('Upload successful!')));
+            // context.pop();
           } else if (state.status == UploadStatus.failure) {
             ScaffoldMessenger.of(context)
                 .showSnackBar(SnackBar(content: Text(state.error)));

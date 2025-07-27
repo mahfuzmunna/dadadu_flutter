@@ -34,6 +34,11 @@ dependencies:
   cached_video_player_plus: ^4.0.3 # for better performance and caching
   video_player: ^2.10.0
 
+  # For file downloading
+  dio: ^5.8.0+1
+  gallery_saver_plus: ^3.2.8
+
+
   # UI/UX
   google_fonts: ^5.1.0
   lottie: ^3.3.1
@@ -67,10 +72,10 @@ dependencies:
   timeago: ^3.4.0
   camera: ^0.10.5+5
   path: ^1.8.3
+  path_provider: ^2.1.2
   http: ^1.1.0
   flutter_dotenv: ^5.2.1
   permission_handler: ^11.3.1
-  path_provider: ^2.1.2
   ffmpeg_kit_flutter_new: ^2.0.0
   crop_your_image: ^2.0.0
   cached_network_image: ^3.4.1
