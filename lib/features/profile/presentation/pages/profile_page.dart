@@ -334,7 +334,6 @@ class _ProfileContentState extends State<_ProfileContent> {
         ),
       );
     } else {
-      // In a real app, you would check a FriendsBloc state here
       bool isFollowing = false; // Placeholder
       return SizedBox(
         width: 200,

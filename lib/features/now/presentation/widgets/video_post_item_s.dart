@@ -1,15 +1,21 @@
 // lib/features/now/presentation/widgets/video_post_item.dart
 
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dio/dio.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:gallery_saver_plus/gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
+
+// import 'package:video_watermark_plus/video_watermark_plus.dart';
 
 import '../../../../injection_container.dart';
 import '../../../comments/presentation/bloc/comments_bloc.dart';
@@ -65,7 +71,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
 
   @override
   void dispose() {
-    widget.controller?.dispose();
+    // widget.controller?.dispose();
     super.dispose();
   }
 
@@ -144,11 +150,62 @@ class _VideoPostItemState extends State<VideoPostItem> {
   }
 
   Future<String> _applyWatermark(String filePath) async {
-    debugPrint("Applying watermark to video at: $filePath");
-    // In a real app, you would call your API here to add a watermark.
-    // For this example, we simulate a short delay and return the original path.
-    await Future.delayed(const Duration(seconds: 1));
-    return filePath;
+    try {
+      debugPrint("Applying watermark to video at: $filePath");
+
+      // 1. Get the watermark image from assets and save it to a temporary file
+      final byteData = await rootBundle.load('assets/images/watermark.png');
+      final tempDir = await getTemporaryDirectory();
+      final watermarkImagePath = '${tempDir.path}/watermark.png';
+      final watermarkFile = File(watermarkImagePath);
+      await watermarkFile.writeAsBytes(byteData.buffer
+          .asUint8List(byteData.offsetInBytes, byteData.lengthInBytes));
+
+      // 2. Define the output path for the watermarked video
+      final outputVideoPath =
+          '${tempDir.path}/watermarked_${widget.post.id}.mp4';
+
+      // 3. Use the video_watermark package to add the image
+
+      final ffmpegCommand = '-y -i "$filePath" -i "${watermarkFile.path}" '
+          '-filter_complex "overlay=(main_w-overlay_w)/2:main_h-overlay_h-290" '
+          '-c:v libx264 -preset ultrafast -crf 23 -c:a aac "$outputVideoPath"';
+
+      final session = await FFmpegKit.execute(ffmpegCommand);
+      final returnCode = await session.getReturnCode();
+
+      if (returnCode?.isValueSuccess() ?? false) {
+        return outputVideoPath;
+      } else {
+        final logs = await session.getAllLogs();
+        logs.forEach((log) => print('FFmpeg Log: ${log.getMessage()}'));
+
+        final stack = await session.getFailStackTrace();
+        print("Fail stack: $stack");
+
+        throw Exception('FFmpeg failed with code: $returnCode');
+      }
+    } catch (e) {
+      throw Exception('Erreur création watermark: $e');
+    }
+
+    // final videoWatermark = VideoWatermark(
+    //   sourceVideoPath: filePath,
+    //   watermark: Watermark(
+    //     image: WatermarkSource.file(watermarkImagePath),
+    //     watermarkSize: WatermarkSize(93.5, 35.3),
+    //     watermarkAlignment: WatermarkAlignment.bottomLeft,
+    //   ),
+    //   savePath: outputVideoPath,
+    //   onSave: (path) {
+    //     debugPrint("Watermarked video saved to: $path");
+    //   },
+    // );
+    //
+    // // 4. Generate the watermarked video
+    // await videoWatermark.generateVideo();
+    //
+    // return outputVideoPath;
   }
 
   void _showSnackBar(String message, {bool isError = false}) {

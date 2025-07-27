@@ -37,6 +37,8 @@ dependencies:
   # For file downloading
   dio: ^5.8.0+1
   gallery_saver_plus: ^3.2.8
+  ffmpeg_kit_flutter_new: ^2.0.0
+  video_watermark_plus: ^1.1.1
 
 
   # UI/UX
@@ -76,7 +78,6 @@ dependencies:
   http: ^1.1.0
   flutter_dotenv: ^5.2.1
   permission_handler: ^11.3.1
-  ffmpeg_kit_flutter_new: ^2.0.0
   crop_your_image: ^2.0.0
   cached_network_image: ^3.4.1
   rxdart: ^0.28.0
@@ -107,6 +108,7 @@ flutter:
     - assets/animations/globe.json
     - assets/images/space_background.jpg
     - assets/images/space_background_2.jpg
+    - assets/images/watermark.png
     - assets/google_logo.png
 
 flutter_icons:
