@@ -1,3 +1,4 @@
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
@@ -137,12 +138,12 @@ class _NowPageViewState extends State<_NowPageView>
 
     _initializingControllers.add(post.id);
     final controller =
-        VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
+        CachedVideoPlayerPlus.networkUrl(Uri.parse(post.videoUrl));
     // final controller = VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
     try {
       await controller.initialize();
       if (mounted) {
-        _controllerCache[post.id] = controller;
+        _controllerCache[post.id] = controller.controller;
       } else {
         await controller.dispose();
       }

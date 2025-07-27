@@ -211,6 +211,9 @@ class VideoPostItem extends StatelessWidget {
             onPressed: () {}),
         const SizedBox(height: 20),
         _buildActionButton(
+            icon: Icons.file_download_rounded, label: 'Save', onPressed: () {}),
+        const SizedBox(height: 20),
+        _buildActionButton(
             icon: Icons.share_outlined,
             label: 'Share',
             onPressed: () {
