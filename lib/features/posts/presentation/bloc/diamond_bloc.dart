@@ -25,8 +25,8 @@ class DiamondBloc extends Bloc<DiamondEvent, DiamondState> {
       SendDiamond event, Emitter<DiamondState> emit) async {
     emit(DiamondLoading());
     final result = await _sendDiamondUseCase(SendDiamondParams(
-      senderId: event.senderId,
-      receiverId: event.receiverId,
+      senderId: event.userId,
+      receiverId: event.postId,
     ));
     result.fold(
       (failure) => emit(DiamondError(failure.message)),
@@ -38,8 +38,8 @@ class DiamondBloc extends Bloc<DiamondEvent, DiamondState> {
       UnsendDiamond event, Emitter<DiamondState> emit) async {
     emit(DiamondLoading());
     final result = await _unsendDiamondUseCase(SendDiamondParams(
-      senderId: event.senderId,
-      receiverId: event.receiverId,
+      senderId: event.userId,
+      receiverId: event.postId,
     ));
     result.fold(
       (failure) => emit(DiamondError(failure.message)),

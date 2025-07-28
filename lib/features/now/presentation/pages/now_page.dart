@@ -2,6 +2,7 @@ import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
+import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
@@ -27,7 +28,8 @@ class NowPage extends StatelessWidget {
         BlocProvider(
             create: (context) => sl<FeedBloc>()..add(SubscribeToFeed())),
         BlocProvider(create: (context) => sl<PostBloc>()),
-        BlocProvider(create: (context) => di.sl<FollowBloc>())
+        BlocProvider(create: (context) => di.sl<FollowBloc>()),
+        BlocProvider(create: (context) => di.sl<DiamondBloc>()),
       ],
       child: const _NowPageView(),
     );

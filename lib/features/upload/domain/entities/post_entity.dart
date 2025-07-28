@@ -10,7 +10,7 @@ class PostEntity extends Equatable {
   final String thumbnailUrl;
   final String caption;
   final String? tag;
-  final int diamonds;
+  final List<String>? diamondGivers;
   final List<CommentEntity>? comments;
   final String? createdAt;
   final bool? isDisabled;
@@ -26,7 +26,7 @@ class PostEntity extends Equatable {
     required this.thumbnailUrl,
     required this.caption,
     required this.tag,
-    required this.diamonds,
+    required this.diamondGivers,
     required this.comments,
     required this.createdAt,
     required this.isDisabled,
@@ -44,7 +44,7 @@ class PostEntity extends Equatable {
         thumbnailUrl,
         caption,
         tag,
-        diamonds,
+        diamondGivers,
         comments,
         createdAt,
         isDisabled,

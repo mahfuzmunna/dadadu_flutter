@@ -70,7 +70,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
                   .subscribeToPostChanges(event.postId)
                   .listen((updatedPost) {
                 debugPrint(
-                    "[PostBloc] Real-time update received for post ${updatedPost.id}. Diamonds: ${updatedPost.diamonds}");
+                    "[PostBloc] Real-time update received for post ${updatedPost.id}. Diamonds: ${updatedPost.diamondGivers?.length}");
                 add(_PostUpdated(post: updatedPost));
               });
             },

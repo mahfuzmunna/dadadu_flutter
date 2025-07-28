@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +49,7 @@ class VideoPostItem extends StatefulWidget {
 class _VideoPostItemState extends State<VideoPostItem> {
   Future<void>? _initializeVideoPlayerFuture;
   bool _hasError = false;
+  bool _diamondActionInProgress = false;
 
   // State variables for the download feature
   bool _isDownloading = false;
@@ -384,8 +386,9 @@ class _VideoPostItemState extends State<VideoPostItem> {
             ),
           ],
         );
-      } else
+      } else {
         return Container();
+      }
     });
   }
 
@@ -452,16 +455,13 @@ class _VideoPostItemState extends State<VideoPostItem> {
   }
 
   Widget _buildActionButtons(BuildContext context) {
+    final authState = context.watch<AuthBloc>().state;
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        _buildActionButton(
-          icon: Icons.diamond_outlined,
-          label: widget.post.diamonds.toString(),
-          onPressed: () {
-            // context.read<PostBloc>().add(IncrementLike(post.id));
-          },
-        ),
+        if (authState is AuthAuthenticated && widget.author != null)
+          _buildDiamondButton(
+              context, authState.user, widget.post, widget.author!),
         const SizedBox(height: 20),
         _buildActionButton(
             icon: Icons.comment_bank_outlined,
@@ -488,6 +488,62 @@ class _VideoPostItemState extends State<VideoPostItem> {
     );
   }
 
+  Widget _buildDiamondButton(BuildContext context, UserEntity currentUser,
+      PostEntity post, UserEntity author) {
+    // Assumption: Your PostEntity has a list of user IDs.
+    // Replace 'diamondGiverIds' with your actual field name.
+    final bool hasGivenDiamond =
+        post.diamondGivers?.contains(currentUser.id) ?? false;
+
+    final bool isDiamondLoading =
+        context.watch<DiamondBloc>().state is DiamondLoading;
+
+    return BlocConsumer<DiamondBloc, DiamondState>(
+      listener: (context, state) {
+        if (state is DiamondSuccess || state is DiamondFailure) {
+          setState(() {
+            _diamondActionInProgress = false;
+          });
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is DiamondLoading;
+
+        return _buildActionButton(
+          iconWidget: (isLoading)
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Icon(
+                  hasGivenDiamond ? Icons.diamond : Icons.diamond_outlined,
+                  color: hasGivenDiamond
+                      ? Theme.of(context).colorScheme.primary
+                      : Colors.white,
+                ),
+          label: '${post.diamondGivers?.length ?? 0}',
+          onPressed: () {
+            if (_diamondActionInProgress) return;
+
+            setState(() {
+              _diamondActionInProgress = true;
+            });
+
+            final event = hasGivenDiamond
+                ? UnsendDiamond(userId: currentUser.id, postId: post.id)
+                : SendDiamond(userId: currentUser.id, postId: post.id);
+
+            context.read<DiamondBloc>().add(event);
+          },
+        );
+      },
+    );
+  }
+
   void _showCommentsBottomSheet(BuildContext context, String postId) {
     showModalBottomSheet(
       context: context,
@@ -505,12 +561,14 @@ class _VideoPostItemState extends State<VideoPostItem> {
   }
 
   Widget _buildActionButton({
-    required IconData icon,
+    IconData? icon,
+    Widget? iconWidget, // Can now pass a custom widget for the icon
     required String label,
     required VoidCallback onPressed,
-    bool isDownloading = false,
-    double downloadProgress = 0.0,
   }) {
+    assert(icon != null || iconWidget != null,
+        'Either icon or iconWidget must be provided.');
+
     return Column(
       children: [
         SizedBox(
@@ -520,22 +578,15 @@ class _VideoPostItemState extends State<VideoPostItem> {
             alignment: Alignment.center,
             children: [
               IconButton(
-                onPressed: isDownloading ? null : onPressed,
+                onPressed: onPressed,
                 style: IconButton.styleFrom(
                   backgroundColor: Colors.black.withOpacity(0.4),
                   foregroundColor: Colors.white,
                   iconSize: 30,
                   padding: const EdgeInsets.all(12),
                 ),
-                icon: Icon(icon),
+                icon: iconWidget ?? Icon(icon),
               ),
-              if (isDownloading)
-                CircularProgressIndicator(
-                  value: downloadProgress > 0 ? downloadProgress : null,
-                  strokeWidth: 3,
-                  color: Colors.white,
-                  backgroundColor: Colors.white.withOpacity(0.3),
-                ),
             ],
           ),
         ),

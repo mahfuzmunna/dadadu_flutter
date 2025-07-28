@@ -8,21 +8,21 @@ abstract class DiamondEvent extends Equatable {
 }
 
 class SendDiamond extends DiamondEvent {
-  final String senderId;
-  final String receiverId;
+  final String userId;
+  final String postId;
 
-  const SendDiamond({required this.senderId, required this.receiverId});
+  const SendDiamond({required this.userId, required this.postId});
 
   @override
-  List<Object> get props => [senderId, receiverId];
+  List<Object> get props => [userId, postId];
 }
 
 class UnsendDiamond extends DiamondEvent {
-  final String senderId;
-  final String receiverId;
+  final String userId;
+  final String postId;
 
-  const UnsendDiamond({required this.senderId, required this.receiverId});
+  const UnsendDiamond({required this.userId, required this.postId});
 
   @override
-  List<Object> get props => [senderId, receiverId];
+  List<Object> get props => [userId, postId];
 }

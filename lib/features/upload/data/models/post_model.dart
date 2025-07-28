@@ -13,7 +13,7 @@ class PostModel extends PostEntity {
     required super.thumbnailUrl,
     required super.caption,
     required super.tag,
-    super.diamonds = 0,
+    required super.diamondGivers,
     super.comments,
     required super.createdAt,
     super.isDisabled = false,
@@ -39,7 +39,9 @@ class PostModel extends PostEntity {
       thumbnailUrl: map['thumbnail_url'] as String,
       caption: map['caption'] as String,
       tag: map['tag'] as String?,
-      diamonds: map['diamonds'] as int,
+      diamondGivers: map['diamond_givers'] != null
+          ? List<String>.from(map['diamond_givers'].map((id) => id.toString()))
+          : [],
       comments: parsedComments,
       createdAt: map['created_at'] as String,
       isDisabled: map['is_disabled'] as bool,
@@ -59,7 +61,7 @@ class PostModel extends PostEntity {
       'thumbnail_url': thumbnailUrl,
       'caption': caption,
       'tag': tag,
-      'diamonds': diamonds,
+      'diamond_givers': diamondGivers,
       'comments': comments
           ?.map((comment) => (comment as CommentModel).toMap())
           .toList(),
@@ -80,7 +82,7 @@ class PostModel extends PostEntity {
     String? thumbnailUrl,
     String? caption,
     String? tag,
-    int? diamonds,
+    List<String>? diamondGivers,
     List<CommentEntity>? comments,
     String? createdAt,
     bool? isDisabled,
@@ -96,7 +98,7 @@ class PostModel extends PostEntity {
       thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
       caption: caption ?? this.caption,
       tag: tag ?? this.tag,
-      diamonds: diamonds ?? this.diamonds,
+      diamondGivers: diamondGivers ?? this.diamondGivers,
       comments: comments ?? this.comments,
       createdAt: createdAt ?? this.createdAt,
       isDisabled: isDisabled ?? this.isDisabled,

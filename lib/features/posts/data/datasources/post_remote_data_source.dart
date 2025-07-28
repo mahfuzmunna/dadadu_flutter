@@ -265,8 +265,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       await supabaseClient.rpc(
         'send_diamond',
         params: {
-          'p_sender_id': senderId,
-          'p_receiver_id': receiverId,
+          'd_user_id': senderId,
+          'd_post_id': receiverId,
         },
       );
     } on PostgrestException catch (e) {
@@ -284,8 +284,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       await supabaseClient.rpc(
         'unsend_diamond',
         params: {
-          'p_sender_id': senderId,
-          'p_receiver_id': receiverId,
+          'd_user_id': senderId,
+          'd_post_id': receiverId,
         },
       );
     } on PostgrestException catch (e) {

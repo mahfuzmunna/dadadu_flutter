@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../injection_container.dart' as di;
-import '../../../now/presentation/widgets/video_post_item.dart';
+import '../../../now/presentation/widgets/video_post_item_s.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 

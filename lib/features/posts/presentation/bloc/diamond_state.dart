@@ -13,6 +13,12 @@ class DiamondLoading extends DiamondState {}
 
 class DiamondSuccess extends DiamondState {}
 
+class DiamondFailure extends DiamondState {
+  final String message;
+
+  const DiamondFailure(this.message);
+}
+
 class DiamondError extends DiamondState {
   final String message;
 
