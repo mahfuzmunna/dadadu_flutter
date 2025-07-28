@@ -490,13 +490,8 @@ class _VideoPostItemState extends State<VideoPostItem> {
 
   Widget _buildDiamondButton(BuildContext context, UserEntity currentUser,
       PostEntity post, UserEntity author) {
-    // Assumption: Your PostEntity has a list of user IDs.
-    // Replace 'diamondGiverIds' with your actual field name.
     final bool hasGivenDiamond =
         post.diamondGivers?.contains(currentUser.id) ?? false;
-
-    final bool isDiamondLoading =
-        context.watch<DiamondBloc>().state is DiamondLoading;
 
     return BlocConsumer<DiamondBloc, DiamondState>(
       listener: (context, state) {
@@ -527,6 +522,11 @@ class _VideoPostItemState extends State<VideoPostItem> {
                 ),
           label: '${post.diamondGivers?.length ?? 0}',
           onPressed: () {
+            if (currentUser.id == author.id) {
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                  content: Text('You can\'t give a diamond to yourself.')));
+              return;
+            }
             if (_diamondActionInProgress) return;
 
             setState(() {
@@ -534,8 +534,14 @@ class _VideoPostItemState extends State<VideoPostItem> {
             });
 
             final event = hasGivenDiamond
-                ? UnsendDiamond(userId: currentUser.id, postId: post.id)
-                : SendDiamond(userId: currentUser.id, postId: post.id);
+                ? UnsendDiamond(
+                    userId: currentUser.id,
+                    postId: post.id,
+                    authorId: post.userId)
+                : SendDiamond(
+                    userId: currentUser.id,
+                    postId: post.id,
+                    authorId: post.userId);
 
             context.read<DiamondBloc>().add(event);
           },

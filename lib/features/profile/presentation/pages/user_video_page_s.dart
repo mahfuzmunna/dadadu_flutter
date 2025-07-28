@@ -10,6 +10,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../../../injection_container.dart' as di;
 import '../../../now/presentation/widgets/video_post_item_s.dart';
+import '../../../posts/presentation/bloc/diamond_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 
@@ -312,37 +313,39 @@ class _UsersVideoViewState extends State<_UsersVideoView>
                 return const Center(child: Text("This user has no posts."));
               }
 
-              return PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                itemCount: usersPosts.length,
-                itemBuilder: (context, index) {
-                  final post = usersPosts[index];
-                  final author = state.authors[post.userId];
-                  return BlocProvider<ProfileBloc>(
-                      create: (context) => di.sl<ProfileBloc>()
-                        ..add(SubscribeToUserProfile(author!.id)),
-                      child: BlocBuilder<ProfileBloc, ProfileState>(
-                          builder: (context, state) {
-                        // if (state is ProfileLoaded) {
-                        //   setState(() {
-                        //     authorFullName = state.user.fullName;
-                        //   });
-                        // };
-                        return VideoPostItem(
-                            key: ValueKey(post.id),
-                            post: post,
-                            author: author,
-                            controller: _controllerCache[post.id],
-                            isCurrentPage: index == _currentPageIndex,
-                            onUserTapped: (userId) {
-                              context.pop();
-                            });
-                      }));
-                },
+              return BlocProvider(
+                create: (context) => di.sl<DiamondBloc>(),
+                child: PageView.builder(
+                  controller: _pageController,
+                  scrollDirection: Axis.vertical,
+                  itemCount: usersPosts.length,
+                  itemBuilder: (context, index) {
+                    final post = usersPosts[index];
+                    final author = state.authors[post.userId];
+                    return BlocProvider<ProfileBloc>(
+                        create: (context) => di.sl<ProfileBloc>()
+                          ..add(SubscribeToUserProfile(author!.id)),
+                        child: BlocBuilder<ProfileBloc, ProfileState>(
+                            builder: (context, state) {
+                          // if (state is ProfileLoaded) {
+                          //   setState(() {
+                          //     authorFullName = state.user.fullName;
+                          //   });
+                          // };
+                          return VideoPostItem(
+                              key: ValueKey(post.id),
+                              post: post,
+                              author: author,
+                              controller: _controllerCache[post.id],
+                              isCurrentPage: index == _currentPageIndex,
+                              onUserTapped: (userId) {
+                                context.pop();
+                              });
+                        }));
+                  },
+                ),
               );
             }
-
             // Fallback for any other state
             return const SizedBox.shrink();
           },

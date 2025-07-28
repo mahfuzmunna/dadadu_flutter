@@ -33,10 +33,14 @@ abstract class PostRepository {
   Future<Either<Failure, List<CommentEntity>>> getPostComments(String postId);
 
   Future<Either<Failure, void>> sendDiamond(
-      {required String senderId, required String receiverId});
+      {required String userId,
+      required String postId,
+      required String authorId});
 
   Future<Either<Failure, void>> unsendDiamond(
-      {required String senderId, required String receiverId});
+      {required String userId,
+      required String postId,
+      required String authorId});
 }
 
 class PostRepositoryImpl implements PostRepository {
@@ -163,10 +167,15 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   Future<Either<Failure, void>> sendDiamond(
-      {required String senderId, required String receiverId}) async {
+      {required String userId,
+      required String postId,
+      required String authorId}) async {
     try {
       await remoteDataSource.sendDiamond(
-          senderId: senderId, receiverId: receiverId);
+        userId: userId,
+        postId: postId,
+        authorId: authorId,
+      );
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
@@ -175,10 +184,15 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   Future<Either<Failure, void>> unsendDiamond(
-      {required String senderId, required String receiverId}) async {
+      {required String userId,
+      required String postId,
+      required String authorId}) async {
     try {
       await remoteDataSource.unsendDiamond(
-          senderId: senderId, receiverId: receiverId);
+        userId: userId,
+        postId: postId,
+        authorId: authorId,
+      );
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));

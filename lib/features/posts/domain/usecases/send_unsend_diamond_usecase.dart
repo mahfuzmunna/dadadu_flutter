@@ -14,7 +14,10 @@ class SendDiamondUseCase implements UseCase<void, SendDiamondParams> {
   Future<Either<Failure, void>> call(SendDiamondParams params) async {
     // You'll need to add sendDiamond to your repository
     return await repository.sendDiamond(
-        senderId: params.senderId, receiverId: params.receiverId);
+      userId: params.userId,
+      postId: params.postId,
+      authorId: params.authorId,
+    );
   }
 }
 
@@ -27,16 +30,24 @@ class UnsendDiamondUseCase implements UseCase<void, SendDiamondParams> {
   Future<Either<Failure, void>> call(SendDiamondParams params) async {
     // You'll need to add unsendDiamond to your repository
     return await repository.unsendDiamond(
-        senderId: params.senderId, receiverId: params.receiverId);
+      userId: params.userId,
+      postId: params.postId,
+      authorId: params.authorId,
+    );
   }
 }
 
 class SendDiamondParams extends Equatable {
-  final String senderId; // The user sending the diamond
-  final String receiverId; // The user receiving the diamond
+  final String userId; // The user sending the diamond
+  final String postId; // The post receiving the diamond
+  final String authorId; // The author receiving the diamond
 
-  const SendDiamondParams({required this.senderId, required this.receiverId});
+  const SendDiamondParams({
+    required this.userId,
+    required this.postId,
+    required this.authorId,
+  });
 
   @override
-  List<Object> get props => [senderId, receiverId];
+  List<Object> get props => [userId, postId, authorId];
 }

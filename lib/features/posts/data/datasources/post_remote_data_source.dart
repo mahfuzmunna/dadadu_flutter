@@ -38,10 +38,14 @@ abstract class PostRemoteDataSource {
   Stream<PostModel> subscribeToPostChanges(String postId);
 
   Future<void> sendDiamond(
-      {required String senderId, required String receiverId});
+      {required String userId,
+      required String postId,
+      required String authorId});
 
   Future<void> unsendDiamond(
-      {required String senderId, required String receiverId});
+      {required String userId,
+      required String postId,
+      required String authorId});
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -259,14 +263,17 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
   @override
   Future<void> sendDiamond(
-      {required String senderId, required String receiverId}) async {
+      {required String userId,
+      required String postId,
+      required String authorId}) async {
     try {
       // Assumes you have a Supabase RPC function named 'send_diamond'
       await supabaseClient.rpc(
         'send_diamond',
         params: {
-          'd_user_id': senderId,
-          'd_post_id': receiverId,
+          'd_user_id': userId,
+          'd_post_id': postId,
+          'd_author_id': authorId,
         },
       );
     } on PostgrestException catch (e) {
@@ -278,14 +285,17 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
   @override
   Future<void> unsendDiamond(
-      {required String senderId, required String receiverId}) async {
+      {required String userId,
+      required String postId,
+      required String authorId}) async {
     try {
       // Assumes you have a Supabase RPC function named 'unsend_diamond'
       await supabaseClient.rpc(
         'unsend_diamond',
         params: {
-          'd_user_id': senderId,
-          'd_post_id': receiverId,
+          'd_user_id': userId,
+          'd_post_id': postId,
+          'd_author_id': authorId,
         },
       );
     } on PostgrestException catch (e) {
