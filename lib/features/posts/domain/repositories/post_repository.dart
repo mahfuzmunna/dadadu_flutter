@@ -21,6 +21,12 @@ abstract class PostRepository {
     Function(double progress)? onUploadProgress,
   });
 
+  Future<Either<Failure, PostEntity>> getPostById(String postId);
+
+  Either<Failure, Stream<PostEntity>> subscribeToPostChanges(String postId);
+
+  Future<Either<Failure, void>> incrementDiamond(String postId);
+
   Either<Failure, Stream<List<PostEntity>>> streamAllPosts();
 
   Either<Failure, Stream<Tuple2<List<PostEntity>, Map<String, UserEntity>>>>
@@ -126,6 +132,36 @@ class PostRepositoryImpl implements PostRepository {
       }
 
       return Right(comments);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PostEntity>> getPostById(String postId) async {
+    try {
+      final post = await remoteDataSource.getPostById(postId);
+      return Right(post);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> incrementDiamond(String postId) async {
+    try {
+      await remoteDataSource.incrementDiamond(postId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Either<Failure, Stream<PostEntity>> subscribeToPostChanges(String postId) {
+    try {
+      final postStream = remoteDataSource.subscribeToPostChanges(postId);
+      return Right(postStream);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     }

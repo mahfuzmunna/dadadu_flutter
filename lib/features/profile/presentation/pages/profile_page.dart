@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/posts/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/follow_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/shared/widgets/emoji_icon.dart';
@@ -240,10 +241,10 @@ class _ProfileContentState extends State<_ProfileContent> {
               const SizedBox(height: 32),
 
               // --- Referral Card ---
-                  if (widget.isMyProfile) ...[
-                    _buildReferralCard(widget.referralLink),
-                    const SizedBox(height: 32),
-                  ],
+              if (widget.isMyProfile) ...[
+                _buildReferralCard(widget.referralLink),
+                const SizedBox(height: 32),
+              ],
 
               // --- Match History ---
               if (widget.isMyProfile) ...[
@@ -495,10 +496,11 @@ class _ProfileContentState extends State<_ProfileContent> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildStatColumn(context, Icons.people_alt_rounded,
-            '${widget.user.followersCount}', 'Followers'),
+            '${widget.user.followerIds.length}', 'Followers'),
         _buildStatColumn(context, Icons.person_add_alt_1_rounded,
-            '${widget.user.followingCount}', 'Following'),
-        _buildStatColumn(context, Icons.ondemand_video_rounded, '$postsCount', 'Videos'),
+            '${widget.user.followingIds.length}', 'Following'),
+        _buildStatColumn(context, Icons.ondemand_video_rounded,
+            '${widget.user.postIds.length}', 'Videos'),
       ],
     );
   }
@@ -629,7 +631,7 @@ class _ProfileContentState extends State<_ProfileContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Uploaded Videos (${usersPosts.length})',
+          'Uploaded Videos (${widget.user.postIds.length})',
           style: Theme.of(context)
               .textTheme
               .titleLarge
@@ -658,54 +660,71 @@ class _ProfileContentState extends State<_ProfileContent> {
               mainAxisSpacing: 10,
               childAspectRatio: 0.7,
             ),
-            itemCount: usersPosts.length,
+            itemCount: widget.user.postIds.length,
             itemBuilder: (context, index) {
-              return Card(
-                clipBehavior: Clip.antiAlias,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-                child: InkWell(
-                  onTap: () {
-                    context.push('/home/${usersPosts[index].id}');
-                  },
-                  child: Stack(
-                    fit: StackFit.expand,
-                    // Make the stack's children fill the card
-                    children: [
-                      // 1. The Thumbnail Image
-                      CachedNetworkImage(
-                        imageUrl: usersPosts[index].thumbnailUrl,
-                        fit: BoxFit.cover,
-                        // Ensures the image covers the card area
-                        // Placeholder while the image is loading
-                        placeholder: (context, url) => Container(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHigh,
-                          child:
-                              const Center(child: CircularProgressIndicator()),
+              return BlocProvider<PostBloc>(
+                create: (context) => di.sl<PostBloc>()
+                  ..add(LoadPost(widget.user.postIds[index])),
+                child: Card(
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                  child: InkWell(
+                    onTap: () {
+                      context.push('/home/${widget.user.postIds[index]}');
+                    },
+                    child: Stack(
+                      fit: StackFit.expand,
+                      // Make the stack's children fill the card
+                      children: [
+                        // 1. The Thumbnail Image
+                        BlocBuilder<PostBloc, PostState>(
+                            builder: (context, state) {
+                          if (state is PostLoading || state is PostInitial) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }
+
+                          if (state is PostLoaded) {
+                            return CachedNetworkImage(
+                              // imageUrl: usersPosts[index].thumbnailUrl,
+                              imageUrl: state.post.thumbnailUrl,
+                              fit: BoxFit.cover,
+                              // Ensures the image covers the card area
+                              // Placeholder while the image is loading
+                              placeholder: (context, url) => Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHigh,
+                                child: const Center(
+                                    child: CircularProgressIndicator()),
+                              ),
+                              // Widget to show if the image fails to load
+                              errorWidget: (context, url, error) => Container(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .surfaceContainerHigh,
+                                child: const Center(
+                                    child: Icon(Icons.broken_image_outlined)),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        }),
+                        // 2. The Play Icon Overlay
+                        Center(
+                          child: Icon(
+                            Icons.play_circle_filled_rounded,
+                            color: Colors.white.withOpacity(0.8),
+                            size: 50,
+                            shadows: const [
+                              Shadow(color: Colors.black45, blurRadius: 10)
+                            ],
+                          ),
                         ),
-                        // Widget to show if the image fails to load
-                        errorWidget: (context, url, error) => Container(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .surfaceContainerHigh,
-                          child: const Center(
-                              child: Icon(Icons.broken_image_outlined)),
-                        ),
-                      ),
-                      // 2. The Play Icon Overlay
-                      Center(
-                        child: Icon(
-                          Icons.play_circle_filled_rounded,
-                          color: Colors.white.withOpacity(0.8),
-                          size: 50,
-                          shadows: const [
-                            Shadow(color: Colors.black45, blurRadius: 10)
-                          ],
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -715,7 +734,7 @@ class _ProfileContentState extends State<_ProfileContent> {
     );
   }
 
-  // --- HELPER METHODS FOR DIALOGS AND BOTTOM SHEETS ---
+// --- HELPER METHODS FOR DIALOGS AND BOTTOM SHEETS ---
 
   Widget _buildStatColumn(
       BuildContext context, IconData icon, String count, String label) {

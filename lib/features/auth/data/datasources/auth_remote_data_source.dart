@@ -247,9 +247,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 bio: currentUser.userMetadata?['bio'] as String?,
                 profilePhotoUrl:
                     currentUser.userMetadata?['profile_photo_url'] as String?,
-                followersCount: 0,
-                followingCount: 0,
-                postCount: 0,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
                   rank: 'Leaf',
@@ -276,9 +273,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               bio: currentUser.userMetadata?['bio'] as String?,
               profilePhotoUrl:
                   currentUser.userMetadata?['profile_photo_url'] as String?,
-              followersCount: 0,
-              followingCount: 0,
-              postCount: 0,
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
                 rank: 'Leaf',

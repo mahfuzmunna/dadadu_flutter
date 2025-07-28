@@ -10,9 +10,6 @@ class UserModel extends UserEntity {
     required super.username,
     required super.bio,
     required super.profilePhotoUrl,
-    required super.followersCount,
-    required super.followingCount,
-    required super.postCount,
     required super.referralsCount,
     required super.createdAt,
     required super.updatedAt,
@@ -27,6 +24,8 @@ class UserModel extends UserEntity {
     required super.location,
     super.diamonds,
     super.followingIds = const [],
+    super.followerIds = const [],
+    super.postIds = const [],
   });
 
   // Factory constructor to create UserModel from a Map (Supabase query result)
@@ -38,9 +37,6 @@ class UserModel extends UserEntity {
       username: map['username'],
         bio: map['bio'] ?? '',
         profilePhotoUrl: map['profile_photo_url'] ?? '',
-        followersCount: map['followers_count'],
-      followingCount: map['following_count'],
-      postCount: map['post_count'],
         referralsCount: map['referrals_count'],
         createdAt: map['created_at'] != null
             ? DateTime.parse(map['created_at'])
@@ -60,8 +56,14 @@ class UserModel extends UserEntity {
         diamonds: map['diamonds'],
         followingIds: map['following_ids'] != null
             ? List<String>.from(map['following_ids'].map((id) => id.toString()))
-            : []
-        // Always null when loaded from DB
+          : [],
+      followerIds: map['follower_ids'] != null
+          ? List<String>.from(map['follower_ids'].map((id) => id.toString()))
+          : [],
+      postIds: map['post_ids'] != null
+          ? List<String>.from(map['post_ids'].map((id) => id.toString()))
+          : [],
+      // Always null when loaded from DB
     );
     return userModel;
   }
@@ -76,9 +78,6 @@ class UserModel extends UserEntity {
       'username': username,
       'bio': bio,
       'profile_photo_url': profilePhotoUrl,
-      'followers_count': followersCount,
-      'following_count': followingCount,
-      'post_count': postCount,
       'referrals_count': referralsCount,
       'created_at': createdAt,
       'updated_at': updatedAt,
@@ -92,6 +91,9 @@ class UserModel extends UserEntity {
       'longitude': longitude,
       'location': location,
       'diamonds': diamonds,
+      'following_ids': followingIds,
+      'follower_ids': followerIds,
+      'post_ids': postIds,
     };
   }
 
@@ -120,6 +122,8 @@ class UserModel extends UserEntity {
     String? location,
     int? diamonds,
     List<String>? followingIds,
+    List<String>? followerIds,
+    List<String>? postIds,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -128,9 +132,6 @@ class UserModel extends UserEntity {
       username: username ?? this.username,
       bio: bio ?? this.bio,
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
-      followersCount: followersCount ?? this.followersCount,
-      followingCount: followingCount ?? this.followingCount,
-      postCount: postCount ?? this.postCount,
       referralsCount: referralsCount ?? this.referralsCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -145,6 +146,8 @@ class UserModel extends UserEntity {
       location: location ?? this.location,
       diamonds: diamonds ?? this.diamonds,
       followingIds: followingIds ?? this.followingIds,
+      followerIds: followerIds ?? this.followerIds,
+      postIds: postIds ?? this.postIds,
     );
   }
 }

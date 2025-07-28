@@ -2,7 +2,7 @@ import 'package:dadadu_app/config/app_config.dart'; // Assuming you have your ke
 import 'package:dadadu_app/features/posts/data/datasources/post_remote_data_source.dart';
 import 'package:dadadu_app/features/posts/domain/repositories/post_repository.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/upload_post_usecase.dart';
-import 'package:dadadu_app/features/posts/presentation/bloc/upload_bloc.dart';
+import 'package:dadadu_app/features/posts/presentation/bloc/post_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 // Use the same GetIt instance from your main injection container
@@ -15,7 +15,8 @@ Future<void> postInjection() async {
 
   // --- Presentation Layer (BLoCs) ---
   sl.registerFactory(
-    () => UploadBloc(uploadPostUseCase: sl()),
+    () => PostBloc(
+        uploadPostUseCase: sl(), postRepository: sl(), profileRepository: sl()),
   );
 
   // --- Domain Layer (Use Cases) ---

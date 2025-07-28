@@ -11,7 +11,7 @@ import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../bloc/upload_bloc.dart';
+import '../bloc/post_bloc.dart';
 
 class CreatePostPage extends StatefulWidget {
   final String videoPath;
@@ -125,7 +125,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       // ✅ Dispatch the event to the UploadBloc
-      context.read<UploadBloc>().add(UploadPost(
+      context.read<PostBloc>().add(UploadPost(
             videoFile: File(widget.videoPath),
             thumbnailBytes: _selectedThumbnail!,
             caption: _captionController.text.trim(),
@@ -139,7 +139,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BlocConsumer<UploadBloc, UploadState>(listener: (context, state) {
+    return BlocConsumer<PostBloc, PostState>(listener: (context, state) {
       // ✅ This listener handles the navigation after the upload is complete.
       if (state is UploadSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(

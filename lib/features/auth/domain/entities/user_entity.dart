@@ -8,9 +8,6 @@ class UserEntity extends Equatable {
   final String? username;
   final String? bio;
   final String? profilePhotoUrl;
-  final int? followersCount;
-  final int? followingCount;
-  final int? postCount;
   final int? referralsCount;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -25,6 +22,8 @@ class UserEntity extends Equatable {
   final String? location;
   final int? diamonds;
   final List<String> followingIds;
+  final List<String> followerIds;
+  final List<String> postIds;
 
   const UserEntity({
     required this.id,
@@ -33,9 +32,6 @@ class UserEntity extends Equatable {
     required this.username,
     required this.bio,
     required this.profilePhotoUrl,
-    required this.followersCount,
-    required this.followingCount,
-    required this.postCount,
     required this.referralsCount,
     required this.createdAt,
     required this.updatedAt,
@@ -50,6 +46,8 @@ class UserEntity extends Equatable {
     required this.location,
     this.diamonds,
     this.followingIds = const [],
+    this.followerIds = const [],
+    this.postIds = const [],
   });
 
   @override
@@ -60,9 +58,6 @@ class UserEntity extends Equatable {
         username,
         bio,
         profilePhotoUrl,
-        followersCount,
-        followingCount,
-        postCount,
         referralsCount,
         createdAt,
         updatedAt,
@@ -77,6 +72,8 @@ class UserEntity extends Equatable {
         location,
         diamonds,
         followingIds,
+        followerIds,
+        postIds,
       ];
 
   UserEntity copyWith({
@@ -86,8 +83,6 @@ class UserEntity extends Equatable {
     String? username,
     String? bio,
     String? profilePhotoUrl,
-    int? followersCount,
-    int? followingCount,
     int? postCount,
     int? referralsCount,
     DateTime? createdAt,
@@ -103,6 +98,8 @@ class UserEntity extends Equatable {
     String? location,
     int? diamonds,
     List<String>? followingIds,
+    List<String>? followerIds,
+    List<String>? postIds,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -111,9 +108,6 @@ class UserEntity extends Equatable {
       username: username ?? this.username,
       bio: bio ?? this.bio,
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
-      followersCount: followersCount ?? this.followersCount,
-      followingCount: followingCount ?? this.followingCount,
-      postCount: postCount ?? this.postCount,
       referralsCount: referralsCount ?? this.referralsCount,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -128,6 +122,8 @@ class UserEntity extends Equatable {
       location: location ?? this.location,
       diamonds: diamonds ?? this.diamonds,
       followingIds: followingIds ?? this.followingIds,
+      followerIds: followerIds ?? this.followerIds,
+      postIds: postIds ?? this.postIds,
     );
   }
 }

@@ -32,6 +32,12 @@ abstract class PostRemoteDataSource {
   Future<List<Map<String, dynamic>>> getPostComments(String postId);
 
   Future<Either<Failure, List<UserEntity>>> getUsersByIds(List<String> userIds);
+
+  Future<PostModel> getPostById(String postId);
+
+  Stream<PostModel> subscribeToPostChanges(String postId);
+
+  Future<void> incrementDiamond(String postId);
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -92,6 +98,15 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         'intent': intent,
         'created_at': DateTime.now().toIso8601String(),
       });
+
+      await supabaseClient.rpc(
+        'append_post_to_user',
+        params: {
+          'target_user_id': userId,
+          'new_post_id': postId,
+        },
+      );
+
       onUploadProgress?.call(1.0); // 100% progress
 
       await thumbnailFile.delete();
@@ -203,6 +218,48 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     } catch (e) {
       throw ServerException('An unexpected error occurred: ${e.toString()}',
           code: 'UNKNOWN_ERROR');
+    }
+  }
+
+  @override
+  Future<PostModel> getPostById(String postId) async {
+    try {
+      final data = await supabaseClient
+          .from(AppConfig.supabasePostTable)
+          .select()
+          .eq('id', postId)
+          .single();
+      return PostModel.fromMap(data);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Stream<PostModel> subscribeToPostChanges(String postId) {
+    try {
+      final stream = supabaseClient
+          .from(AppConfig.supabasePostTable)
+          .stream(primaryKey: ['id']).eq('id', postId);
+
+      return stream.map((data) {
+        if (data.isEmpty) {
+          throw ServerException('Post not found in stream.');
+        }
+        return PostModel.fromMap(data.first);
+      });
+    } catch (e) {
+      throw ServerException('Failed to stream post: ${e.toString()}');
+    }
+  }
+
+  @override
+  Future<void> incrementDiamond(String postId) async {
+    try {
+      await supabaseClient
+          .rpc('increment_diamonds', params: {'post_id_to_update': postId});
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 }

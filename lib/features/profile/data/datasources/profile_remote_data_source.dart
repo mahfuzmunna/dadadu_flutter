@@ -99,10 +99,18 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       // Inserts a new row into the 'followers' table.
       // The database triggers you created will automatically update the counts.
-      await _supabaseClient.from('followers').insert({
-        'follower_id': followerId,
-        'following_id': followingId,
-      });
+      // await _supabaseClient.from('followers').insert({
+      //   'follower_id': followerId,
+      //   'following_id': followingId,
+      // });
+
+      await _supabaseClient.rpc(
+        'follow_user',
+        params: {
+          'follower_id': followerId,
+          'following_id': followingId,
+        },
+      );
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

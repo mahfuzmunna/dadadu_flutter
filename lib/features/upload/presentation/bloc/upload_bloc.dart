@@ -1,4 +1,4 @@
-// lib/features/upload/presentation/bloc/upload_bloc.dart
+// lib/features/upload/presentation/bloc/post_bloc.dart
 import 'dart:async';
 import 'dart:io';
 
@@ -13,8 +13,8 @@ import '../../../auth/domain/usecases/get_current_user_usecase.dart'; // To get 
 import '../../domain/entities/post_entity.dart';
 import '../../domain/usecases/upload_post_usecase.dart';
 
-part 'upload_event.dart'; // Links to upload_event.dart
-part 'upload_state.dart'; // Links to upload_state.dart
+part 'upload_event.dart'; // Links to post_event.dart
+part 'upload_state.dart'; // Links to post_state.dart
 
 class UploadBloc extends Bloc<UploadEvent, UploadState> {
   final UploadPostUseCase uploadPostUseCase;

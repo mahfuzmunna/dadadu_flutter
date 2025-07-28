@@ -1,4 +1,4 @@
-// lib/features/upload/presentation/bloc/upload_event.dart
+// lib/features/upload/presentation/bloc/post_event.dart
 part of 'upload_bloc.dart'; // This line links it to the bloc file
 
 @immutable
