@@ -39,7 +39,6 @@ class FindUsersByVibeParams extends Equatable {
     required this.vibe,
     required this.currentLatitude,
     required this.currentLongitude,
-    // this.maxDistanceInKm = 100,
     required this.maxDistanceInKm,
   });
 

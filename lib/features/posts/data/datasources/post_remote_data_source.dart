@@ -31,6 +31,11 @@ abstract class PostRemoteDataSource {
 
   Future<List<Map<String, dynamic>>> getPostComments(String postId);
 
+  Future<Either<Failure, void>> addComment(
+      {required String userId,
+      required String postId,
+      required String comment});
+
   Future<Either<Failure, List<UserEntity>>> getUsersByIds(List<String> userIds);
 
   Future<PostModel> getPostById(String postId);
@@ -202,6 +207,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           .single();
 
       // The comments are returned as a List<dynamic> which we cast
+      // to List of CommentModel
+
       return List<Map<String, dynamic>>.from(response['comments'] ?? []);
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
@@ -298,6 +305,33 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           'd_author_id': authorId,
         },
       );
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addComment(
+      {required String userId,
+      required String postId,
+      required String comment}) async {
+    try {
+      // supabaseClient.from(AppConfig.supabasePostTable).insert({
+      //   'id': postId,
+      //   'user_id': userId,
+      //   'comment': comment,
+      //   'created_at': DateTime.now().toIso8601String()});
+      await supabaseClient.rpc(
+        'add_post_comment',
+        params: {
+          'd_user_id': userId,
+          'd_post_id': postId,
+          'd_comment': comment,
+        },
+      );
+      return const Right(null);
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

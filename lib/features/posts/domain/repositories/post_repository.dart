@@ -41,6 +41,11 @@ abstract class PostRepository {
       {required String userId,
       required String postId,
       required String authorId});
+
+  Future<Either<Failure, void>> addComment(
+      {required String userId,
+      required String postId,
+      required String comment});
 }
 
 class PostRepositoryImpl implements PostRepository {
@@ -196,6 +201,20 @@ class PostRepositoryImpl implements PostRepository {
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> addComment(
+      {required String userId,
+      required String postId,
+      required String comment}) async {
+    try {
+      await remoteDataSource.addComment(
+          userId: userId, postId: postId, comment: comment);
+      return const Right(null);
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
     }
   }
 }

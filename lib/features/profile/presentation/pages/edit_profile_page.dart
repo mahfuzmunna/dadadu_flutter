@@ -38,11 +38,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
     final authState = context.read<AuthBloc>().state;
     if (authState is AuthAuthenticated) {
       _currentUser = authState.user;
+      _usernameController =
+          TextEditingController(text: _currentUser?.username ?? '');
+      _fullNameController =
+          TextEditingController(text: _currentUser?.fullName ?? '');
+      _bioController = TextEditingController(text: _currentUser?.bio ?? '');
     }
-    _usernameController = TextEditingController(text: _currentUser?.username ?? '');
-    _fullNameController =
-        TextEditingController(text: _currentUser?.fullName ?? '');
-    _bioController = TextEditingController(text: _currentUser?.bio ?? '');
   }
 
   @override
@@ -217,7 +218,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         controller: _bioController,
                         decoration: const InputDecoration(
                             labelText: 'Bio', border: OutlineInputBorder()),
-                        maxLines: 3,
                       ),
                       const SizedBox(height: 32),
 

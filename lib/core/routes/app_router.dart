@@ -252,44 +252,45 @@ class AppRouter {
         final authState = authBloc.state;
         final location = state.uri.toString();
 
+        // Define route locations and public paths
         const splashLocation = '/';
-        const homeLocation = '/home';
         const loginLocation = '/login';
+        const homeLocation = '/home';
         const onboardingLocation = '/upload-profile-photo';
-        const publicRoutes = ['/login', '/signUp', '/forgot-password'];
+        const authRoutes = ['/login', '/signUp', '/forgot-password'];
 
-        final isAtSplash = location == splashLocation;
-        final isAtAuthRoute = publicRoutes.contains(location);
+        final isAtAuthRoute = authRoutes.contains(location);
         final isAtOnboarding = location == onboardingLocation;
 
-        // --- REDIRECTION RULES ---
-
-        // 1. If the state is initializing, stay on the splash screen.
+        // 1. While the app is initializing, stay on the splash screen.
+        // This prevents redirects before the auth state is resolved.
         if (authState is AuthInitial || authState is AuthLoading) {
-          return isAtSplash ? null : splashLocation;
+          return location == splashLocation ? null : splashLocation;
         }
 
-        // 2. If the user just signed up, force them to the onboarding page.
+        // 2. If the user just signed up, they MUST go to onboarding.
         if (authState is AuthSignUpSuccess) {
-          return isAtOnboarding ? null : onboardingLocation;
+          return location == onboardingLocation ? null : onboardingLocation;
         }
 
-        // 3. If the user is authenticated...
+        // 3. If the user is authenticated:
         if (authState is AuthAuthenticated) {
-          // ...and they are on a public page, send them home.
-          if (isAtAuthRoute || isAtOnboarding || isAtSplash) {
+          // If they are on a public page (auth, onboarding) or the splash screen, send them home.
+          if (isAtAuthRoute || isAtOnboarding || location == splashLocation) {
             return homeLocation;
           }
-        }
-        // 4. If the user is NOT authenticated...
-        else {
-          // ...and they are on a protected page, send them to login.
-          if (!isAtAuthRoute && !isAtSplash) {
-            return loginLocation;
-          }
+          // Otherwise, they are on a protected page and can stay.
+          return null;
         }
 
-        // 5. In all other cases, no redirection is needed.
+        // 4. If the user is NOT authenticated (or in an error state):
+        // They should only be on the auth routes. If they are anywhere else, redirect them to login.
+        // The splash screen is not a valid destination after loading is complete for an unauthenticated user.
+        if (!isAtAuthRoute) {
+          return loginLocation;
+        }
+
+        // 5. If unauthenticated and on an auth route, no redirect is needed.
         return null;
       },
 
@@ -299,7 +300,6 @@ class AppRouter {
       ),
 
       // Listens to AuthBloc's stream to trigger redirects whenever auth state changes.
-      // This is crucial for reacting to login/logout events.
       refreshListenable: GoRouterRefreshStream(authBloc.status),
     );
   }

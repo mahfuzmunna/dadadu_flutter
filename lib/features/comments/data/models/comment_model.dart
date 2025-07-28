@@ -12,9 +12,11 @@ class CommentModel extends CommentEntity {
   factory CommentModel.fromMap(Map<String, dynamic> map) {
     return CommentModel(
         userId: map['user_id'] as String,
-        comment: map['comment'] as String,
-        timestamp: DateTime.parse(map['timestamp'] as String),
-        likes: map['likes'] as int,
+        comment: map['comment_text'] as String,
+        timestamp: map['timestamp'] != null
+            ? DateTime.parse(map['timestamp'])
+            : DateTime.now(),
+        likes: map['likes'] ?? 0,
         author: null);
   }
 

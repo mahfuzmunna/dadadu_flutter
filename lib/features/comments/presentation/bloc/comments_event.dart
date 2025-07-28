@@ -1,5 +1,7 @@
 part of 'comments_bloc.dart';
 
+// lib/features/comments/presentation/bloc/comments_event.dart
+
 abstract class CommentsEvent extends Equatable {
   const CommentsEvent();
 
@@ -7,7 +9,7 @@ abstract class CommentsEvent extends Equatable {
   List<Object> get props => [];
 }
 
-/// Dispatched when the UI needs to load the comments for a specific post.
+/// Event to fetch all comments for a specific post.
 class LoadComments extends CommentsEvent {
   final String postId;
 
@@ -15,4 +17,14 @@ class LoadComments extends CommentsEvent {
 
   @override
   List<Object> get props => [postId];
+}
+
+/// Event to add a new comment to a post.
+class AddComment extends CommentsEvent {
+  final CommentParams params;
+
+  const AddComment(this.params);
+
+  @override
+  List<Object> get props => [params];
 }

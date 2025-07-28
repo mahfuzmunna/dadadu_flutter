@@ -41,11 +41,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   AuthRemoteDataSourceImpl({required this.supabaseClient});
 
-  // Helper to construct public URL for Supabase storage
-  String _getPublicUrl(String bucketName, String path) {
-    return supabaseClient.storage.from(bucketName).getPublicUrl(path);
-  }
-
   @override
   Future<UserModel> signUpWithEmailAndPassword({
     required String email,
@@ -84,7 +79,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final List<Map<String, dynamic>> response = await supabaseClient
           .from(AppConfig
               .supabaseUserTable) // Replace with your actual profiles table name
-          .insert(userProfileData)
+          .upsert(userProfileData)
           .select(); // Use .select() to get the inserted data back
 
       if (response.isEmpty) {

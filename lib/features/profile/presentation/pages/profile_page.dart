@@ -231,7 +231,12 @@ class _ProfileContentState extends State<_ProfileContent> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: _buildDiamondCounter(context, widget.user),
+        leading: (widget.isMyProfile)
+            ? _buildDiamondCounter(context, widget.user)
+            : IconButton(
+                onPressed: () => context.pop(),
+                icon: Icon(Icons.arrow_back_ios_new_rounded,
+                    color: Theme.of(context).colorScheme.primary)),
         leadingWidth: 84,
         title: Text(widget.isMyProfile
             ? 'My Profile'

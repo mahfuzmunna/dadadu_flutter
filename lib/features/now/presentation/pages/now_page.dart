@@ -53,8 +53,6 @@ class _NowPageViewState extends State<_NowPageView>
   int _currentPageIndex = 0;
   bool _hasNewNotifications = true;
 
-  final int _maxCacheSize =
-      3; // Max controllers to keep in memory (current, previous, next)
   final Map<String, VideoPlayerController> _controllerCache = {};
   String? _currentPostId;
   final Set<String> _initializingControllers = {};
@@ -85,7 +83,7 @@ class _NowPageViewState extends State<_NowPageView>
 
     // Get the current primary route (e.g., '/home', '/discover')
     final String topRoute =
-        _router.routerDelegate.currentConfiguration.fullPath ?? '';
+        _router.routerDelegate.currentConfiguration.fullPath;
     final bool isActive =
         (topRoute == '/home'); // '/home' is the path for your NowPage
 
@@ -155,7 +153,7 @@ class _NowPageViewState extends State<_NowPageView>
     }
 
     if (controller?.value.isInitialized ?? false) {
-      await controller?.setLooping(true);
+      await controller?.setLooping(false);
       await controller?.play();
     }
     if (mounted) setState(() {});

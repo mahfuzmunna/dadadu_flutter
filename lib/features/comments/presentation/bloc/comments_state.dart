@@ -7,25 +7,38 @@ abstract class CommentsState extends Equatable {
   List<Object> get props => [];
 }
 
+/// State emitted when an error occurs while fetching comments.
+
+class CommentPosting extends CommentsState {}
+
+class CommentPosted extends CommentsState {}
+
+// lib/features/comments/presentation/bloc/comments_state.dart
+
 class CommentsInitial extends CommentsState {}
 
 class CommentsLoading extends CommentsState {}
 
-/// State emitted when comments have been successfully loaded and sorted.
+/// State when comments are successfully loaded.
+/// It holds separate lists for recent and popular comments.
 class CommentsLoaded extends CommentsState {
-  /// A list of comments sorted by timestamp (newest first).
   final List<CommentEntity> recent;
-
-  /// A list of comments sorted by the number of likes (most liked first).
   final List<CommentEntity> popular;
 
-  const CommentsLoaded({required this.recent, required this.popular});
+  const CommentsLoaded({this.recent = const [], this.popular = const []});
 
   @override
   List<Object> get props => [recent, popular];
 }
 
-/// State emitted when an error occurs while fetching comments.
+/// State when adding a comment is in progress.
+class CommentAdding extends CommentsState {}
+
+/// State when a comment has been successfully added.
+/// You can use this to show a confirmation message.
+class CommentAdded extends CommentsState {}
+
+/// State for any errors related to loading or adding comments.
 class CommentsError extends CommentsState {
   final String message;
 

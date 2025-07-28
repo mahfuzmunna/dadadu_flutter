@@ -564,7 +564,8 @@ class _VideoPostItemState extends State<VideoPostItem> {
         maxChildSize: 0.9,
         builder: (context, scrollController) => BlocProvider(
           create: (context) => sl<CommentsBloc>()..add(LoadComments(postId)),
-          child: CommentsView(scrollController: scrollController),
+          child:
+              CommentsView(scrollController: scrollController, postId: postId),
         ),
       ),
     );

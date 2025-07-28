@@ -208,7 +208,10 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // 2. Calculate distance, filter, and sort on the client-side
       final List<UserWithDistance> nearbyUsers = [];
       for (final user in users) {
-        if (user.latitude != null && user.longitude != null) {
+        if (user.latitude != null &&
+            user.longitude != null &&
+            user.latitude!.isNotEmpty &&
+            user.longitude!.isNotEmpty) {
           final distanceInMeters = Geolocator.distanceBetween(
             params.currentLatitude,
             params.currentLongitude,

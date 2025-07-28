@@ -5,9 +5,10 @@ import '../../injection_container.dart';
 
 Future<void> commentsInjection() async {
   sl.registerFactory(
-    () => CommentsBloc(getPostCommentsUseCase: sl()),
+    () => CommentsBloc(getPostCommentsUseCase: sl(), addCommentUseCase: sl()),
   );
 
   // Use cases
   sl.registerLazySingleton(() => GetPostCommentsUseCase(sl()));
+  sl.registerLazySingleton(() => AddCommentUseCase(sl()));
 }
