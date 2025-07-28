@@ -83,5 +83,7 @@ class AuthUserChanged extends AuthEvent {
 }
 
 class AuthRefreshCurrentUser extends AuthEvent {
-  const AuthRefreshCurrentUser(); // No props, it's just a signal
+  final String currentUserId;
+
+  const AuthRefreshCurrentUser(this.currentUserId);
 }

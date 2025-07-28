@@ -97,13 +97,6 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<void> followUser(
       {required String followerId, required String followingId}) async {
     try {
-      // Inserts a new row into the 'followers' table.
-      // The database triggers you created will automatically update the counts.
-      // await _supabaseClient.from('followers').insert({
-      //   'follower_id': followerId,
-      //   'following_id': followingId,
-      // });
-
       await _supabaseClient.rpc(
         'follow_user',
         params: {
@@ -124,11 +117,13 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       // Deletes a row from the 'followers' table based on the composite primary key.
       // The database triggers will automatically update the counts.
-      await _supabaseClient
-          .from('followers')
-          .delete()
-          .eq('follower_id', followerId)
-          .eq('following_id', followingId);
+      await _supabaseClient.rpc(
+        'unfollow_user',
+        params: {
+          'unfollower_id': followerId,
+          'unfollowing_id': followingId,
+        },
+      );
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

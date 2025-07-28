@@ -28,6 +28,27 @@ class AuthUnauthenticated extends AuthState {
   const AuthUnauthenticated({this.message});
 }
 
+class AuthRefreshing extends AuthState {
+  final String? message;
+
+  const AuthRefreshing({this.message});
+}
+
+class AuthRefreshedCurrentUser extends AuthState {
+  final UserEntity user;
+
+  const AuthRefreshedCurrentUser({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
+
+class AuthRefreshingCurrentUser extends AuthState {
+  final String? message;
+
+  const AuthRefreshingCurrentUser({this.message});
+}
+
 /// A special, temporary state for when a user has just signed up
 /// and needs to complete the onboarding (e.g., upload a photo).
 class AuthSignUpSuccess extends AuthState {

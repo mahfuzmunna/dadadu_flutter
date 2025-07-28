@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
+import 'package:dadadu_app/features/profile/domain/usecases/get_user_profile_data_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 // 🔑 FIX: Import Supabase with an alias to prevent name conflicts.
@@ -21,6 +22,13 @@ import '../../domain/usecases/sign_up_usecase.dart';
 part 'auth_event.dart';
 part 'auth_state.dart'; // This defines YOUR AuthState
 
+enum AuthenticationStatus {
+  unknown,
+  onboarding,
+  authenticated,
+  unauthenticated
+}
+
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInUseCase _signInUseCase;
   final SignUpUseCase _signUpUseCase;
@@ -32,19 +40,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   final SignInWithOAuthUseCase signInWithOAuthUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
+  final GetUserProfileDataUseCase _getUserProfileDataUseCase;
 
+  final _authStatusController =
+      StreamController<AuthenticationStatus>.broadcast();
 
   AuthBloc({
     required SignInUseCase signInUseCase,
     required SignUpUseCase signUpUseCase,
     required SignOutUseCase signOutUseCase,
     required GetCurrentUserUseCase getCurrentUserUseCase,
+    required GetUserProfileDataUseCase getUserProfileDataUseCase,
     required this.signInWithOAuthUseCase,
     required this.resetPasswordUseCase,
   })  : _signInUseCase = signInUseCase,
         _signUpUseCase = signUpUseCase,
         _signOutUseCase = signOutUseCase,
         _getCurrentUserUseCase = getCurrentUserUseCase,
+        _getUserProfileDataUseCase = getUserProfileDataUseCase,
         super(AuthInitial()) {
     _setupAuthListener();
 
@@ -58,8 +71,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // on<AuthSignInWithOAuthRequested>(_onAuthSignInWithOAuthRequested);
     // on<AuthPasswordResetRequested>(_onAuthPasswordResetRequested);
     // on<AuthUserChanged>(_onAuthUserChanged);
-    // on<AuthRefreshCurrentUser>(_onAuthRefreshCurrentUser);
+    on<AuthRefreshCurrentUser>(_onAuthRefreshCurrentUser);
   }
+
+  /// Public stream for GoRouter to listen to for redirection.
+  Stream<AuthenticationStatus> get status => _authStatusController.stream;
 
   void _setupAuthListener() {
     // Now explicitly listen to the aliased supabase.AuthState stream
@@ -78,11 +94,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       AuthInitialCheckRequested event, Emitter<AuthState> emit) async {
     final result = await _getCurrentUserUseCase(NoParams());
     result.fold(
-      (_) => emit(const AuthUnauthenticated()),
-      (user) => emit(user != null
-          ? AuthAuthenticated(user: user)
-          : const AuthUnauthenticated()),
-    );
+      (_) => emit(const AuthUnauthenticated()), (user) {
+      if (user != null) {
+        emit(AuthAuthenticated(user: user));
+        _authStatusController.add(AuthenticationStatus.authenticated);
+      } else {
+        emit(const AuthUnauthenticated());
+        _authStatusController.add(AuthenticationStatus.unauthenticated);
+      }
+    });
   }
 
   Future<void> _onSignIn(
@@ -110,14 +130,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (failure) {
         _authStateSubscription?.resume();
         emit(AuthUnauthenticated(message: failure.message));
-      },
-      (user) => emit(AuthSignUpSuccess(user: user)),
-    );
+      }, (user) {
+      emit(AuthSignUpSuccess(user: user));
+      _authStatusController.add(AuthenticationStatus.onboarding);
+    });
   }
 
   void _onOnboardingComplete(
       AuthOnboardingComplete event, Emitter<AuthState> emit) {
     emit(AuthAuthenticated(user: event.user));
+    _authStatusController.add(AuthenticationStatus.authenticated);
     _authStateSubscription?.resume();
   }
 
@@ -131,9 +153,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   void _onUserChanged(_AuthUserChanged event, Emitter<AuthState> emit) {
     if (state is AuthSignUpSuccess)
       return; // Don't interrupt the onboarding flow
-    emit(event.user != null
-        ? AuthAuthenticated(user: event.user!)
-        : const AuthUnauthenticated());
+    if (event.user != null) {
+      emit(AuthAuthenticated(user: event.user!));
+      _authStatusController.add(AuthenticationStatus.authenticated);
+    } else {
+      emit(const AuthUnauthenticated());
+      _authStatusController.add(AuthenticationStatus.unauthenticated);
+    }
   }
 
 /*  Future<void> _onAuthOnboardingComplete(AuthOnboardingComplete event,
@@ -175,7 +201,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   Future<void> _onAuthRefreshCurrentUser(
       AuthRefreshCurrentUser event, Emitter<AuthState> emit) async {
-    final result = await _getCurrentUserUseCase(NoParams());
+    final result = await _getUserProfileDataUseCase(
+        GetUserProfileParams(userId: event.currentUserId));
     result.fold(
       (_) => emit(const AuthUnauthenticated()),
       (user) => user != null
@@ -187,6 +214,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   @override
   Future<void> close() {
     _authStateSubscription?.cancel();
+    _authStatusController.close();
     return super.close();
   }
 }

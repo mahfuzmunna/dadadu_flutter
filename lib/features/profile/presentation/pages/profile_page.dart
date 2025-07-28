@@ -119,9 +119,6 @@ class _ProfileContentState extends State<_ProfileContent> {
         onPressed: () => context.push('/editProfile'),
       );
     } else {
-      // Follow/Unfollow and Message Buttons for other users
-
-      // In a real app, this would come from the user's data (e.g., a list of following IDs)
       final bool isFollowing =
           currentUser.followingIds.contains(profileUser.id);
 
@@ -131,11 +128,19 @@ class _ProfileContentState extends State<_ProfileContent> {
           // Follow/Unfollow Button
           BlocConsumer<FollowBloc, FollowState>(
             listener: (context, state) {
+              if (state is FollowSuccess) {
+                try {
+                  context
+                      .read<AuthBloc>()
+                      .add(AuthRefreshCurrentUser(currentUser.id));
+                } catch (e) {
+                  debugPrint('Error refreshing current user: $e');
+                }
+              }
               if (state is FollowError) {
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(state.message)));
               }
-              // Success is handled by the real-time update of the profile's follower count
             },
             builder: (context, state) {
               if (state is FollowLoading) {

@@ -240,45 +240,46 @@ class AppRouter {
       // --- GLOBAL REDIRECT LOGIC ---
       redirect: (BuildContext context, GoRouterState state) {
         final authState = authBloc.state;
-        final currentLocation = state.uri.toString();
+        final location = state.uri.toString();
 
-        // 1. Define public and onboarding routes
+        const splashLocation = '/';
+        const homeLocation = '/home';
+        const loginLocation = '/login';
+        const onboardingLocation = '/upload-profile-photo';
         const publicRoutes = ['/login', '/signUp', '/forgot-password'];
-        const onboardingRoute = '/upload-profile-photo';
 
-        final isOnPublicRoute = publicRoutes.contains(currentLocation);
-        final isOnOnboardingRoute = currentLocation == onboardingRoute;
-        final isOnSplash = currentLocation == '/';
+        final isAtSplash = location == splashLocation;
+        final isAtAuthRoute = publicRoutes.contains(location);
+        final isAtOnboarding = location == onboardingLocation;
 
-        // 2. Handle INITIALIZING state
+        // --- REDIRECTION RULES ---
+
+        // 1. If the state is initializing, stay on the splash screen.
         if (authState is AuthInitial || authState is AuthLoading) {
-          // While initializing, only allow the splash screen
-          return isOnSplash ? null : '/';
+          return isAtSplash ? null : splashLocation;
         }
 
-        // 3. Handle SIGN UP SUCCESS (Onboarding) state
+        // 2. If the user just signed up, force them to the onboarding page.
         if (authState is AuthSignUpSuccess) {
-          // If user is in onboarding, they can ONLY be on the onboarding route
-          return isOnOnboardingRoute ? null : onboardingRoute;
+          return isAtOnboarding ? null : onboardingLocation;
         }
 
-        // 4. Handle AUTHENTICATED state
+        // 3. If the user is authenticated...
         if (authState is AuthAuthenticated) {
-          // If logged in, they should NOT be on public auth routes, onboarding, or splash
-          if (isOnPublicRoute || isOnOnboardingRoute || isOnSplash) {
-            return '/home';
+          // ...and they are on a public page, send them home.
+          if (isAtAuthRoute || isAtOnboarding || isAtSplash) {
+            return homeLocation;
           }
         }
-
-        // 5. Handle UNAUTHENTICATED state
+        // 4. If the user is NOT authenticated...
         else {
-          // If logged out, they can ONLY be on public routes
-          if (!isOnPublicRoute) {
-            return '/login';
+          // ...and they are on a protected page, send them to login.
+          if (!isAtAuthRoute && !isAtSplash) {
+            return loginLocation;
           }
         }
 
-        // 6. No redirection needed
+        // 5. In all other cases, no redirection is needed.
         return null;
       },
 
@@ -289,27 +290,41 @@ class AppRouter {
 
       // Listens to AuthBloc's stream to trigger redirects whenever auth state changes.
       // This is crucial for reacting to login/logout events.
-      refreshListenable: GoRouterRefreshStream(authBloc.stream),
+      refreshListenable: GoRouterRefreshStream(authBloc.status),
     );
   }
 }
 
 /// A `Listenable` that notifies `GoRouter` when a `Stream` emits a new value.
 /// Used to trigger re-evaluation of the router's `redirect` logic.
-class GoRouterRefreshStream extends ChangeNotifier {
-  late final StreamSubscription<dynamic> _subscription;
+// class GoRouterRefreshStream extends ChangeNotifier {
+//   late final StreamSubscription<dynamic> _subscription;
+//
+//   GoRouterRefreshStream(Stream<dynamic> stream) {
+//     notifyListeners(); // Notify listeners immediately on creation
+//     _subscription = stream.asBroadcastStream().listen(
+//           (dynamic _) =>
+//               notifyListeners(), // Notify listeners whenever the stream emits
+//         );
+//   }
+//
+//   @override
+//   void dispose() {
+//     _subscription.cancel(); // Cancel the subscription to prevent memory leaks
+//     super.dispose();
+//   }
+// }
 
-  GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners(); // Notify listeners immediately on creation
-    _subscription = stream.asBroadcastStream().listen(
-          (dynamic _) =>
-              notifyListeners(), // Notify listeners whenever the stream emits
-        );
+class GoRouterRefreshStream extends ChangeNotifier {
+  late final StreamSubscription<AuthenticationStatus> _subscription;
+
+  GoRouterRefreshStream(Stream<AuthenticationStatus> stream) {
+    _subscription = stream.listen((_) => notifyListeners());
   }
 
   @override
   void dispose() {
-    _subscription.cancel(); // Cancel the subscription to prevent memory leaks
+    _subscription.cancel();
     super.dispose();
   }
 }

@@ -59,7 +59,9 @@ class HomePage extends StatelessWidget {
                   onPressed: isLoading
                       ? null
                       : () {
-                          context.read<AuthBloc>().add(AuthSignOutRequested());
+                          context
+                              .read<AuthBloc>()
+                              .add(const AuthSignOutRequested());
                         },
                   child: const Text('Sign Out'),
                 ),

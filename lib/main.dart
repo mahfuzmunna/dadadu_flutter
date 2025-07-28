@@ -19,7 +19,6 @@ import 'core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
   try {
     await initializeCameras();
     await Supabase.initialize(
@@ -29,26 +28,10 @@ void main() async {
       authOptions:
           const FlutterAuthClientOptions(authFlowType: AuthFlowType.pkce),
     );
-
     await di.init();
-
     runApp(const MyApp());
   } catch (e, stack) {
-    debugPrint('FATAL APP STARTUP ERROR: $e');
-    debugPrint('STACK TRACE: $stack');
-    runApp(
-      MaterialApp(
-        home: Scaffold(
-          body: Center(
-            child: Text(
-              'App failed to start.\nCheck console for details.\nError: ${e.toString()}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.red),
-            ),
-          ),
-        ),
-      ),
-    );
+    debugPrint('FATAL APP STARTUP ERROR: $e,$stack');
   }
 }
 
@@ -60,48 +43,50 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  // Stream subscription for deep links
+  late final AuthBloc _authBloc;
+  late final GoRouter _router;
+
   StreamSubscription? _sub;
 
   @override
   void initState() {
     super.initState();
+    _authBloc = di.sl<AuthBloc>()..add(const AuthInitialCheckRequested());
+    _router =
+        AppRouter.router(authBloc: _authBloc); // 👈 Static router instance
   }
+
   @override
   void dispose() {
     _sub?.cancel();
+    _authBloc.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 5. Provide the AuthBloc to the widget tree
-    // This allows other widgets (like SignInPage, ProfilePage, etc.) to access it.
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (context) => ThemeCubit()),
-        BlocProvider(
-          create: (context) =>
-              di.sl<AuthBloc>()..add(const AuthInitialCheckRequested()),
-        ),
-        BlocProvider(create: (context) => di.sl<FeedBloc>()),
-        BlocProvider(create: (context) => di.sl<ProfileBloc>()),
+        BlocProvider(create: (_) => ThemeCubit()),
+        BlocProvider<AuthBloc>.value(value: _authBloc),
+        BlocProvider(create: (_) => di.sl<FeedBloc>()),
+        BlocProvider(create: (_) => di.sl<ProfileBloc>()),
       ],
-      child: BlocBuilder<ThemeCubit, ThemeMode>(builder: (context, themeMode) {
-        final router = AppRouter.router(authBloc: context.watch<AuthBloc>());
-        return Provider<GoRouter>.value(
-          value: router,
-          child: MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            // Set to false for production
-            title: 'Dadadu',
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
-            themeMode: themeMode,
-            routerConfig: router, // Use the configured GoRouter instance
-          ),
-        );
-      }),
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return Provider<GoRouter>.value(
+            value: _router,
+            child: MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              title: 'Dadadu',
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              routerConfig: _router, // 🚀 Stable router
+            ),
+          );
+        },
+      ),
     );
   }
 }

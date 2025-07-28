@@ -22,7 +22,7 @@ Future<void> authInjection() async {
       signOutUseCase: sl(),
       resetPasswordUseCase: sl(),
       getCurrentUserUseCase: sl(),
-    ),
+        getUserProfileDataUseCase: sl()),
   );
 
   // Use cases
