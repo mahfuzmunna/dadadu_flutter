@@ -359,13 +359,17 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<List<UserModel>> findUsersByVibe(String vibe) async {
     try {
-      final List<Map<String, dynamic>> response = await _supabaseClient
+      final response = await _supabaseClient
           .from(AppConfig.supabaseUserTable)
           .select()
-          .eq('discover_mode', vibe); // Filter by the selected vibe
-      // Note: We don't filter by distance here to allow for broader searches if needed.
-      // Filtering is handled efficiently on the client-side in the repository.
-      return response.map((map) => UserModel.fromMap(map)).toList();
+          .eq('discover_mode', vibe);
+      final users = response.map((map) => UserModel.fromMap(map)).toList();
+
+      final withLocation = users
+          .where((user) => user.latitude != null && user.longitude != null)
+          .toList();
+
+      return withLocation;
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

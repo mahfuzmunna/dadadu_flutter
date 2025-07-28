@@ -204,7 +204,9 @@ class _NowPageViewState extends State<_NowPageView>
     if (state == AppLifecycleState.paused) {
       controller?.pause();
     } else if (state == AppLifecycleState.resumed) {
-      controller?.play();
+      if (_isPageActive) {
+        controller?.play();
+      }
     }
   }
 

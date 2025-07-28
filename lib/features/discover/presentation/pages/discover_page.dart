@@ -35,6 +35,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
   String _locationErrorMessage = "";
   Position? _currentPosition;
   bool _isLocationListenerActive = false;
+  double _selectedDistance = 1; // Default distance in km
 
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -190,21 +191,193 @@ class _DiscoverPageState extends State<DiscoverPage> {
   }
 
   Widget _buildVibeSelectionPage() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const PulsingRadarIcon(),
-          const SizedBox(height: 24),
-          const Text("What's your vibe today?", style: TextStyle(fontSize: 24)),
-          const SizedBox(height: 40),
-          _buildVibeButton("Love", Icons.favorite, Colors.pink),
-          const SizedBox(height: 20),
-          _buildVibeButton("Business", Icons.business_center, Colors.blue),
-          const SizedBox(height: 20),
-          _buildVibeButton("Entertainment", Icons.movie, Colors.purple),
+    return SingleChildScrollView(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const PulsingRadarIcon(),
+              const SizedBox(height: 24),
+              const Text("What's your vibe today?",
+                  style: TextStyle(fontSize: 24)),
+              const SizedBox(height: 40),
+              _buildVibeButton("Love", Icons.favorite, Colors.pink),
+              const SizedBox(height: 20),
+              _buildVibeButton("Business", Icons.business_center, Colors.blue),
+              const SizedBox(height: 20),
+              _buildVibeButton("Entertainment", Icons.movie, Colors.purple),
+
+              // NEW: Distance Selector UI
+              _buildDistanceSelector(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDistanceSelector() {
+    final theme = Theme.of(context);
+    return Column(
+      children: [
+        const SizedBox(
+          height: 18,
+        ),
+        Text(
+          'Search within',
+          style: theme.textTheme.titleMedium
+              ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _selectedDistance < 1
+              ? '${(_selectedDistance * 1000).round()} m'
+              : '${_selectedDistance.round()} km',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 16), // Increased spacing for a cleaner look
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Left Icon Button: Update Location
+              _buildSelectorButton(
+                icon: Icons.my_location,
+                tooltip: 'Update My Location',
+                onPressed: () {
+                  _showSnackBar('Updating your location...');
+                  _checkLocationPermissionAndService();
+                },
+              ),
+              // Center Slider
+              Expanded(
+                child: Slider(
+                  value: _selectedDistance,
+                  min: 0.1,
+                  // Start at 100m
+                  max: 1.0,
+                  // Max at 1km (locked limit)
+                  divisions: 9,
+                  // Creates 100m steps
+                  label: _selectedDistance < 1
+                      ? '${(_selectedDistance * 1000).round()} m'
+                      : '${_selectedDistance.round()} km',
+                  activeColor: theme.colorScheme.primary,
+                  inactiveColor: theme.colorScheme.surfaceContainerHighest,
+                  onChanged: (double value) {
+                    setState(() {
+                      _selectedDistance = value;
+                    });
+                  },
+                ),
+              ),
+              // Right Icon Button: Increase Limit
+              _buildSelectorButton(
+                icon: Icons.lock_open_outlined,
+                tooltip: 'Increase Distance Limit',
+                onPressed: () => _showIncreaseLimitDialog(),
+              ),
+            ],
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget _buildSelectorButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    required String tooltip,
+  }) {
+    final theme = Theme.of(context);
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: theme.shadowColor.withOpacity(0.1),
+            spreadRadius: 1,
+            blurRadius: 8,
+            offset: const Offset(0, 2), // changes position of shadow
+          ),
         ],
       ),
+      child: IconButton(
+        icon: Icon(icon),
+        color: theme.colorScheme.primary,
+        tooltip: tooltip,
+        onPressed: onPressed,
+      ),
+    );
+  }
+
+  // NEW: Method to show the "Increase Limit" dialog
+  void _showIncreaseLimitDialog() {
+    final authState = context.read<AuthBloc>().state;
+    int referralCount = 0;
+
+    // Safely get the referral count from the authenticated user
+    if (authState is AuthAuthenticated) {
+      // Assumption: Your UserEntity has a field like `referralCount`
+      referralCount = authState.user.referralsCount ?? 0;
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.people_alt_outlined),
+              SizedBox(width: 10),
+              Text('Unlock More Distance'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                  'Refer 10 new users to unlock the ability to search for people further away!'),
+              const SizedBox(height: 20),
+              Center(
+                child: Text.rich(
+                  TextSpan(
+                    style: Theme.of(context).textTheme.titleMedium,
+                    children: [
+                      const TextSpan(text: 'Your referrals: '),
+                      TextSpan(
+                        text: '$referralCount / 10',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Got It'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -225,6 +398,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
           context.push('/discover/users', extra: {
             'vibe': label,
             'position': _currentPosition!,
+            'distance': _selectedDistance,
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

@@ -7,14 +7,12 @@ abstract class DiscoverState extends Equatable {
 
 class DiscoverInitial extends DiscoverState {
   @override
-  // TODO: implement props
   List<Object?> get props => throw UnimplementedError();
 /*...*/
 }
 
 class DiscoverLoading extends DiscoverState {
   @override
-  // TODO: implement props
   List<Object?> get props => throw UnimplementedError();
 /*...*/
 }
@@ -25,7 +23,6 @@ class DiscoverUsersLoaded extends DiscoverState {
   DiscoverUsersLoaded(this.users);
 
   @override
-  // TODO: implement props
   List<Object?> get props => throw UnimplementedError();
 }
 
@@ -35,6 +32,5 @@ class DiscoverError extends DiscoverState {
   DiscoverError(this.message);
 
   @override
-  // TODO: implement props
   List<Object?> get props => throw UnimplementedError();
 }

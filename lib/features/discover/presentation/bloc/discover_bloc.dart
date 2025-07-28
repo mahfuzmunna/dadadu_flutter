@@ -24,6 +24,7 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
       vibe: event.vibe,
       currentLatitude: event.position.latitude,
       currentLongitude: event.position.longitude,
+      maxDistanceInKm: event.distance,
     ));
     result.fold(
       (failure) => emit(DiscoverError(failure.message)),

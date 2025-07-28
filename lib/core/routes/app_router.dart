@@ -83,8 +83,10 @@ class AppRouter {
             final args = state.extra as Map<String, dynamic>;
             final vibe = args['vibe'] as String;
             final position = args['position'] as Position;
+            final distance = args['distance'] as double;
 
-            return VibeUsersPage(vibe: vibe, currentPosition: position);
+            return VibeUsersPage(
+                vibe: vibe, currentPosition: position, maxDistance: distance);
           },
         ),
         GoRoute(
