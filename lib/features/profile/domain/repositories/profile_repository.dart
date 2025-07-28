@@ -19,6 +19,12 @@ abstract class ProfileRepository {
 
   Future<Either<Failure, UserEntity>> getUserProfile(String userId);
 
+  Future<Either<Failure, void>> followUser(
+      {required String followerId, required String followingId});
+
+  Future<Either<Failure, void>> unfollowUser(
+      {required String followerId, required String followingId});
+
   /// Updates the user's profile data, optionally including a new photo.
   Future<Either<Failure, void>> updateUserProfile({
     required UserEntity user,
@@ -87,6 +93,30 @@ class ProfileRepositoryImpl implements ProfileRepository {
     } catch (e) {
       return Left(
           ServerFailure('An unexpected error occurred: ${e.toString()}'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> followUser(
+      {required String followerId, required String followingId}) async {
+    try {
+      await remoteDataSource.followUser(
+          followerId: followerId, followingId: followingId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> unfollowUser(
+      {required String followerId, required String followingId}) async {
+    try {
+      await remoteDataSource.unfollowUser(
+          followerId: followerId, followingId: followingId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
     }
   }
 

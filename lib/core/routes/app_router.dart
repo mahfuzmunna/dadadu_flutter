@@ -16,6 +16,7 @@ import 'package:dadadu_app/features/chat/presentation/pages/chats_page.dart';
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
 import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
+import 'package:dadadu_app/features/posts/presentation/bloc/upload_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
@@ -101,9 +102,12 @@ class AppRouter {
             final args = state.extra as Map<String, dynamic>;
             final videoPath = args['videoPath'] as String;
             final draft = args['draft'] as PostDraft;
-            return CreatePostPage(
-              videoPath: videoPath,
-              initialDraft: draft,
+            return BlocProvider<UploadBloc>(
+              create: (context) => di.sl<UploadBloc>(),
+              child: CreatePostPage(
+                videoPath: videoPath,
+                initialDraft: draft,
+              ),
             );
           },
         ),

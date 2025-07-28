@@ -17,6 +17,12 @@ class AppConfig {
       'BUNNY_CDN_HOSTNAME',
       defaultValue: 'dadadu.b-cdn.net');
 
+  static const String supabaseUserTable =
+      String.fromEnvironment('SUPABASE_USER_TABLE', defaultValue: 'users_data');
+
+  static const String supabasePostTable =
+      String.fromEnvironment('SUPABASE_POST_TABLE', defaultValue: 'posts');
+
 // If using flutter_dotenv:
 // static final String wasabiAccessKey = dotenv.env['WASABI_ACCESS_KEY']!;
 // static final String wasabiSecretKey = dotenv.env['WASABI_SECRET_KEY']!;

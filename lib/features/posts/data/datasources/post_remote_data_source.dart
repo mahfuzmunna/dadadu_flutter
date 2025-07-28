@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:dadadu_app/config/app_config.dart';
 import 'package:dadadu_app/core/errors/exceptions.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:minio/minio.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
@@ -16,7 +18,7 @@ import '../../../upload/data/models/post_model.dart';
 abstract class PostRemoteDataSource {
   Future<void> uploadPost({
     required File videoFile,
-    required File thumbnailFile,
+    required Uint8List thumbnailBytes,
     required String caption,
     required String intent,
     required String userId,
@@ -50,19 +52,24 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   @override
   Future<void> uploadPost({
     required File videoFile,
-    required File thumbnailFile,
+    required Uint8List thumbnailBytes,
     required String caption,
     required String intent,
     required String userId,
     Function(double progress)? onUploadProgress,
   }) async {
+    File? thumbnailFile;
     try {
       final postId = uuid.v4();
       final videoExt = videoFile.path.split('.').last;
-      final thumbExt = thumbnailFile.path.split('.').last;
+
+      final tempDir = await getTemporaryDirectory();
+      // We'll assume JPEG for the thumbnail.
+      thumbnailFile = await File('${tempDir.path}/thumb_$postId.jpg')
+          .writeAsBytes(thumbnailBytes);
 
       final videoObjectKey = 'videos/$userId/$postId.$videoExt';
-      final thumbObjectKey = 'thumbnails/$userId/$postId.$thumbExt';
+      final thumbObjectKey = 'thumbnails/$userId/$postId.$thumbnailFile';
 
       // 1. Upload Video
       onUploadProgress?.call(0.1); // 10% progress
@@ -76,7 +83,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       onUploadProgress?.call(0.8); // 80% progress
 
       // 3. Insert into Supabase 'posts' table
-      await supabaseClient.from('posts').insert({
+      await supabaseClient.from(AppConfig.supabasePostTable).insert({
         'id': postId,
         'user_id': userId,
         'video_url': videoUrl,
@@ -86,6 +93,8 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         'created_at': DateTime.now().toIso8601String(),
       });
       onUploadProgress?.call(1.0); // 100% progress
+
+      await thumbnailFile.delete();
     } catch (e) {
       throw ServerException('Upload failed: ${e.toString()}');
     }
@@ -108,7 +117,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     try {
       // Use .stream() to listen to the entire 'posts' table, ordered by creation time.
       final stream = supabaseClient
-          .from('posts')
+          .from(AppConfig.supabasePostTable)
           .stream(primaryKey: ['id']).order('created_at', ascending: false);
 
       // Transform the raw data into a Stream of PostModels
@@ -124,7 +133,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   Stream<Tuple2<List<PostModel>, Map<String, UserModel>>> streamFeed() {
     try {
       final postStream = supabaseClient
-          .from('posts')
+          .from(AppConfig.supabasePostTable)
           .stream(primaryKey: ['id']).order('created_at', ascending: false);
 
       // Use asyncMap to process the posts and fetch their authors
@@ -141,7 +150,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
 
         // 2. Fetch all required author profiles in a single query
         final authorMaps = await supabaseClient
-            .from('profiles')
+            .from(AppConfig.supabaseUserTable)
             .select()
             .filter('id', 'in', '(${userIds.join(',')})');
         // .in_('id', userIds);
@@ -164,7 +173,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   Future<List<Map<String, dynamic>>> getPostComments(String postId) async {
     try {
       final response = await supabaseClient
-          .from('posts')
+          .from(AppConfig.supabasePostTable)
           .select('comments')
           .eq('id', postId)
           .single();
@@ -183,7 +192,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       List<String> userIds) async {
     try {
       final authorMaps = await supabaseClient
-          .from('profiles')
+          .from(AppConfig.supabaseUserTable)
           .select()
           .filter('id', 'in', '(${userIds.join(',')})');
 

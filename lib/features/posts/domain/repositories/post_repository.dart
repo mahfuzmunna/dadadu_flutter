@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dartz/dartz.dart';
@@ -13,7 +14,7 @@ import '../../data/datasources/post_remote_data_source.dart';
 abstract class PostRepository {
   Future<Either<Failure, void>> uploadPost({
     required File videoFile,
-    required File thumbnailFile,
+    required Uint8List thumbnailBytes,
     required String caption,
     required String intent,
     required String userId,
@@ -42,7 +43,7 @@ class PostRepositoryImpl implements PostRepository {
   @override
   Future<Either<Failure, void>> uploadPost({
     required File videoFile,
-    required File thumbnailFile,
+    required Uint8List thumbnailBytes,
     required String caption,
     required String intent,
     required String userId,
@@ -57,7 +58,7 @@ class PostRepositoryImpl implements PostRepository {
       // Call the method on the remote data source to perform the actual upload
       await remoteDataSource.uploadPost(
         videoFile: videoFile,
-        thumbnailFile: thumbnailFile,
+        thumbnailBytes: thumbnailBytes,
         caption: caption,
         intent: intent,
         userId: userId,

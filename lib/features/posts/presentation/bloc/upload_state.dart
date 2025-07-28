@@ -1,84 +1,34 @@
-// lib/features/posts/presentation/bloc/upload_state.dart
 part of 'upload_bloc.dart';
 
-/// Enum representing the different stages of the upload process.
-enum UploadStatus {
-  initial,
-  loadingThumbnail,
-  uploading,
-  success,
-  failure,
-}
-enum UploadViewMode { initial, camera, preview }
-
-class UploadState extends Equatable {
-  /// The current view mode.
-  final UploadViewMode viewMode;
-
-  /// The current status of the upload process.
-  final UploadStatus status;
-
-  /// The video file selected by the user.
-  final File? videoFile;
-
-  /// The thumbnail file generated from the video.
-  final File? thumbnailFile;
-
-  /// The caption entered by the user.
-  final String caption;
-
-  /// The intent selected by the user (e.g., 'love').
-  final String intent;
-
-  /// The upload progress from 0.0 to 1.0.
-  final double progress;
-
-  /// An error message if the status is `failure`.
-  final String error;
-
-  const UploadState({
-    this.viewMode = UploadViewMode.initial,
-    this.status = UploadStatus.initial,
-    this.videoFile,
-    this.thumbnailFile,
-    this.caption = '',
-    this.intent = 'entertainment', // Default intent
-    this.progress = 0.0,
-    this.error = '',
-  });
-
-  /// Creates a copy of the current state with updated values.
-  UploadState copyWith({
-    UploadViewMode? viewMode,
-    UploadStatus? status,
-    File? videoFile,
-    File? thumbnailFile,
-    String? caption,
-    String? intent,
-    double? progress,
-    String? error,
-  }) {
-    return UploadState(
-      viewMode: viewMode ?? this.viewMode,
-      status: status ?? this.status,
-      videoFile: videoFile ?? this.videoFile,
-      thumbnailFile: thumbnailFile ?? this.thumbnailFile,
-      caption: caption ?? this.caption,
-      intent: intent ?? this.intent,
-      progress: progress ?? this.progress,
-      error: error ?? this.error,
-    );
-  }
+abstract class UploadState extends Equatable {
+  const UploadState();
 
   @override
-  List<Object?> get props => [
-        viewMode,
-        status,
-        videoFile,
-        thumbnailFile,
-        caption,
-        intent,
-        progress,
-        error,
-      ];
+  List<Object> get props => [];
+}
+
+/// The initial state before any upload is attempted.
+class UploadInitial extends UploadState {}
+
+/// State indicating that the upload is currently in progress.
+class UploadInProgress extends UploadState {
+  final double progress;
+
+  const UploadInProgress(this.progress);
+
+  @override
+  List<Object> get props => [progress];
+}
+
+/// State emitted when the post has been successfully published.
+class UploadSuccess extends UploadState {}
+
+/// State emitted when an error occurs during the upload process.
+class UploadFailure extends UploadState {
+  final String message;
+
+  const UploadFailure(this.message);
+
+  @override
+  List<Object> get props => [message];
 }

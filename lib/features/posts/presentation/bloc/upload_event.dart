@@ -1,4 +1,3 @@
-// lib/features/posts/presentation/bloc/upload_event.dart
 part of 'upload_bloc.dart';
 
 abstract class UploadEvent extends Equatable {
@@ -8,50 +7,28 @@ abstract class UploadEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Dispatched when the user selects a video from the gallery or camera.
-class UploadVideoSelected extends UploadEvent {
+/// Dispatched from the UI to start the entire post upload process.
+class UploadPost extends UploadEvent {
   final File videoFile;
-
-  const UploadVideoSelected(this.videoFile);
-
-  @override
-  List<Object> get props => [videoFile];
-}
-
-/// Dispatched as the user types in the caption field.
-class UploadCaptionChanged extends UploadEvent {
+  final Uint8List thumbnailBytes;
   final String caption;
-
-  const UploadCaptionChanged(this.caption);
-
-  @override
-  List<Object> get props => [caption];
-}
-
-/// Dispatched when the user selects a new video intent (e.g., Love, Business).
-class UploadIntentChanged extends UploadEvent {
   final String intent;
-
-  const UploadIntentChanged(this.intent);
-
-  @override
-  List<Object> get props => [intent];
-}
-
-/// Dispatched when the user taps the final "Publish" button.
-class UploadSubmitted extends UploadEvent {
   final String userId;
 
-  const UploadSubmitted(this.userId);
+  const UploadPost({
+    required this.videoFile,
+    required this.thumbnailBytes,
+    required this.caption,
+    required this.intent,
+    required this.userId,
+  });
 
   @override
-  List<Object> get props => [userId];
+  List<Object?> get props =>
+      [videoFile, thumbnailBytes, caption, intent, userId];
 }
 
-/// Dispatched to clear the state and reset the upload page.
-class UploadReset extends UploadEvent {}
-
-/// Internal event used by the use case to report upload progress.
+/// Internal event used by the use case to report upload progress back to the BLoC.
 class _UploadProgressUpdated extends UploadEvent {
   final double progress;
 
@@ -60,7 +37,3 @@ class _UploadProgressUpdated extends UploadEvent {
   @override
   List<Object> get props => [progress];
 }
-
-class UploadShowCameraView extends UploadEvent {}
-
-class UploadShowInitialView extends UploadEvent {}

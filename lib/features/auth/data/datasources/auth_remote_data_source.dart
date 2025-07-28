@@ -1,5 +1,6 @@
 // lib/features/auth/data/datasources/auth_remote_data_source.dart
 
+import 'package:dadadu_app/config/app_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -78,12 +79,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'email': supabaseUser.email,
         'full_name': fullName,
         'username': username,
-        'created_at': DateTime.now().toIso8601String(),
-        'updated_at': DateTime.now().toIso8601String(),
       };
 
       final List<Map<String, dynamic>> response = await supabaseClient
-          .from('profiles') // Replace with your actual profiles table name
+          .from(AppConfig
+              .supabaseUserTable) // Replace with your actual profiles table name
           .insert(userProfileData)
           .select(); // Use .select() to get the inserted data back
 
@@ -131,7 +131,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       // Fetch user profile from your 'profiles' table after successful auth sign-in
       final profileData = await supabaseClient
-          .from('profiles')
+          .from(AppConfig.supabaseUserTable)
           .select()
           .eq('id', response.user!.id)
           .single();
@@ -194,7 +194,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Fetch user profile from your 'profiles' table
       final profileData = await supabaseClient
-          .from('profiles')
+          .from(AppConfig.supabaseUserTable)
           .select()
           .eq('id', currentUser.id)
           .single();
@@ -229,7 +229,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           // Attempt to fetch full profile data
           try {
             final List<Map<String, dynamic>> profileData = await supabaseClient
-                .from('profiles')
+                .from(AppConfig.supabaseUserTable)
                 .select()
                 .eq('id', currentUser.id)
                 .limit(1);
@@ -250,9 +250,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 followersCount: 0,
                 followingCount: 0,
                 postCount: 0,
-                createdAt: DateTime.now().toIso8601String(),
-                updatedAt: DateTime.now().toIso8601String(),
-                rank: 'Leaf',
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                  rank: 'Leaf',
                 referralLink: '',
                 moodStatus: '',
                 language: '',
@@ -261,7 +261,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                   latitude: '0.0',
                   longitude: '0.0',
                   location: '',
-                  diamonds: 0);
+                  diamonds: 0,
+                  referralsCount: 0);
             }
           } catch (e) {
             debugPrint('Error fetching user profile in AuthStateChange: $e');
@@ -278,9 +279,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
               followersCount: 0,
               followingCount: 0,
               postCount: 0,
-              createdAt: DateTime.now().toIso8601String(),
-              updatedAt: DateTime.now().toIso8601String(),
-              rank: 'Leaf',
+                createdAt: DateTime.now(),
+                updatedAt: DateTime.now(),
+                rank: 'Leaf',
               referralLink: '',
               moodStatus: '',
               language: '',
@@ -289,7 +290,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
                 latitude: '0.0',
                 longitude: '0.0',
                 location: '',
-                diamonds: 0);
+                diamonds: 0,
+                referralsCount: 0);
           }
         }
       }

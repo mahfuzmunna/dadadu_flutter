@@ -16,6 +16,10 @@ abstract class ChatRepository {
       {required String roomId,
       required String content,
       required String senderId});
+
+  Future<Either<Failure, String>> createChatRoom({
+    required List<String> participantIds,
+  });
 }
 
 class ChatRepositoryImpl implements ChatRepository {
@@ -68,6 +72,23 @@ class ChatRepositoryImpl implements ChatRepository {
       final roomsStream = remoteDataSource.streamChatRooms();
       return Right(roomsStream);
     } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, String>> createChatRoom({
+    required List<String> participantIds,
+  }) async {
+    try {
+      // Call the data source method.
+      final roomId =
+          await remoteDataSource.createChatRoom(participantIds: participantIds);
+
+      // On success, return the room ID wrapped in a Right.
+      return Right(roomId);
+    } on ServerException catch (e) {
+      // If the data source throws a ServerException, convert it to a ServerFailure.
       return Left(ServerFailure(e.message, code: e.code));
     }
   }

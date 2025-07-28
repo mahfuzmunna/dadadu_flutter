@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/profile/presentation/bloc/follow_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/shared/widgets/emoji_icon.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +13,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../injection_container.dart' as di;
+import '../../../chat/domain/usecases/create_chat_room_usecase.dart';
 import '../../../now/presentation/bloc/feed_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart'; // For sharing content
 
@@ -35,7 +37,8 @@ class ProfilePage extends StatelessWidget {
             create: (context) => di.sl<FeedBloc>()..add(SubscribeToFeed())),
         BlocProvider(
             create: (context) =>
-                di.sl<ProfileBloc>()..add(SubscribeToUserProfile(userId)))
+                di.sl<ProfileBloc>()..add(SubscribeToUserProfile(userId))),
+        BlocProvider(create: (context) => di.sl<FollowBloc>()),
       ],
       child: const _ProfileView(),
     );
@@ -100,6 +103,92 @@ class _ProfileContentState extends State<_ProfileContent> {
   List<PostEntity> _usersPosts = [];
 
   Map<String, UserEntity> _authors = {};
+
+  Widget _buildDynamicActionButton(
+      BuildContext context, bool isMyProfile, UserEntity profileUser) {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) return const SizedBox.shrink();
+    final currentUser = authState.user;
+
+    if (isMyProfile) {
+      // Edit Profile Button
+      return FilledButton.icon(
+        icon: const Icon(Icons.edit_rounded),
+        label: const Text('Edit Profile'),
+        onPressed: () => context.push('/editProfile'),
+      );
+    } else {
+      // Follow/Unfollow and Message Buttons for other users
+
+      // In a real app, this would come from the user's data (e.g., a list of following IDs)
+      final bool isFollowing =
+          currentUser.followingIds.contains(profileUser.id);
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // Follow/Unfollow Button
+          BlocConsumer<FollowBloc, FollowState>(
+            listener: (context, state) {
+              if (state is FollowError) {
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(state.message)));
+              }
+              // Success is handled by the real-time update of the profile's follower count
+            },
+            builder: (context, state) {
+              if (state is FollowLoading) {
+                return const FilledButton(
+                    onPressed: null,
+                    child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2)));
+              }
+              return FilledButton.icon(
+                icon: Icon(isFollowing
+                    ? Icons.person_remove_rounded
+                    : Icons.person_add_rounded),
+                label: Text(isFollowing ? 'Unfollow' : 'Follow'),
+                onPressed: () {
+                  final event = isFollowing
+                      ? UnfollowUser(
+                          currentUserId: currentUser.id,
+                          profileUserId: profileUser.id)
+                      : FollowUser(
+                          currentUserId: currentUser.id,
+                          profileUserId: profileUser.id);
+                  context.read<FollowBloc>().add(event);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: isFollowing
+                      ? Colors.grey.shade600
+                      : Theme.of(context).colorScheme.primary,
+                ),
+              );
+            },
+          ),
+          const SizedBox(width: 16),
+
+          // Message Button
+          IconButton.filledTonal(
+            icon: const Icon(Icons.message_rounded),
+            onPressed: () async {
+              // Create or get the chat room and navigate
+              final createChatRoomUseCase = di.sl<CreateChatRoomUseCase>();
+              final result =
+                  await createChatRoomUseCase([currentUser.id, profileUser.id]);
+              result.fold(
+                (failure) => ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(failure.message))),
+                (roomId) => context.push('/chat/$roomId'),
+              );
+            },
+          ),
+        ],
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -312,55 +401,59 @@ class _ProfileContentState extends State<_ProfileContent> {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             ),
         const SizedBox(height: 16),
-        _buildDynamicActionButton(isMyProfile),
+        _buildDynamicActionButton(
+          context,
+          isMyProfile,
+          widget.user,
+        ),
       ],
     );
   }
 
-  Widget _buildDynamicActionButton(bool isMyProfile) {
-    if (isMyProfile) {
-      return SizedBox(
-        width: 200,
-        child: FilledButton.icon(
-          icon: const Icon(Icons.edit_rounded),
-          label: const Text('Edit Profile'),
-          onPressed: () => context.push('/editProfile'),
-          style: FilledButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-          ),
-        ),
-      );
-    } else {
-      bool isFollowing = false; // Placeholder
-      return SizedBox(
-        width: 200,
-        child: FilledButton.icon(
-          icon: Icon(isFollowing
-              ? Icons.person_remove_rounded
-              : Icons.person_add_rounded),
-          label: Text(isFollowing ? 'Unfollow' : 'Follow'),
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(
-                      '${isFollowing ? 'Unfollowing' : 'Following'} ${widget.user.username}')),
-            );
-          },
-          style: FilledButton.styleFrom(
-            backgroundColor: isFollowing
-                ? Colors.grey
-                : Theme.of(context).colorScheme.primary,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-          ),
-        ),
-      );
-    }
-  }
+  // Widget _buildDynamicActionButton(bool isMyProfile) {
+  //   if (isMyProfile) {
+  //     return SizedBox(
+  //       width: 200,
+  //       child: FilledButton.icon(
+  //         icon: const Icon(Icons.edit_rounded),
+  //         label: const Text('Edit Profile'),
+  //         onPressed: () => context.push('/editProfile'),
+  //         style: FilledButton.styleFrom(
+  //           padding: const EdgeInsets.symmetric(vertical: 12),
+  //           shape: RoundedRectangleBorder(
+  //             borderRadius: BorderRadius.circular(24),
+  //           ),
+  //         ),
+  //       ),
+  //     );
+  //   } else {
+  //     bool isFollowing = false; // Placeholder
+  //     return SizedBox(
+  //       width: 200,
+  //       child: FilledButton.icon(
+  //         icon: Icon(isFollowing
+  //             ? Icons.person_remove_rounded
+  //             : Icons.person_add_rounded),
+  //         label: Text(isFollowing ? 'Unfollow' : 'Follow'),
+  //         onPressed: () {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             SnackBar(
+  //                 content: Text(
+  //                     '${isFollowing ? 'Unfollowing' : 'Following'} ${widget.user.username}')),
+  //           );
+  //         },
+  //         style: FilledButton.styleFrom(
+  //           backgroundColor: isFollowing
+  //               ? Colors.grey
+  //               : Theme.of(context).colorScheme.primary,
+  //           padding: const EdgeInsets.symmetric(vertical: 12),
+  //           shape:
+  //               RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
 
   Widget _buildMoodAndBadgesSection() {
     return Row(

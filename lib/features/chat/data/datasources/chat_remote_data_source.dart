@@ -14,6 +14,8 @@ abstract class ChatRemoteDataSource {
       {required String roomId,
       required String content,
       required String senderId});
+
+  Future<String> createChatRoom({required List<String> participantIds});
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -122,6 +124,24 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return stream.asyncExpand((futureList) => Stream.fromFuture(futureList));
     } catch (e) {
       throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<String> createChatRoom({required List<String> participantIds}) async {
+    try {
+      // Call the database function we just created.
+      final roomId = await supabaseClient.rpc(
+        'create_or_get_chat_room',
+        params: {'participant_ids_input': participantIds},
+      );
+
+      // The RPC returns the room ID as a string.
+      return roomId as String;
+    } catch (e) {
+      // Handle potential errors from the RPC call.
+      throw ServerException(
+          'Failed to create or get chat room: ${e.toString()}');
     }
   }
 }

@@ -3,6 +3,7 @@
 import 'package:dadadu_app/features/location/data/datasources/location_remote_data_source.dart';
 import 'package:dadadu_app/features/location/domain/repositories/location_repository.dart';
 import 'package:dadadu_app/features/location/domain/usecases/get_location_name_usecase.dart';
+import 'package:dadadu_app/features/profile/presentation/bloc/follow_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:http/http.dart' as http;
 
@@ -13,6 +14,7 @@ import 'data/datasources/profile_remote_data_source.dart';
 // Profile Feature Domain Layer
 import 'domain/repositories/profile_repository.dart';
 import 'domain/usecases/delete_profile_image_usecase.dart';
+import 'domain/usecases/follow_unfollow_user_usecase.dart';
 import 'domain/usecases/get_posts_usecase.dart';
 import 'domain/usecases/get_user_profile_data_usecase.dart';
 import 'domain/usecases/stream_user_profile_usecase.dart';
@@ -39,6 +41,8 @@ Future<void> profileInjection() async {
         updateUserMoodUseCase: sl(),
         streamUserProfileUseCase: sl(),
       ));
+  sl.registerFactory(
+      () => FollowBloc(followUserUseCase: sl(), unfollowUserUseCase: sl()));
 
   // Profile Feature - Domain Layer (Use Cases)
   sl.registerLazySingleton(() => GetUserProfileDataUseCase(sl()));
@@ -50,6 +54,8 @@ Future<void> profileInjection() async {
   sl.registerLazySingleton(() => UpdateUserLocationUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUserMoodUseCase(sl()));
   sl.registerLazySingleton(() => StreamUserProfileUseCase(sl()));
+  sl.registerLazySingleton(() => FollowUserUseCase(sl()));
+  sl.registerLazySingleton(() => UnfollowUserUseCase(sl()));
 
   sl.registerLazySingleton<LocationRepository>(
       () => LocationRepositoryImpl(remoteDataSource: sl()));

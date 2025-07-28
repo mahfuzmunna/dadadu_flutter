@@ -5,9 +5,13 @@ import 'dart:typed_data';
 
 import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
+
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../bloc/upload_bloc.dart';
 
 class CreatePostPage extends StatefulWidget {
   final String videoPath;
@@ -118,67 +122,105 @@ class _CreatePostPageState extends State<CreatePostPage> {
       return;
     }
 
-    debugPrint('--- Publishing Post ---');
-    debugPrint('Video Path: ${widget.videoPath}');
-    debugPrint('Caption: ${_captionController.text.trim()}');
-    debugPrint('Intent: $_selectedIntent');
-    debugPrint('Thumbnail selected: Yes');
-
-    context.go('/home');
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      // ✅ Dispatch the event to the UploadBloc
+      context.read<UploadBloc>().add(UploadPost(
+            videoFile: File(widget.videoPath),
+            thumbnailBytes: _selectedThumbnail!,
+            caption: _captionController.text.trim(),
+            intent: _selectedIntent,
+            userId: authState.user.id,
+          ));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('New Post'),
-        centerTitle: true,
-        // The publish button is now at the bottom of the page
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- Top Section: Thumbnail Preview & Caption ---
-            Row(
+    return BlocConsumer<UploadBloc, UploadState>(listener: (context, state) {
+      // ✅ This listener handles the navigation after the upload is complete.
+      if (state is UploadSuccess) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Post published successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+        context.go('/home'); // Navigate to the home feed
+      } else if (state is UploadFailure) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Upload failed: ${state.message}'),
+            backgroundColor: theme.colorScheme.error,
+          ),
+        );
+      }
+    }, builder: (context, state) {
+      final isLoading = state is UploadInProgress;
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('New Post'),
+          centerTitle: true,
+          // The publish button is now at the bottom of the page
+        ),
+        body: AbsorbPointer(
+          absorbing: isLoading,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildThumbnailPreview(),
-                const SizedBox(width: 16),
-                Expanded(child: _buildCaptionField()),
-              ],
-            ),
-            const SizedBox(height: 24),
+                // --- Top Section: Thumbnail Preview & Caption ---
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildThumbnailPreview(),
+                    const SizedBox(width: 16),
+                    Expanded(child: _buildCaptionField()),
+                  ],
+                ),
+                const SizedBox(height: 24),
 
-            // --- Thumbnail Selector ---
-            Text('Choose a cover', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            _buildThumbnailSelector(),
-            const SizedBox(height: 24),
+                // --- Thumbnail Selector ---
+                    Text('Choose a cover', style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 12),
+                    _buildThumbnailSelector(),
+                    const SizedBox(height: 24),
 
-            // --- Intent/Category Selector ---
-            Text('Select an Intent', style: theme.textTheme.titleMedium),
-            const SizedBox(height: 12),
-            _buildIntentSelector(),
-            const SizedBox(height: 48), // Extra space before button
+                // --- Intent/Category Selector ---
+                Text('Select an Intent', style: theme.textTheme.titleMedium),
+                const SizedBox(height: 12),
+                _buildIntentSelector(),
+                const SizedBox(height: 48), // Extra space before button
 
-            // --- Publish Button ---
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                icon: const Icon(Icons.publish_rounded),
-                label: const Text('Publish'),
-                onPressed: _publishPost,
-                style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16)),
+                // --- Publish Button ---
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        icon: isLoading
+                            ? const SizedBox.shrink()
+                            : const Icon(Icons.publish_rounded),
+                        label: Text(isLoading
+                            ? 'Publishing... ${(state.progress * 100)
+                            .toStringAsFixed(0)}%'
+                            : 'Publish'),
+                        onPressed: isLoading ? null : _publishPost,
+                        style: FilledButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 16)),
+                      ),
+                    ),
+                    if(isLoading) ...[
+                      const SizedBox(height: 16),
+                      LinearProgressIndicator(value: state.progress,),
+                    ]
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
-      ),
+          );
+        }
     );
   }
 

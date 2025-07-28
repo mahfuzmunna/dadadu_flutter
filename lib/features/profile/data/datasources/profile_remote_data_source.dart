@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dadadu_app/config/app_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:minio/minio.dart';
@@ -19,6 +20,12 @@ import '../../domain/usecases/update_user_mood_usecase.dart';
 abstract class ProfileRemoteDataSource {
   Stream<UserModel> streamUserProfile(String userId);
   Future<UserModel> getUserProfile(String userId);
+
+  Future<void> followUser(
+      {required String followerId, required String followingId});
+
+  Future<void> unfollowUser(
+      {required String followerId, required String followingId});
 
   Future<void> updateUserProfile({required UserEntity user, File? photoFile});
   Future<List<PostModel>> getUserPosts(String userId);
@@ -71,7 +78,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<UserModel> getUserProfile(String userId) async {
     try {
       final response = await _supabaseClient
-          .from('profiles') // Your users table
+          .from(AppConfig.supabaseUserTable) // Your users table
           .select()
           .eq('id', userId)
           .single();
@@ -83,6 +90,41 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     } catch (e) {
       throw ServerException('An unexpected error occurred: ${e.toString()}',
           code: 'UNKNOWN_ERROR');
+    }
+  }
+
+  @override
+  Future<void> followUser(
+      {required String followerId, required String followingId}) async {
+    try {
+      // Inserts a new row into the 'followers' table.
+      // The database triggers you created will automatically update the counts.
+      await _supabaseClient.from('followers').insert({
+        'follower_id': followerId,
+        'following_id': followingId,
+      });
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> unfollowUser(
+      {required String followerId, required String followingId}) async {
+    try {
+      // Deletes a row from the 'followers' table based on the composite primary key.
+      // The database triggers will automatically update the counts.
+      await _supabaseClient
+          .from('followers')
+          .delete()
+          .eq('follower_id', followerId)
+          .eq('following_id', followingId);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
     }
   }
 
@@ -125,7 +167,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
       // Step 3: Update the 'profiles' table in Supabase
       await _supabaseClient
-          .from('profiles')
+          .from(AppConfig.supabaseUserTable)
           .update(updateData)
           .eq('id', user.id);
     } on PostgrestException catch (e) {
@@ -140,7 +182,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<List<PostModel>> getUserPosts(String userId) async {
     try {
       final List<Map<String, dynamic>> response = await _supabaseClient
-          .from('posts') // Your posts table
+          .from(AppConfig.supabasePostTable) // Your posts table
           .select()
           .eq('user_id', userId)
           .order('timestamp', ascending: false);
@@ -160,13 +202,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       // 1. Get the current user's profile to retrieve the image URL from Supabase DB
       final response = await _supabaseClient
-          .from('users')
+          .from(AppConfig.supabaseUserTable)
           .select('profile_photo_url')
           .eq('id', userId)
           .single();
 
-      if (response == null ||
-          response['profile_photo_url'] == null ||
+      if (response['profile_photo_url'] == null ||
           response['profile_photo_url'].isEmpty) {
         return; // No image to delete or URL not found
       }
@@ -184,7 +225,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       await _minioClient.removeObject(_wasabiBucketName, objectKey);
 
       // 4. Update user profile in Supabase database to remove image URL
-      await _supabaseClient.from('users').update({
+      await _supabaseClient.from(AppConfig.supabaseUserTable).update({
         'profile_photo_url': null,
         // Set to NULL or an empty string as per your DB schema
         'updated_at': DateTime.now().toIso8601String(),
@@ -221,7 +262,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       };
 
       await _supabaseClient
-          .from('profiles')
+          .from(AppConfig.supabaseUserTable)
           .update(updateData)
           .eq('id', params.userId); // Target the specific user
     } on PostgrestException catch (e) {
@@ -258,7 +299,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final String cdnImageUrl = 'https://$_bunnyCdnHostname/$objectKey';
 
       // 3. Update the 'profiles' table in Supabase
-      await _supabaseClient.from('profiles').update({
+      await _supabaseClient.from(AppConfig.supabaseUserTable).update({
         'profile_photo_url': cdnImageUrl,
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', userId);
@@ -278,7 +319,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<void> updateUserMood(UpdateUserMoodParams params) async {
     try {
-      await _supabaseClient.from('profiles').update({
+      await _supabaseClient.from(AppConfig.supabaseUserTable).update({
         'mood_status': params.moodStatus,
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', params.userId);
@@ -294,7 +335,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       // Listen to changes on the 'profiles' table for a specific user ID
       final stream = _supabaseClient
-          .from('profiles')
+          .from(AppConfig.supabaseUserTable)
           .stream(primaryKey: ['id']).eq('id', userId);
 
       // The stream returns a List<Map<String, dynamic>>. We need to transform it.
@@ -316,7 +357,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   Future<List<UserModel>> findUsersByVibe(String vibe) async {
     try {
       final List<Map<String, dynamic>> response = await _supabaseClient
-          .from('profiles')
+          .from(AppConfig.supabaseUserTable)
           .select()
           .eq('discover_mode', vibe); // Filter by the selected vibe
       // Note: We don't filter by distance here to allow for broader searches if needed.
