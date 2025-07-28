@@ -25,12 +25,10 @@ import 'package:dadadu_app/features/settings/presentation/pages/settings_page.da
 // import 'package:dadadu_app/features/upload/presentation/pages/create_post_camera_page.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/sign_up_page.dart';
 import '../../features/chat/presentation/pages/chat_page.dart';
-import '../../features/discover/presentation/pages/vibe_users_page.dart';
 import '../../features/now/now_injection.dart' as di;
 import '../../features/posts/presentation/pages/create_post_camera_page.dart';
 import '../../features/posts/presentation/pages/create_post_page.dart';
@@ -76,19 +74,28 @@ class AppRouter {
             path: '/upload-profile-photo',
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const UploadProfilePhotoPage()),
-        GoRoute(
-          path: '/discover/users', // The path for the new page
-          builder: (context, state) {
-            // We pass the vibe and position as a map in the 'extra' parameter
-            final args = state.extra as Map<String, dynamic>;
-            final vibe = args['vibe'] as String;
-            final position = args['position'] as Position;
-            final distance = args['distance'] as double;
-
-            return VibeUsersPage(
-                vibe: vibe, currentPosition: position, maxDistance: distance);
-          },
-        ),
+        // GoRoute(
+        //   path: '/discover/users', // The path for the new page
+        //   builder: (context, state) {
+        //     // We pass the vibe and position as a map in the 'extra' parameter
+        //     final args = state.extra as Map<String, dynamic>;
+        //     final vibe = args['vibe'] as String;
+        //     final position = args['position'] as Position;
+        //     final distance = args['distance'] as double;
+        //
+        //     return VibeUsersPage(
+        //         vibe: vibe, currentPosition: position, maxDistance: distance);
+        //   },
+        //   routes: [
+        //     GoRoute(
+        //       path: ':userId',
+        //       builder: (BuildContext context, GoRouterState state) {
+        //         final String postId = state.pathParameters['userId']!;
+        //         return UsersVideoPage(postId: postId);
+        //       },
+        //     ),
+        //   ]
+        // ),
         GoRoute(
             path: '/settings',
             parentNavigatorKey: _rootNavigatorKey,
@@ -227,7 +234,8 @@ class AppRouter {
                             ..add(SubscribeToUserProfile(userId)),
                           // The ProfilePage now takes NO arguments for this route.
                           // It will get all its data from the ProfileBloc.
-                          child: ProfilePage(userId: userId),
+                          child: ProfilePage(
+                              key: ValueKey(userId), userId: userId),
                         );
                       },
                     ),

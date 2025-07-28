@@ -89,6 +89,16 @@ class UpdateUserMood extends ProfileEvent {
   List<Object> get props => [userId, mood];
 }
 
+class UpdateDiscoverMode extends ProfileEvent {
+  final String userId;
+  final String discoverMode;
+
+  const UpdateDiscoverMode({required this.userId, required this.discoverMode});
+
+  @override
+  List<Object> get props => [userId, discoverMode];
+}
+
 class SubscribeToUserProfile extends ProfileEvent {
   final String userId;
 

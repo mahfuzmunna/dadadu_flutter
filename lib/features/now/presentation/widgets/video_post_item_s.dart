@@ -298,98 +298,102 @@ class _VideoPostItemState extends State<VideoPostItem> {
 
     final authState = context.watch<AuthBloc>().state;
 
-    return BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
-      if (state is ProfileLoaded && state.user != null) {
-        author = state.user;
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // --- Author Info ---
-            GestureDetector(
-              onTap: () {
-                (author != null) ? widget.onUserTapped(author!.id) : null;
-              },
-              child: Row(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 2),
-                    ),
-                    child: CircleAvatar(
-                      radius: 22,
-                      backgroundImage: author?.profilePhotoUrl != null &&
-                              author!.profilePhotoUrl!.isNotEmpty
-                          ? CachedNetworkImageProvider(author!.profilePhotoUrl!)
-                          : null,
-                      child: (author?.profilePhotoUrl == null ||
-                              author!.profilePhotoUrl!.isEmpty)
-                          ? const Icon(Icons.person, size: 22)
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    author?.username ?? 'loading...',
-                    style: textTheme.titleMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      shadows: [shadow],
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  // Follow Chip
-                  if (author != null && authState is AuthAuthenticated)
-                    _buildFollowButton(context, authState.user, author!),
-                  // if (author != null) // Only show if author is loaded
-                  //   const Chip(
-                  //     label: Text('Follow'),
-                  //     labelStyle:
-                  //         TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                  //     padding: EdgeInsets.zero,
-                  //     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  //     visualDensity:
-                  //         VisualDensity(horizontal: 0.0, vertical: -4),
-                  //   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // --- Caption ---
-            Text(
-              post.caption,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.bodyMedium?.copyWith(
-                color: Colors.white,
-                shadows: [shadow],
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            // --- Sound/Music Info ---
-            Row(
+    return BlocProvider<FollowBloc>(
+        create: (context) => sl<FollowBloc>(),
+        child:
+            BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
+          if (state is ProfileLoaded && state.user != null) {
+            author = state.user;
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(Icons.music_note, color: Colors.white, size: 16),
-                const SizedBox(width: 8),
-                Text(
-                  'Original Sound - ${author?.username ?? '...'}',
-                  style: textTheme.bodySmall?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    shadows: [shadow],
+                // --- Author Info ---
+                GestureDetector(
+                  onTap: () {
+                    (author != null) ? widget.onUserTapped(author!.id) : null;
+                  },
+                  child: Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 22,
+                          backgroundImage: author?.profilePhotoUrl != null &&
+                                  author!.profilePhotoUrl!.isNotEmpty
+                              ? CachedNetworkImageProvider(
+                                  author!.profilePhotoUrl!)
+                              : null,
+                          child: (author?.profilePhotoUrl == null ||
+                                  author!.profilePhotoUrl!.isEmpty)
+                              ? const Icon(Icons.person, size: 22)
+                              : null,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        author?.username ?? 'loading...',
+                        style: textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          shadows: [shadow],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Follow Chip
+                      if (author != null && authState is AuthAuthenticated)
+                        _buildFollowButton(context, authState.user, author!),
+                      // if (author != null) // Only show if author is loaded
+                      //   const Chip(
+                      //     label: Text('Follow'),
+                      //     labelStyle:
+                      //         TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                      //     padding: EdgeInsets.zero,
+                      //     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      //     visualDensity:
+                      //         VisualDensity(horizontal: 0.0, vertical: -4),
+                      //   ),
+                    ],
                   ),
                 ),
+                const SizedBox(height: 12),
+
+                // --- Caption ---
+                    Text(
+                      post.caption,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: Colors.white,
+                        shadows: [shadow],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                // --- Sound/Music Info ---
+                Row(
+                  children: [
+                    const Icon(Icons.music_note, color: Colors.white, size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Original Sound - ${author?.username ?? '...'}',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        shadows: [shadow],
+                      ),
+                    ),
+                  ],
+                ),
               ],
-            ),
-          ],
-        );
-      } else {
-        return Container();
-      }
-    });
+            );
+          } else {
+            return Container();
+          }
+        }));
   }
 
   Widget _buildFollowButton(

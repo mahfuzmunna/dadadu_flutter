@@ -24,3 +24,26 @@ class UpdateUserMoodParams extends Equatable {
   @override
   List<Object> get props => [userId, moodStatus];
 }
+
+class UpdateDiscoverModeUseCase
+    implements UseCase<void, UpdateDiscoverModeParams> {
+  final ProfileRepository repository;
+
+  UpdateDiscoverModeUseCase(this.repository);
+
+  @override
+  Future<Either<Failure, void>> call(UpdateDiscoverModeParams params) async {
+    return await repository.updateDiscoverMode(params);
+  }
+}
+
+class UpdateDiscoverModeParams extends Equatable {
+  final String userId;
+  final String discoverMode;
+
+  const UpdateDiscoverModeParams(
+      {required this.userId, required this.discoverMode});
+
+  @override
+  List<Object> get props => [userId, discoverMode];
+}

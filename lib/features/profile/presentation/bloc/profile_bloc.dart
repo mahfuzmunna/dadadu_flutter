@@ -34,6 +34,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final DeleteProfileImageUseCase deleteProfileImageUseCase;
   final UpdateUserLocationUseCase _updateUserLocationUseCase;
   final UpdateUserMoodUseCase _updateUserMoodUseCase;
+  final UpdateDiscoverModeUseCase _updateDiscoverModeUseCase;
 
   StreamSubscription<UserEntity>? _profileSubscription;
 
@@ -47,11 +48,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     required this.deleteProfileImageUseCase,
     required UpdateUserLocationUseCase updateUserLocationUseCase,
     required UpdateUserMoodUseCase updateUserMoodUseCase,
+    required UpdateDiscoverModeUseCase updateDiscoverModeUseCase,
   })  : _streamUserProfileUseCase = streamUserProfileUseCase,
         _updateProfilePhotoUseCase = updateProfilePhotoUseCase,
         _updateUserLocationUseCase = updateUserLocationUseCase,
         _updateUserProfileUseCase = updateUserProfileUseCase,
         _updateUserMoodUseCase = updateUserMoodUseCase,
+        _updateDiscoverModeUseCase = updateDiscoverModeUseCase,
         super(const ProfileInitial()) {
     on<SubscribeToUserProfile>(_onSubscribeToUserProfile);
     on<_UserProfileUpdated>(_onUserProfileUpdated);
@@ -62,6 +65,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     on<DeleteProfileImage>(_onDeleteProfileImage);
     on<UpdateUserLocation>(_onUpdateUserLocation);
     on<UpdateUserMood>(_onUpdateUserMood);
+    on<UpdateDiscoverMode>(_onUpdateDiscoverMode);
   }
 
   Future<void> _onLoadUserProfile(
@@ -230,6 +234,24 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   void _onUserProfileUpdated(
       _UserProfileUpdated event, Emitter<ProfileState> emit) {
     emit(ProfileLoaded(user: event.user));
+  }
+
+  Future<void> _onUpdateDiscoverMode(
+    UpdateDiscoverMode event,
+    Emitter<ProfileState> emit,
+  ) async {
+    // We don't need a loading state here as it's a quick background update.
+    // The UI will update automatically via the real-time stream.
+    final result = await _updateDiscoverModeUseCase(UpdateDiscoverModeParams(
+        userId: event.userId, discoverMode: event.discoverMode));
+
+    result.fold(
+      (failure) => emit(ProfileError(message: failure.message)),
+      (_) {
+        // We don't need to emit a success state because the real-time stream
+        // will automatically push a new ProfileLoaded state, updating the UI.
+      },
+    );
   }
 }
 

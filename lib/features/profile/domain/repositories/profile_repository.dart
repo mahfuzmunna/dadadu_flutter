@@ -45,6 +45,9 @@ abstract class ProfileRepository {
 
   Future<Either<Failure, void>> updateUserMood(UpdateUserMoodParams params);
 
+  Future<Either<Failure, void>> updateDiscoverMode(
+      UpdateDiscoverModeParams params);
+
   Future<Either<Failure, List<UserWithDistance>>> findUsersByVibe(
       FindUsersByVibeParams params);
 }
@@ -167,6 +170,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
       UpdateUserMoodParams params) async {
     try {
       await remoteDataSource.updateUserMood(params);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateDiscoverMode(
+      UpdateDiscoverModeParams params) async {
+    try {
+      await remoteDataSource.updateDiscoverMode(params);
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));

@@ -41,6 +41,8 @@ abstract class ProfileRemoteDataSource {
 
   Future<void> updateUserMood(UpdateUserMoodParams params);
 
+  Future<void> updateDiscoverMode(UpdateDiscoverModeParams params);
+
   Future<List<UserModel>> findUsersByVibe(String vibe);
 }
 
@@ -324,6 +326,20 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       await _supabaseClient.from(AppConfig.supabaseUserTable).update({
         'mood_status': params.moodStatus,
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', params.userId);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> updateDiscoverMode(UpdateDiscoverModeParams params) async {
+    try {
+      await _supabaseClient.from(AppConfig.supabaseUserTable).update({
+        'discover_mode': params.discoverMode,
         'updated_at': DateTime.now().toIso8601String(),
       }).eq('id', params.userId);
     } on PostgrestException catch (e) {

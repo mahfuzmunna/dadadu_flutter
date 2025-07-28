@@ -339,7 +339,6 @@ class _NowPageViewState extends State<_NowPageView>
             if (state is FeedError) {
               return Center(child: Text('Error: ${state.message}'));
             }
-            // LOADED STATE
             if (_posts.isNotEmpty) {
               return PageView.builder(
                 controller: _pageController,
@@ -364,7 +363,9 @@ class _NowPageViewState extends State<_NowPageView>
               );
             }
             // Fallback for any other state
-            return const SizedBox.shrink();
+            return const Center(
+              child: Text("No posts found."),
+            );
           },
         ),
       ),

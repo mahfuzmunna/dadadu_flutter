@@ -39,6 +39,7 @@ Future<void> profileInjection() async {
         deleteProfileImageUseCase: sl(),
         updateUserLocationUseCase: sl(),
         updateUserMoodUseCase: sl(),
+        updateDiscoverModeUseCase: sl(),
         streamUserProfileUseCase: sl(),
       ));
   sl.registerFactory(
@@ -53,6 +54,7 @@ Future<void> profileInjection() async {
   sl.registerLazySingleton(() => GetLocationNameUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUserLocationUseCase(sl()));
   sl.registerLazySingleton(() => UpdateUserMoodUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateDiscoverModeUseCase(sl()));
   sl.registerLazySingleton(() => StreamUserProfileUseCase(sl()));
   sl.registerLazySingleton(() => FollowUserUseCase(sl()));
   sl.registerLazySingleton(() => UnfollowUserUseCase(sl()));

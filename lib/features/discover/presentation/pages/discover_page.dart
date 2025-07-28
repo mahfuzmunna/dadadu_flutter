@@ -5,6 +5,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/discover/domain/usecases/find_users_by_vibe_usecase.dart';
+import 'package:dadadu_app/features/discover/presentation/pages/vibe_users_page_s.dart';
 import 'package:dadadu_app/features/location/domain/usecases/get_location_name_usecase.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
@@ -12,7 +13,6 @@ import 'package:dadadu_app/shared/widgets/pulsing_radar_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:go_router/go_router.dart';
 
 enum LocationPermissionStatus {
   initial,
@@ -36,6 +36,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
   Position? _currentPosition;
   bool _isLocationListenerActive = false;
   double _selectedDistance = 1; // Default distance in km
+  bool _goToVide = false;
+  String _selectedVibe = "";
+  Position? _selectedCurrentPosition;
+  double _selectedMaxDistance = 1;
 
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
@@ -48,6 +52,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
     super.initState();
     _positionStreamSubscription?.cancel();
     _checkLocationPermissionAndService();
+    _goToVide = false;
   }
 
   Future<void> _checkLocationPermissionAndService() async {
@@ -174,6 +179,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
       case LocationPermissionStatus.initial:
         return const Center(child: CircularProgressIndicator());
       case LocationPermissionStatus.granted:
+        if (_goToVide) {
+          return VibeUsersPage(
+              vibe: _selectedVibe,
+              currentPosition: _selectedCurrentPosition as Position,
+              maxDistance: _selectedMaxDistance,
+              onBackPressed: () {
+                setState(() {
+                  _goToVide = false;
+                });
+              });
+        }
         return _buildVibeSelectionPage();
       default:
         return _buildLocationErrorPage();
@@ -183,9 +199,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Discover'),
-      ),
+      appBar: (!_goToVide)
+          ? AppBar(
+              title: const Text('Discover'),
+            )
+          : null,
       body: _buildBody(),
     );
   }
@@ -393,12 +411,27 @@ class _DiscoverPageState extends State<DiscoverPage> {
         minimumSize: const Size(250, 60),
       ),
       onPressed: () {
+        final authState = context.read<AuthBloc>().state;
         if (_currentPosition != null) {
           // ✅ Navigate to the new page, passing the vibe and position
-          context.push('/discover/users', extra: {
-            'vibe': label,
-            'position': _currentPosition!,
-            'distance': _selectedDistance,
+          // context.push('/discover/users', extra: {
+          //   'vibe': label,
+          //   'position': _currentPosition!,
+          //   'distance': _selectedDistance,
+          // });
+
+          if (authState is AuthAuthenticated) {
+            context.read<ProfileBloc>().add(UpdateDiscoverMode(
+                  userId: authState.user.id,
+                  discoverMode: label,
+                ));
+          }
+
+          setState(() {
+            _goToVide = true;
+            _selectedVibe = label;
+            _selectedCurrentPosition = _currentPosition;
+            _selectedMaxDistance = _selectedDistance;
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

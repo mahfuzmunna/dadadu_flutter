@@ -5,6 +5,7 @@ import 'package:dadadu_app/injection_container.dart' as di;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 
@@ -12,12 +13,14 @@ class VibeUsersPage extends StatelessWidget {
   final String vibe;
   final Position currentPosition;
   final double maxDistance;
+  final VoidCallback onBackPressed;
 
   const VibeUsersPage({
     super.key,
     required this.vibe,
     required this.currentPosition,
     required this.maxDistance,
+    required this.onBackPressed,
   });
 
   @override
@@ -28,6 +31,10 @@ class VibeUsersPage extends StatelessWidget {
             vibe: vibe, position: currentPosition, distance: maxDistance)),
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: onBackPressed,
+          ),
           title: Text('$vibe Vibe'),
         ),
         body: BlocBuilder<DiscoverBloc, DiscoverState>(
@@ -125,6 +132,11 @@ class _UserCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  ElevatedButton(
+                      onPressed: () {
+                        context.push("/profile/${user.id}");
+                      },
+                      child: Text('View Profile'))
                 ],
               ),
             ),
