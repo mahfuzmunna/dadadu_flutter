@@ -37,7 +37,11 @@ abstract class PostRemoteDataSource {
 
   Stream<PostModel> subscribeToPostChanges(String postId);
 
-  Future<void> incrementDiamond(String postId);
+  Future<void> sendDiamond(
+      {required String senderId, required String receiverId});
+
+  Future<void> unsendDiamond(
+      {required String senderId, required String receiverId});
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -254,10 +258,38 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
-  Future<void> incrementDiamond(String postId) async {
+  Future<void> sendDiamond(
+      {required String senderId, required String receiverId}) async {
     try {
-      await supabaseClient
-          .rpc('increment_diamonds', params: {'post_id_to_update': postId});
+      // Assumes you have a Supabase RPC function named 'send_diamond'
+      await supabaseClient.rpc(
+        'send_diamond',
+        params: {
+          'p_sender_id': senderId,
+          'p_receiver_id': receiverId,
+        },
+      );
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> unsendDiamond(
+      {required String senderId, required String receiverId}) async {
+    try {
+      // Assumes you have a Supabase RPC function named 'unsend_diamond'
+      await supabaseClient.rpc(
+        'unsend_diamond',
+        params: {
+          'p_sender_id': senderId,
+          'p_receiver_id': receiverId,
+        },
+      );
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }

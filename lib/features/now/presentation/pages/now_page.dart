@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../injection_container.dart' as di;
+import '../../../profile/presentation/bloc/follow_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../widgets/video_post_item_s.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
@@ -26,6 +27,7 @@ class NowPage extends StatelessWidget {
         BlocProvider(
             create: (context) => sl<FeedBloc>()..add(SubscribeToFeed())),
         BlocProvider(create: (context) => sl<PostBloc>()),
+        BlocProvider(create: (context) => di.sl<FollowBloc>())
       ],
       child: const _NowPageView(),
     );

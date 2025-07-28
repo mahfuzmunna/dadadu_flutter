@@ -18,7 +18,9 @@ import 'package:video_player/video_player.dart';
 // import 'package:video_watermark_plus/video_watermark_plus.dart';
 
 import '../../../../injection_container.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../comments/presentation/bloc/comments_bloc.dart';
+import '../../../profile/presentation/bloc/follow_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart';
 import 'comments_view.dart';
@@ -292,6 +294,8 @@ class _VideoPostItemState extends State<VideoPostItem> {
     const shadow =
         Shadow(blurRadius: 4, color: Colors.black54, offset: Offset(0, 1));
 
+    final authState = context.watch<AuthBloc>().state;
+
     return BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
       if (state is ProfileLoaded && state.user != null) {
         author = state.user;
@@ -334,16 +338,18 @@ class _VideoPostItemState extends State<VideoPostItem> {
                   ),
                   const SizedBox(width: 8),
                   // Follow Chip
-                  if (author != null) // Only show if author is loaded
-                    const Chip(
-                      label: Text('Follow'),
-                      labelStyle:
-                          TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                      padding: EdgeInsets.zero,
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity:
-                          VisualDensity(horizontal: 0.0, vertical: -4),
-                    ),
+                  if (author != null && authState is AuthAuthenticated)
+                    _buildFollowButton(context, authState.user, author!),
+                  // if (author != null) // Only show if author is loaded
+                  //   const Chip(
+                  //     label: Text('Follow'),
+                  //     labelStyle:
+                  //         TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  //     padding: EdgeInsets.zero,
+                  //     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  //     visualDensity:
+                  //         VisualDensity(horizontal: 0.0, vertical: -4),
+                  //   ),
                 ],
               ),
             ),
@@ -381,6 +387,68 @@ class _VideoPostItemState extends State<VideoPostItem> {
       } else
         return Container();
     });
+  }
+
+  Widget _buildFollowButton(
+      BuildContext context, UserEntity currentUser, UserEntity author) {
+    // Don't show the follow button on your own post
+    if (currentUser.id == author.id) {
+      return const SizedBox.shrink();
+    }
+
+    final bool isFollowing = currentUser.followingIds.contains(author.id);
+
+    return BlocConsumer<FollowBloc, FollowState>(
+      listener: (context, state) {
+        if (state is FollowSuccess) {
+          // Refresh current user data to update the UI correctly
+          context.read<AuthBloc>().add(AuthRefreshCurrentUser(currentUser.id));
+        }
+        if (state is FollowError) {
+          _showSnackBar(state.message, isError: true);
+        }
+      },
+      builder: (context, state) {
+        // Show a loading indicator while the request is in progress
+        if (state is FollowLoading) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.0),
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                  strokeWidth: 2, color: Colors.white),
+            ),
+          );
+        }
+
+        // The actual button, wrapped in a GestureDetector for the tap event
+        return GestureDetector(
+          onTap: () {
+            final event = isFollowing
+                ? UnfollowUser(
+                    currentUserId: currentUser.id, profileUserId: author.id)
+                : FollowUser(
+                    currentUserId: currentUser.id, profileUserId: author.id);
+            context.read<FollowBloc>().add(event);
+          },
+          child: Chip(
+            label: Text(isFollowing ? 'Following' : 'Follow'),
+            labelStyle: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: isFollowing ? Colors.black : Colors.white,
+            ),
+            backgroundColor: isFollowing
+                ? Colors.white.withOpacity(0.8)
+                : Theme.of(context).colorScheme.primary,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            visualDensity: const VisualDensity(horizontal: 0.0, vertical: -4),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildActionButtons(BuildContext context) {

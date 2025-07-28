@@ -25,14 +25,18 @@ abstract class PostRepository {
 
   Either<Failure, Stream<PostEntity>> subscribeToPostChanges(String postId);
 
-  Future<Either<Failure, void>> incrementDiamond(String postId);
-
   Either<Failure, Stream<List<PostEntity>>> streamAllPosts();
 
   Either<Failure, Stream<Tuple2<List<PostEntity>, Map<String, UserEntity>>>>
       streamFeed();
 
   Future<Either<Failure, List<CommentEntity>>> getPostComments(String postId);
+
+  Future<Either<Failure, void>> sendDiamond(
+      {required String senderId, required String receiverId});
+
+  Future<Either<Failure, void>> unsendDiamond(
+      {required String senderId, required String receiverId});
 }
 
 class PostRepositoryImpl implements PostRepository {
@@ -148,9 +152,21 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
-  Future<Either<Failure, void>> incrementDiamond(String postId) async {
+  Either<Failure, Stream<PostEntity>> subscribeToPostChanges(String postId) {
     try {
-      await remoteDataSource.incrementDiamond(postId);
+      final postStream = remoteDataSource.subscribeToPostChanges(postId);
+      return Right(postStream);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> sendDiamond(
+      {required String senderId, required String receiverId}) async {
+    try {
+      await remoteDataSource.sendDiamond(
+          senderId: senderId, receiverId: receiverId);
       return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
@@ -158,10 +174,12 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
-  Either<Failure, Stream<PostEntity>> subscribeToPostChanges(String postId) {
+  Future<Either<Failure, void>> unsendDiamond(
+      {required String senderId, required String receiverId}) async {
     try {
-      final postStream = remoteDataSource.subscribeToPostChanges(postId);
-      return Right(postStream);
+      await remoteDataSource.unsendDiamond(
+          senderId: senderId, receiverId: receiverId);
+      return const Right(null);
     } on ServerException catch (e) {
       return Left(ServerFailure(e.message, code: e.code));
     }

@@ -2,8 +2,11 @@ import 'package:dadadu_app/config/app_config.dart'; // Assuming you have your ke
 import 'package:dadadu_app/features/posts/data/datasources/post_remote_data_source.dart';
 import 'package:dadadu_app/features/posts/domain/repositories/post_repository.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/upload_post_usecase.dart';
+import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/post_bloc.dart';
 import 'package:get_it/get_it.dart';
+
+import 'domain/usecases/send_unsend_diamond_usecase.dart';
 
 // Use the same GetIt instance from your main injection container
 final sl = GetIt.instance;
@@ -18,9 +21,14 @@ Future<void> postInjection() async {
     () => PostBloc(
         uploadPostUseCase: sl(), postRepository: sl(), profileRepository: sl()),
   );
+  sl.registerFactory(
+    () => DiamondBloc(sendDiamondUseCase: sl(), unsendDiamondUseCase: sl()),
+  );
 
   // --- Domain Layer (Use Cases) ---
   sl.registerLazySingleton(() => UploadPostUseCase(sl()));
+  sl.registerLazySingleton(() => SendDiamondUseCase(sl()));
+  sl.registerLazySingleton(() => UnsendDiamondUseCase(sl()));
 
   // --- Data Layer (Repositories) ---
   sl.registerLazySingleton<PostRepository>(

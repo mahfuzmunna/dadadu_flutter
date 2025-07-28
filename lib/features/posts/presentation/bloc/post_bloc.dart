@@ -31,7 +31,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     on<UploadPost>(_onUploadPost);
     on<_UploadProgressUpdated>(_onUploadProgressUpdated);
     on<LoadPost>(_onLoadPost);
-    on<IncrementLike>(_onIncrementLike);
     on<_PostUpdated>(_onPostUpdated);
   }
 
@@ -61,12 +60,6 @@ class PostBloc extends Bloc<PostEvent, PostState> {
         );
       },
     );
-  }
-
-  Future<void> _onIncrementLike(
-      IncrementLike event, Emitter<PostState> emit) async {
-    await _postRepository.incrementDiamond(event.postId);
-    // Success is handled by the real-time stream
   }
 
   void _onPostUpdated(_PostUpdated event, Emitter<PostState> emit) {
