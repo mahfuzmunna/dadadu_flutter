@@ -31,31 +31,31 @@ class UserModel extends UserEntity {
   // Factory constructor to create UserModel from a Map (Supabase query result)
   factory UserModel.fromMap(Map<String, dynamic> map) {
     final userModel = UserModel(
-        id: map['id'],
+      id: map['id'],
       email: map['email'],
       fullName: map['full_name'],
       username: map['username'],
-        bio: map['bio'] ?? '',
-        profilePhotoUrl: map['profile_photo_url'] ?? '',
-        referralsCount: map['referrals_count'],
-        createdAt: map['created_at'] != null
-            ? DateTime.parse(map['created_at'])
-            : DateTime.now(),
-        updatedAt: map['updated_at'] != null
-            ? DateTime.parse(map['updated_at'])
-            : DateTime.now(),
-        rank: map['rank'],
-        referralLink: map['referral_link'] ?? '',
-        moodStatus: map['mood_status'] ?? '',
-        language: map['language'],
+      bio: map['bio'] ?? '',
+      profilePhotoUrl: map['profile_photo_url'] ?? '',
+      referralsCount: map['referrals_count'],
+      createdAt: map['created_at'] != null
+          ? DateTime.parse(map['created_at'])
+          : DateTime.now(),
+      updatedAt: map['updated_at'] != null
+          ? DateTime.parse(map['updated_at'])
+          : DateTime.now(),
+      rank: map['rank'],
+      referralLink: map['referral_link'] ?? '',
+      moodStatus: map['mood_status'] ?? '',
+      language: map['language'],
       discoverMode: map['discover_mode'],
       isEmailConfirmed: map['is_confirmed_email'],
-        latitude: map['latitude'] ?? '',
-        longitude: map['longitude'] ?? '',
-        location: map['location'] ?? '',
-        diamonds: map['diamonds'],
-        followingIds: map['following_ids'] != null
-            ? List<String>.from(map['following_ids'].map((id) => id.toString()))
+      latitude: map['latitude'] ?? '',
+      longitude: map['longitude'] ?? '',
+      location: map['location'] ?? '',
+      diamonds: map['diamonds'],
+      followingIds: map['following_ids'] != null
+          ? List<String>.from(map['following_ids'].map((id) => id.toString()))
           : [],
       followerIds: map['follower_ids'] != null
           ? List<String>.from(map['follower_ids'].map((id) => id.toString()))
@@ -98,33 +98,30 @@ class UserModel extends UserEntity {
   }
 
   @override
-  UserModel copyWith({
-    String? id,
-    String? email,
-    String? fullName,
-    String? username,
-    String? bio,
-    String? profilePhotoUrl,
-    int? followersCount,
-    int? followingCount,
-    int? postCount,
-    int? referralsCount,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    String? rank,
-    String? referralLink,
-    String? moodStatus,
-    String? language,
-    String? discoverMode,
-    bool? isEmailConfirmed,
-    String? latitude,
-    String? longitude,
-    String? location,
-    int? diamonds,
-    List<String>? followingIds,
-    List<String>? followerIds,
-    List<String>? postIds,
-  }) {
+  UserEntity copyWith(
+      {String? id,
+      String? email,
+      String? fullName,
+      String? username,
+      String? bio,
+      String? profilePhotoUrl,
+      int? postCount,
+      int? referralsCount,
+      DateTime? createdAt,
+      DateTime? updatedAt,
+      String? rank,
+      String? referralLink,
+      String? moodStatus,
+      String? language,
+      String? discoverMode,
+      bool? isEmailConfirmed,
+      String? latitude,
+      String? longitude,
+      String? location,
+      int? diamonds,
+      List<String>? followingIds,
+      List<String>? followerIds,
+      List<String>? postIds}) {
     return UserModel(
       id: id ?? this.id,
       email: email ?? this.email,
