@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/chat/presentation/bloc/chatroom_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/follow_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -14,7 +15,6 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../injection_container.dart' as di;
-import '../../../chat/domain/usecases/create_chat_room_usecase.dart';
 import '../../../now/presentation/bloc/feed_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart'; // For sharing content
 
@@ -40,6 +40,7 @@ class ProfilePage extends StatelessWidget {
             create: (context) =>
                 di.sl<ProfileBloc>()..add(SubscribeToUserProfile(userId))),
         BlocProvider(create: (context) => di.sl<FollowBloc>()),
+        BlocProvider(create: (context) => di.sl<ChatRoomBloc>()),
       ],
       child: const _ProfileView(),
     );
@@ -177,17 +178,47 @@ class _ProfileContentState extends State<_ProfileContent> {
           const SizedBox(width: 16),
 
           // Message Button
-          IconButton.filledTonal(
-            icon: const Icon(Icons.message_rounded),
-            onPressed: () async {
-              // Create or get the chat room and navigate
-              final createChatRoomUseCase = di.sl<CreateChatRoomUseCase>();
-              final result =
-                  await createChatRoomUseCase([currentUser.id, profileUser.id]);
-              result.fold(
-                (failure) => ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(content: Text(failure.message))),
-                (roomId) => context.push('/chat/$roomId'),
+          BlocConsumer<ChatRoomBloc, ChatRoomState>(
+            listener: (context, state) {
+              // This handles side-effects like navigation or showing SnackBars
+              if (state is ChatRoomCreated) {
+                // Navigate to the chat page on success
+                context.push('/chat/${state.roomId}');
+              }
+              if (state is ChatRoomError) {
+                // Show an error message on failure
+                ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text(state.message)));
+              }
+            },
+            builder: (context, state) {
+              // This rebuilds the button UI based on the state
+              Widget buttonContent;
+              if (state is ChatRoomCreating) {
+                // Show a loading indicator while creating
+                buttonContent = const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(strokeWidth: 2.5),
+                );
+              } else {
+                // Show the default icon
+                buttonContent = const Icon(Icons.message_rounded);
+              }
+
+              return IconButton.filledTonal(
+                padding: const EdgeInsets.all(8),
+                icon: buttonContent,
+                // Disable the button while loading
+                onPressed: state is ChatRoomCreating
+                    ? null
+                    : () {
+                        // Dispatch the event to the BLoC
+                        context.read<ChatRoomBloc>().add(
+                              CreateChatRoom(
+                                  userIds: [currentUser.id, profileUser.id]),
+                            );
+                      },
               );
             },
           ),

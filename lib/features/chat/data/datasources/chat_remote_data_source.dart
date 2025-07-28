@@ -1,3 +1,4 @@
+import 'package:dadadu_app/config/app_config.dart';
 import 'package:dadadu_app/core/errors/exceptions.dart';
 import 'package:dadadu_app/features/chat/data/models/chat_message_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -45,11 +46,18 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       required String content,
       required String senderId}) async {
     try {
-      await supabaseClient.from('chat_messages').insert({
-        'room_id': roomId,
+      final message = await supabaseClient
+          .from('chat_messages')
+          .insert({
+            'room_id': roomId,
         'sender_id': senderId,
         'content': content,
-      });
+          })
+          .select()
+          .single();
+      await supabaseClient
+          .from('chat_rooms')
+          .update({'last_message_id': message['id']}).eq('id', roomId);
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     }
@@ -85,7 +93,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
             // 2. Fetch all required profiles and messages in batch
             final [authorMaps, messageMaps] = await Future.wait([
               supabaseClient
-                  .from('profiles')
+                  .from(AppConfig.supabaseUserTable)
                   .select()
                   .filter('id', 'in', '(${otherParticipantIds.join(',')})'),
               if (lastMessageIds.isNotEmpty)
@@ -132,7 +140,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     try {
       // Call the database function we just created.
       final roomId = await supabaseClient.rpc(
-        'create_or_get_chat_room',
+        'create_get_chat_room',
         params: {'participant_ids_input': participantIds},
       );
 

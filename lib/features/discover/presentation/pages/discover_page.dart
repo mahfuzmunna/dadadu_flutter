@@ -13,6 +13,7 @@ import 'package:dadadu_app/shared/widgets/pulsing_radar_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:lottie/lottie.dart';
 
 enum LocationPermissionStatus {
   initial,
@@ -201,7 +202,38 @@ class _DiscoverPageState extends State<DiscoverPage> {
     return Scaffold(
       appBar: (!_goToVide)
           ? AppBar(
-              title: const Text('Discover'),
+              title: Hero(
+                // This tag MUST match the one on the FloatingActionButton.
+                tag: 'discover_fab_hero',
+                // A common pattern to avoid text style issues during animation.
+                flightShuttleBuilder: (
+                  flightContext,
+                  animation,
+                  flightDirection,
+                  fromHeroContext,
+                  toHeroContext,
+                ) {
+                  return DefaultTextStyle(
+                    style: DefaultTextStyle.of(toHeroContext).style,
+                    child: toHeroContext.widget,
+                  );
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SizedBox(
+                      height: 32, // Match size roughly to the destination look
+                      width: 32,
+                      child: Lottie.asset('assets/animations/globe.json'),
+                    ),
+                    const SizedBox(width: 8),
+                    const Text('Discover'),
+                  ],
+                ),
+              ),
+              centerTitle: true,
+              backgroundColor: Colors.transparent,
+              elevation: 0,
             )
           : null,
       body: _buildBody(),

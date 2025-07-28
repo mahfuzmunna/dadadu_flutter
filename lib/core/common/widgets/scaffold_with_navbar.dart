@@ -93,6 +93,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
     return Scaffold(
       body: widget.navigationShell,
       floatingActionButton: FloatingActionButton(
+        heroTag: 'discover_fab_hero',
         shape: const CircleBorder(),
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -131,52 +132,68 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
           children: <Widget>[
             // Home Button (Unchanged)
             IconButton(
-              icon: Icon(
-                selectedButtonIndex == 0 ? Icons.home : Icons.home_outlined,
-                color: selectedButtonIndex == 0
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              icon: AnimatedScale(
+                scale: selectedButtonIndex == 0 ? 1.2 : 1.0,
+                duration: Duration(milliseconds: 200),
+                child: Icon(
+                  selectedButtonIndex == 0 ? Icons.home : Icons.home_outlined,
+                  color: selectedButtonIndex == 0
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
               onPressed: () => _onTap(context, 0),
               tooltip: 'Home',
             ),
-            // ✅ Upload Button (Previously Discover)
             IconButton(
-              icon: Icon(
-                selectedButtonIndex == 1
-                    ? Icons.add_a_photo
-                    : Icons.add_a_photo_outlined,
-                color: selectedButtonIndex == 1
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              icon: AnimatedScale(
+                scale: selectedButtonIndex == 1 ? 1.2 : 1.0,
+                duration: Duration(milliseconds: 200),
+                child: Icon(
+                  selectedButtonIndex == 1
+                      ? Icons.camera_alt
+                      : Icons.camera_alt_outlined,
+                  color: selectedButtonIndex == 1
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-              onPressed: () => _onTap(context, 1), // Taps branch 2
+              onPressed: () => _onTap(context, 1),
               tooltip: 'Upload',
             ),
             const SizedBox(width: 48.0), // Spacer for the FAB
-            // Friends Button (Unchanged)
             IconButton(
-              icon: Icon(
-                selectedButtonIndex == 2
-                    ? Icons.messenger_outline
-                    : Icons.messenger_outline_outlined,
-                color: selectedButtonIndex == 2
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              icon: AnimatedScale(
+                scale: selectedButtonIndex == 2 ? 1.2 : 1.0,
+                duration: Duration(milliseconds: 200),
+                child: Icon(
+                  selectedButtonIndex == 2
+                      ? Icons.message
+                      : Icons.message_outlined,
+                  color: selectedButtonIndex == 2
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-              onPressed: () => _onTap(context, 2), // Taps branch 3
+              onPressed: () => _onTap(context, 2),
               tooltip: 'Chats',
             ),
-            // Profile Button (Unchanged)
+
             IconButton(
-              icon: Icon(
-                selectedButtonIndex == 3 ? Icons.person : Icons.person_outlined,
-                color: selectedButtonIndex == 3
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
+              icon: AnimatedScale(
+                scale: selectedButtonIndex == 3 ? 1.2 : 1.0,
+                duration: Duration(milliseconds: 200),
+                child: Icon(
+                  selectedButtonIndex == 3
+                      ? Icons.person
+                      : Icons.person_outlined,
+                  color: selectedButtonIndex == 3
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-              onPressed: () => _onTap(context, 3), // Taps branch 4
-              tooltip: 'Profile',
+              onPressed: () => _onTap(context, 3),
+              tooltip: 'Chats',
             ),
           ],
         ),
