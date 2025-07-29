@@ -1,3 +1,4 @@
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
@@ -9,9 +10,10 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../injection_container.dart' as di;
-import '../../../now/presentation/widgets/video_post_item_s.dart';
+import '../../../now/presentation/widgets/video_post_item.dart';
 import '../../../posts/presentation/bloc/diamond_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
+import '../bloc/follow_bloc.dart';
 // import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
 
 class UsersVideoPage extends StatelessWidget {
@@ -27,6 +29,8 @@ class UsersVideoPage extends StatelessWidget {
         BlocProvider(
             create: (context) => sl<FeedBloc>()..add(SubscribeToFeed())),
         BlocProvider(create: (context) => sl<PostBloc>()),
+        BlocProvider(create: (context) => di.sl<FollowBloc>()),
+        BlocProvider(create: (context) => di.sl<DiamondBloc>()),
       ],
       child: _UsersVideoView(
         initialPostId: postId,
@@ -50,54 +54,99 @@ class _UsersVideoViewState extends State<_UsersVideoView>
   late PostEntity initialPost;
   List<PostEntity> _usersPosts = [];
   Map<String, UserEntity> _authors = {};
+  UserEntity? _author;
   int _currentPageIndex = 0;
-
-  final int _maxCacheSize =
-      3; // Max controllers to keep in memory (current, previous, next)
   final Map<String, VideoPlayerController> _controllerCache = {};
   final Set<String> _initializingControllers = {};
+  List<PostEntity> _posts = [];
+  late GoRouter _router;
+  bool _isPageActive = true;
+  bool _hasNewNotifications = true;
+
+  String? _currentPostId;
+
+  // ✅ 1. Keep track of videos the user has manually started playing.
+  final Set<String> _userHasInitiatedPlay = {};
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-
     _pageController.addListener(() {
       final newPage = _pageController.page?.round() ?? 0;
       if (newPage != _currentPageIndex) {
-        _onPageChanged(_usersPosts, newPage);
+        _onPageChanged(newPage);
       }
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _router = GoRouter.of(context);
+      _router.routerDelegate.addListener(_handleRouteChange);
+      // ✅ Set the initial route state correctly
+      _handleRouteChange();
+    });
+  }
+
+  void _handleRouteChange() {
+    if (!mounted) return;
+
+    final String topRoute =
+        _router.routerDelegate.currentConfiguration.fullPath;
+    final bool isActive =
+        (topRoute == '/'); // Assuming NowPage is at the root '/'
+
+    if (_isPageActive != isActive) {
+      setState(() {
+        _isPageActive = isActive;
+      });
+
+      final controller = _controllerCache[_currentPostId];
+      if (controller == null) return;
+
+      if (isActive) {
+        // Page is active again. Play only if the user has previously played it.
+        if (_userHasInitiatedPlay.contains(_currentPostId!)) {
+          controller.play();
+        }
+      } else {
+        // Page is no longer active, so pause the video.
+        controller.pause();
+      }
+    }
   }
 
   @override
   void dispose() {
+    _router.routerDelegate.removeListener(_handleRouteChange);
     WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     _disposeAllControllers();
     super.dispose();
   }
 
-  void _onPageChanged(List<PostEntity> posts, int newPage) {
-    if (posts.isNotEmpty && _currentPageIndex < posts.length) {
-      final oldPostId = posts[_currentPageIndex].id;
+  void _onPageChanged(int newPage) {
+    if (_posts.isNotEmpty && _currentPageIndex < _posts.length) {
+      final oldPostId = _posts[_currentPageIndex].id;
       _controllerCache[oldPostId]?.pause();
     }
     setState(() => _currentPageIndex = newPage);
-    _manageControllerCache(posts, newPage);
+    _manageControllerCache(newPage);
   }
 
-  Future<void> _manageControllerCache(List<PostEntity> posts, int page) async {
-    if (page < 0 || page >= posts.length) return;
+  Future<void> _manageControllerCache(int page) async {
+    if (page < 0 || page >= _posts.length) return;
 
-    await _initializeAndPlay(posts, page);
+    // ✅ 3. This function now prepares the video and plays it ONLY if already started by the user.
+    await _prepareAndPlayCurrentVideo(page);
 
-    if (page + 1 < posts.length) _initializeControllerForIndex(posts, page + 1);
-    if (page - 1 >= 0) _initializeControllerForIndex(posts, page - 1);
+    // Pre-initialize neighbors
+    if (page + 1 < _posts.length) _initializeControllerForIndex(page + 1);
+    if (page - 1 >= 0) _initializeControllerForIndex(page - 1);
 
-    final idsToKeep = {posts[page].id};
-    if (page > 0) idsToKeep.add(posts[page - 1].id);
-    if (page < posts.length - 1) idsToKeep.add(posts[page + 1].id);
+    // Dispose of controllers outside the cache window
+    final idsToKeep = {_posts[page].id};
+    if (page > 0) idsToKeep.add(_posts[page - 1].id);
+    if (page < _posts.length - 1) idsToKeep.add(_posts[page + 1].id);
 
     _controllerCache.keys
         .where((id) => !idsToKeep.contains(id))
@@ -105,16 +154,25 @@ class _UsersVideoViewState extends State<_UsersVideoView>
         .forEach(_disposeController);
   }
 
-  Future<void> _initializeAndPlay(List<PostEntity> posts, int index) async {
-    final post = posts[index];
-    if (!_controllerCache.containsKey(post.id)) {
-      await _initializeControllerForIndex(posts, index);
+  // Renamed from _initializeAndPlay to be more descriptive
+  Future<void> _prepareAndPlayCurrentVideo(int index) async {
+    if (index < 0 || index >= _posts.length) return;
+
+    final post = _posts[index];
+    _currentPostId = post.id;
+    VideoPlayerController? controller = _controllerCache[post.id];
+
+    if (controller == null) {
+      await _initializeControllerForIndex(index);
+      controller = _controllerCache[post.id];
     }
-    final controller = _controllerCache[post.id];
+
     if (controller?.value.isInitialized ?? false) {
-      await controller?.setLooping(true);
-      await controller?.play();
-      if (mounted) setState(() {});
+      await controller?.setLooping(true); // Loop is good for feeds
+      // ✅ Play only if the user has previously initiated play for this video.
+      if (_userHasInitiatedPlay.contains(post.id) && _isPageActive) {
+        await controller?.play();
+      }
     }
   }
 
@@ -130,95 +188,43 @@ class _UsersVideoViewState extends State<_UsersVideoView>
     _controllerCache.clear();
   }
 
-  Future<void> _initializeControllerForIndex(
-      List<PostEntity> posts, int index) async {
-    final post = posts[index];
-    if (_controllerCache.containsKey(post.id)) return;
+  Future<void> _initializeControllerForIndex(int index) async {
+    if (index < 0 || index >= _posts.length) return;
+    final post = _posts[index];
+    if (_controllerCache.containsKey(post.id) ||
+        _initializingControllers.contains(post.id)) return;
 
+    _initializingControllers.add(post.id);
     final controller =
-        VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
-    _controllerCache[post.id] = controller;
+        CachedVideoPlayerPlus.networkUrl(Uri.parse(post.videoUrl));
     try {
       await controller.initialize();
-      if (mounted) setState(() {});
+      if (mounted) {
+        _controllerCache[post.id] = controller.controller;
+        setState(() {});
+      } else {
+        await controller.dispose();
+      }
     } catch (e) {
       debugPrint("Error pre-caching video for post ${post.id}: $e");
+    } finally {
+      _initializingControllers.remove(post.id);
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final controller = _controllerCache[_usersPosts[_currentPageIndex].id];
+    if (_currentPostId == null) return;
+    final controller = _controllerCache[_currentPostId!];
+
     if (state == AppLifecycleState.paused) {
       controller?.pause();
     } else if (state == AppLifecycleState.resumed) {
-      controller?.play();
+      // If the page is active and the user had played this video, resume it.
+      if (_isPageActive && _userHasInitiatedPlay.contains(_currentPostId!)) {
+        controller?.play();
+      }
     }
-  }
-
-  // ✅ NEW: Helper method to show the notifications dialog
-  void _showNotificationsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        // Dummy data for notifications
-        final notifications = [
-          {
-            'user': 'mahfuzmunna',
-            'action': 'liked your video.',
-            'time': '5m ago'
-          },
-          {
-            'user': 'sakib',
-            'action': 'started following you.',
-            'time': '1h ago'
-          },
-          {
-            'user': 'john_doe',
-            'action': 'commented: "Awesome!"',
-            'time': '3h ago'
-          },
-        ];
-
-        return AlertDialog(
-          title: const Text('Notifications'),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notification = notifications[index];
-                return ListTile(
-                  leading: const CircleAvatar(child: Icon(Icons.person)),
-                  title: RichText(
-                    text: TextSpan(
-                      style: DefaultTextStyle.of(context).style,
-                      children: <TextSpan>[
-                        TextSpan(
-                            text: notification['user'],
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
-                        TextSpan(text: ' ${notification['action']}'),
-                      ],
-                    ),
-                  ),
-                  subtitle: Text(notification['time']!),
-                );
-              },
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop(); // Dismiss dialog
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -236,7 +242,12 @@ class _UsersVideoViewState extends State<_UsersVideoView>
           // Add padding for better placement
           child: IconButton(
             onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            icon: Container(
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.arrow_back_ios_new_rounded)),
             // Style for a modern, adaptive look
             style: IconButton.styleFrom(
               backgroundColor: Colors.black.withOpacity(0.4),
@@ -248,32 +259,19 @@ class _UsersVideoViewState extends State<_UsersVideoView>
             tooltip: 'Back',
           ),
         ),
-        // title: BlocBuilder<ProfileBloc, ProfileState>(
-        //   builder: (context, state) {
-        //     if (state is ProfileLoaded) {
-        //       final author = state.user;
-        //     }
-        //     return _buildNowChip(authorFullName!, colorScheme);
-        //   },
-        // ),
-        // actions: [
-        //   IconButton(
-        //     icon: const Icon(Icons.notifications_none_rounded),
-        //     tooltip: 'Notifications',
-        //     onPressed: () {
-        //       _showNotificationsDialog(context);
-        //     },
-        //     style: IconButton.styleFrom(
-        //       foregroundColor: Colors.white,
-        //       shadowColor: Colors.black.withOpacity(0.5),
-        //       elevation: 4,
-        //     ),
-        //   ),
-        // ],
       ),
       body: Padding(
         padding: EdgeInsets.only(top: statusBarHeight),
-        child: BlocBuilder<FeedBloc, FeedState>(
+        child: BlocConsumer<FeedBloc, FeedState>(
+          listener: (context, state) {
+            if (state is FeedLoaded) {
+              setState(() {
+                _posts = state.posts;
+                _authors = state.authors;
+              });
+              _manageControllerCache(0);
+            }
+          },
           builder: (context, state) {
             // LOADING STATE
             if (state is FeedLoading || state is FeedInitial) {
@@ -284,152 +282,69 @@ class _UsersVideoViewState extends State<_UsersVideoView>
               return Center(child: Text('Error: ${state.message}'));
             }
             // LOADED STATE
-            if (state is FeedLoaded) {
-              final PostEntity initialPost = state.posts
-                  .firstWhere((post) => post.id == widget.initialPostId);
+            if (_posts.isNotEmpty) {
+              final PostEntity initialPost =
+                  _posts.firstWhere((post) => post.id == widget.initialPostId);
+              _author = _authors[initialPost.userId];
 
-              final usersPosts = state.posts
+              final usersPosts = _posts
                   .where((post) => post.userId == initialPost.userId)
                   .toList();
               final initialPageIndex =
                   usersPosts.indexWhere((post) => post.id == initialPost.id);
 
-              if (_pageController.initialPage != initialPageIndex) {
-                _pageController = PageController(initialPage: initialPageIndex);
-                _currentPageIndex = initialPageIndex;
-                _pageController.addListener(() {
-                  final newPage = _pageController!.page?.round() ?? 0;
-                  if (newPage != _currentPageIndex) {
-                    _onPageChanged(usersPosts, newPage);
-                  }
-                });
-                // Initial load for the first video
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  _manageControllerCache(usersPosts, initialPageIndex);
-                });
-              }
+              // if (_pageController.initialPage != initialPageIndex) {
+              //   _pageController = PageController(initialPage: initialPageIndex);
+              //   _currentPageIndex = initialPageIndex;
+              //   _pageController.addListener(() {
+              //     final newPage = _pageController!.page?.round() ?? 0;
+              //     if (newPage != _currentPageIndex) {
+              //       _onPageChanged(usersPosts, newPage);
+              //     }
+              //   });
+              //   // Initial load for the first video
+              //   WidgetsBinding.instance.addPostFrameCallback((_) {
+              //     _manageControllerCache(usersPosts, initialPageIndex);
+              //   });
+              // }
 
               if (usersPosts.isEmpty) {
                 return const Center(child: Text("This user has no posts."));
               }
 
-              return BlocProvider(
-                create: (context) => di.sl<DiamondBloc>(),
-                child: PageView.builder(
+              return PageView.builder(
                   controller: _pageController,
                   scrollDirection: Axis.vertical,
                   itemCount: usersPosts.length,
                   itemBuilder: (context, index) {
                     final post = usersPosts[index];
-                    final author = state.authors[post.userId];
+                    final author = _author;
                     return BlocProvider<ProfileBloc>(
-                        create: (context) => di.sl<ProfileBloc>()
-                          ..add(SubscribeToUserProfile(author!.id)),
-                        child: BlocBuilder<ProfileBloc, ProfileState>(
-                            builder: (context, state) {
-                          // if (state is ProfileLoaded) {
-                          //   setState(() {
-                          //     authorFullName = state.user.fullName;
-                          //   });
-                          // };
-                          return VideoPostItem(
-                              key: ValueKey(post.id),
-                              post: post,
-                              author: author,
-                              controller: _controllerCache[post.id],
-                              isCurrentPage: index == _currentPageIndex,
-                              onUserTapped: (userId) {
-                                context.pop();
-                              });
-                        }));
-                  },
-                ),
-              );
+                      create: (context) => di.sl<ProfileBloc>()
+                        ..add(SubscribeToUserProfile(author!.id)),
+                      child: VideoPostItem(
+                        key: ValueKey(post.id),
+                        post: post,
+                        author: author,
+                        controller: _controllerCache[post.id],
+                        isCurrentPage: index == _currentPageIndex,
+                        onPlayPressed: () {
+                          if (!_userHasInitiatedPlay.contains(post.id)) {
+                            setState(() {
+                              _userHasInitiatedPlay.add(post.id);
+                            });
+                          }
+                          _controllerCache[post.id]?.play();
+                        },
+                        onUserTapped: (userId) =>
+                            context.push('/profile/${userId}'),
+                      ),
+                    );
+                  });
             }
             // Fallback for any other state
             return const SizedBox.shrink();
           },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNowChip(String text, ColorScheme colorScheme) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 4.0),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            // Add an action here, e.g., scroll to the top of the feed
-            debugPrint("Now Chip Tapped!");
-          },
-          borderRadius: BorderRadius.circular(24),
-          // Match the container's border radius
-          child: Ink(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: BoxDecoration(
-              // ✅ Gradient updated to use the primary blue color
-              gradient: LinearGradient(
-                colors: [
-                  colorScheme.primary.withOpacity(0.8),
-                  colorScheme.primary,
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(24), // Slightly more rounded
-              boxShadow: [
-                BoxShadow(
-                  color: colorScheme.primary.withOpacity(0.3),
-                  // Shadow matches the blue theme
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ✅ Live indicator dot is now a vibrant white
-                Container(
-                  width: 10,
-                  height: 10,
-                  decoration: BoxDecoration(
-                    color: colorScheme.onPrimary, // Bright white on blue
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: colorScheme.onPrimary.withOpacity(0.7),
-                        blurRadius: 5,
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                    // ✅ Text color is now onPrimary for high contrast
-                    color: colorScheme.onPrimary,
-                  ),
-                ),
-                // if (totalPosts < 0)
-                //   Text(
-                //     ' ${_currentPageIndex + 1}/$totalPosts',
-                //     style: TextStyle(
-                //       fontSize: 14,
-                //       // ✅ Counter text is slightly transparent for a subtle look
-                //       color: colorScheme.onPrimary.withOpacity(0.8),
-                //       fontWeight: FontWeight.w600,
-                //     ),
-                //   ),
-              ],
-            ),
-          ),
         ),
       ),
     );
