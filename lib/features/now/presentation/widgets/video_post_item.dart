@@ -32,6 +32,7 @@ class VideoPostItem extends StatefulWidget {
   final bool isCurrentPage;
   final VideoPlayerController? controller;
   final Function(String userId) onUserTapped;
+  final VoidCallback onPlayPressed;
 
   const VideoPostItem({
     super.key,
@@ -40,6 +41,7 @@ class VideoPostItem extends StatefulWidget {
     required this.isCurrentPage,
     required this.onUserTapped,
     required this.controller,
+    required this.onPlayPressed,
   });
 
   @override
@@ -47,9 +49,8 @@ class VideoPostItem extends StatefulWidget {
 }
 
 class _VideoPostItemState extends State<VideoPostItem> {
-  Future<void>? _initializeVideoPlayerFuture;
-  bool _hasError = false;
   bool _diamondActionInProgress = false;
+  bool _isPlaying = false;
 
   // State variables for the download feature
   bool _isDownloading = false;
@@ -58,45 +59,36 @@ class _VideoPostItemState extends State<VideoPostItem> {
   @override
   void initState() {
     super.initState();
-    // _initializeVideo();
+
+    widget.controller?.addListener(_onControllerUpdate);
+    _isPlaying = widget.controller?.value.isPlaying ?? false;
+  }
+
+  void _onControllerUpdate() {
+    if (!mounted) return;
+    final bool isPlaying = widget.controller?.value.isPlaying ?? false;
+    if (_isPlaying != isPlaying) {
+      setState(() {
+        _isPlaying = isPlaying;
+      });
+    }
   }
 
   @override
   void didUpdateWidget(covariant VideoPostItem oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.isCurrentPage != oldWidget.isCurrentPage) {
-      if (widget.isCurrentPage) {
-        widget.controller?.play();
-      } else {
-        widget.controller?.pause();
-      }
+    if (widget.controller != oldWidget.controller) {
+      oldWidget.controller?.removeListener(_onControllerUpdate);
+      widget.controller?.addListener(_onControllerUpdate);
+      _isPlaying = widget.controller?.value.isPlaying ?? false;
     }
   }
 
   @override
   void dispose() {
-    // widget.controller?.dispose();
+    widget.controller?.removeListener(_onControllerUpdate);
     super.dispose();
-  }
-
-  void _initializeVideo() {
-    if (widget.controller != null) return;
-
-    _initializeVideoPlayerFuture = widget.controller!.initialize().then((_) {
-      if (!mounted) return;
-      if (widget.controller!.value.isInitialized) {
-        widget.controller!.setLooping(true);
-        if (widget.isCurrentPage) {
-          widget.controller!.play();
-        }
-      } else {
-        if (mounted) setState(() => _hasError = true);
-      }
-      if (mounted) setState(() {});
-    }).catchError((error) {
-      debugPrint("Error initializing video for post ${widget.post.id}: $error");
-      if (mounted) setState(() => _hasError = true);
-    });
+    // widget.controller?.dispose();
   }
 
   // --- Video Saving Logic ---
@@ -208,21 +200,104 @@ class _VideoPostItemState extends State<VideoPostItem> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = widget.controller;
     return GestureDetector(
       onTap: () {
-        if (widget.controller?.value.isInitialized ?? false) {
-          widget.controller!.value.isPlaying
-              ? widget.controller!.pause()
-              : widget.controller!.play();
+        if (controller == null) return;
+
+        if (controller.value.isPlaying) {
+          controller.pause();
+        } else {
+          // Use the callback when play is pressed.
+          widget.onPlayPressed();
         }
       },
       child: Stack(
         fit: StackFit.expand,
         children: [
-          _buildVideoPlayer(),
+          // Your main content (Video Player, author info, etc.)
+          if (controller != null && controller.value.isInitialized)
+            Center(
+              child: AspectRatio(
+                  aspectRatio: controller.value.aspectRatio,
+                  child: _buildVideoPlayer()),
+            )
+          else
+            const Center(child: CircularProgressIndicator()),
+
+          // Show play button only when video is paused
+          // if (!_isPlaying)
+          //   Container(
+          //     decoration: BoxDecoration(
+          //       color: Colors.black.withOpacity(0.4),
+          //       shape: BoxShape.circle,
+          //     ),
+          //     child: const Icon(
+          //       Icons.play_arrow,
+          //       color: Colors.white,
+          //       size: 80,
+          //     ),
+          //   ),
+          _buildAnimatedPlayButton(),
+
+          // _buildVideoPlayer(),
           _buildGradientOverlay(),
           SafeArea(child: _buildPostOverlay(context)),
         ],
+      ),
+    );
+  }
+
+  // Add this new method inside your _VideoPostItemState class
+
+  Widget _buildAnimatedPlayButton() {
+    return Center(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 200),
+        reverseDuration: const Duration(milliseconds: 100),
+        // Define the fade and scale transition
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return ScaleTransition(
+            scale: animation,
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+        child: _isPlaying
+            // If playing, show an empty container.
+            // The key ensures AnimatedSwitcher recognizes the change.
+            ? const SizedBox.shrink(key: ValueKey('playing'))
+            // If paused, show the beautiful Material play button.
+            : Container(
+                key: const ValueKey('paused'),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 10,
+                      spreadRadius: 2,
+                    )
+                  ],
+                ),
+                child: IconButton(
+                  // ✅ Logic is now handled here directly.
+                  onPressed: () {
+                    if (widget.controller?.value.isPlaying ?? false) {
+                      widget.controller?.pause();
+                    } else {
+                      widget.onPlayPressed();
+                    }
+                  },
+                  icon:
+                      const Icon(Icons.play_arrow_rounded, color: Colors.white),
+                  iconSize: 48,
+                  padding: const EdgeInsets.all(20),
+                ),
+              ),
       ),
     );
   }
@@ -257,9 +332,9 @@ class _VideoPostItemState extends State<VideoPostItem> {
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Colors.black.withOpacity(0.4),
+              Colors.black.withOpacity(1),
               Colors.transparent,
-              Colors.black.withOpacity(0.6)
+              Colors.black.withOpacity(1)
             ],
             stops: const [0.0, 0.4, 1.0],
           ),
@@ -302,7 +377,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
         create: (context) => sl<FollowBloc>(),
         child:
             BlocBuilder<ProfileBloc, ProfileState>(builder: (context, state) {
-          if (state is ProfileLoaded && state.user != null) {
+          if (state is ProfileLoaded) {
             author = state.user;
             return Column(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -346,32 +421,22 @@ class _VideoPostItemState extends State<VideoPostItem> {
                       // Follow Chip
                       if (author != null && authState is AuthAuthenticated)
                         _buildFollowButton(context, authState.user, author!),
-                      // if (author != null) // Only show if author is loaded
-                      //   const Chip(
-                      //     label: Text('Follow'),
-                      //     labelStyle:
-                      //         TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                      //     padding: EdgeInsets.zero,
-                      //     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      //     visualDensity:
-                      //         VisualDensity(horizontal: 0.0, vertical: -4),
-                      //   ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 12),
 
                 // --- Caption ---
-                    Text(
-                      post.caption,
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: Colors.white,
-                        shadows: [shadow],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
+                Text(
+                  post.caption,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: Colors.white,
+                    shadows: [shadow],
+                  ),
+                ),
+                const SizedBox(height: 12),
 
                 // --- Sound/Music Info ---
                 Row(
@@ -402,7 +467,6 @@ class _VideoPostItemState extends State<VideoPostItem> {
     if (currentUser.id == author.id) {
       return const SizedBox.shrink();
     }
-
     final bool isFollowing = currentUser.followingIds.contains(author.id);
 
     return BlocConsumer<FollowBloc, FollowState>(
@@ -477,9 +541,22 @@ class _VideoPostItemState extends State<VideoPostItem> {
             }),
         const SizedBox(height: 20),
         _buildActionButton(
-            icon: Icons.file_download_rounded,
-            label: 'Save',
-            onPressed: _saveVideo),
+          iconWidget: (_isDownloading)
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Icon(
+                  Icons.save_alt,
+                  color: Colors.white,
+                ),
+          label: _isDownloading ? 'Saving...' : 'Save',
+          onPressed: _saveVideo,
+        ),
         const SizedBox(height: 20),
         _buildActionButton(
             icon: Icons.share_outlined,
