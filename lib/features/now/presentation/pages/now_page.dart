@@ -8,14 +8,12 @@ import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../injection_container.dart' as di;
 import '../../../profile/presentation/bloc/follow_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
-import '../widgets/video_post_item_s.dart';
-// import 'package:dadadu_app/features/now/presentation/widgets/video_post_item.dart';
+import '../widgets/video_post_item.dart';
 
 class NowPage extends StatelessWidget {
   const NowPage({super.key});
@@ -57,6 +55,9 @@ class _NowPageViewState extends State<_NowPageView>
   String? _currentPostId;
   final Set<String> _initializingControllers = {};
 
+  // ✅ 1. Keep track of videos the user has manually started playing.
+  final Set<String> _userHasInitiatedPlay = {};
+
   @override
   void initState() {
     super.initState();
@@ -68,43 +69,47 @@ class _NowPageViewState extends State<_NowPageView>
       }
     });
 
-    // Use addPostFrameCallback to ensure context is ready
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      // Get the GoRouter instance provided at the root of your app
-      _router = Provider.of<GoRouter>(context, listen: false);
-      // Add the listener
+      _router = GoRouter.of(context);
       _router.routerDelegate.addListener(_handleRouteChange);
+      // ✅ Set the initial route state correctly
+      _handleRouteChange();
     });
   }
 
-  /// This function runs every time the route changes.
+  // ✅ 2. Fixed logic to correctly pause/resume video based on route activity.
   void _handleRouteChange() {
     if (!mounted) return;
 
-    // Get the current primary route (e.g., '/home', '/discover')
     final String topRoute =
         _router.routerDelegate.currentConfiguration.fullPath;
     final bool isActive =
-        (topRoute == '/home'); // '/home' is the path for your NowPage
+        (topRoute == '/'); // Assuming NowPage is at the root '/'
 
     if (_isPageActive != isActive) {
       setState(() {
         _isPageActive = isActive;
       });
-      // If the page is no longer the active tab, pause the video.
-      if (!isActive && _currentPostId != null) {
-        _controllerCache[_currentPostId]?.pause();
-      } else {
-        // If the page becomes active again, play the video if it's the current one.
-        if (_isPageActive && _currentPostId != null) {
-          _controllerCache[_currentPostId]?.play();
+
+      final controller = _controllerCache[_currentPostId];
+      if (controller == null) return;
+
+      if (isActive) {
+        // Page is active again. Play only if the user has previously played it.
+        if (_userHasInitiatedPlay.contains(_currentPostId!)) {
+          controller.play();
         }
+      } else {
+        // Page is no longer active, so pause the video.
+        controller.pause();
       }
     }
   }
 
   @override
   void dispose() {
+    // ✅ Remove the router listener
+    _router.routerDelegate.removeListener(_handleRouteChange);
     WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     _disposeAllControllers();
@@ -123,8 +128,8 @@ class _NowPageViewState extends State<_NowPageView>
   Future<void> _manageControllerCache(int page) async {
     if (page < 0 || page >= _posts.length) return;
 
-    // Play the current video
-    await _initializeAndPlay(page);
+    // ✅ 3. This function now prepares the video and plays it ONLY if already started by the user.
+    await _prepareAndPlayCurrentVideo(page);
 
     // Pre-initialize neighbors
     if (page + 1 < _posts.length) _initializeControllerForIndex(page + 1);
@@ -141,22 +146,26 @@ class _NowPageViewState extends State<_NowPageView>
         .forEach(_disposeController);
   }
 
-  Future<void> _initializeAndPlay(int index) async {
+  // Renamed from _initializeAndPlay to be more descriptive
+  Future<void> _prepareAndPlayCurrentVideo(int index) async {
     if (index < 0 || index >= _posts.length) return;
 
     final post = _posts[index];
-    VideoPlayerController? controller = _controllerCache[post.id];
     _currentPostId = post.id;
+    VideoPlayerController? controller = _controllerCache[post.id];
+
     if (controller == null) {
       await _initializeControllerForIndex(index);
       controller = _controllerCache[post.id];
     }
 
     if (controller?.value.isInitialized ?? false) {
-      await controller?.setLooping(false);
-      await controller?.play();
+      await controller?.setLooping(true); // Loop is good for feeds
+      // ✅ Play only if the user has previously initiated play for this video.
+      if (_userHasInitiatedPlay.contains(post.id) && _isPageActive) {
+        await controller?.play();
+      }
     }
-    if (mounted) setState(() {});
   }
 
   Future<void> _disposeController(String postId) async {
@@ -180,11 +189,11 @@ class _NowPageViewState extends State<_NowPageView>
     _initializingControllers.add(post.id);
     final controller =
         CachedVideoPlayerPlus.networkUrl(Uri.parse(post.videoUrl));
-    // final controller = VideoPlayerController.networkUrl(Uri.parse(post.videoUrl));
     try {
       await controller.initialize();
       if (mounted) {
         _controllerCache[post.id] = controller.controller;
+        setState(() {});
       } else {
         await controller.dispose();
       }
@@ -195,20 +204,24 @@ class _NowPageViewState extends State<_NowPageView>
     }
   }
 
+  // ✅ 4. Fixed app lifecycle logic
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (_posts.isEmpty) return;
-    final controller = _controllerCache[_posts[_currentPageIndex].id];
+    if (_currentPostId == null) return;
+    final controller = _controllerCache[_currentPostId!];
+
     if (state == AppLifecycleState.paused) {
       controller?.pause();
     } else if (state == AppLifecycleState.resumed) {
-      if (_isPageActive) {
+      // If the page is active and the user had played this video, resume it.
+      if (_isPageActive && _userHasInitiatedPlay.contains(_currentPostId!)) {
         controller?.play();
       }
     }
   }
 
-  // ✅ NEW: Helper method to show the notifications dialog
+  // ... (keep the rest of your methods like _showNotificationsDialog and _buildNowChip)
+
   void _showNotificationsDialog(BuildContext context) {
     setState(() {
       _hasNewNotifications = false;
@@ -273,100 +286,6 @@ class _NowPageViewState extends State<_NowPageView>
           ],
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final statusBarHeight = MediaQuery.of(context).padding.top;
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        centerTitle: false,
-        excludeHeaderSemantics: true,
-        title: BlocBuilder<FeedBloc, FeedState>(
-          builder: (context, state) {
-            final int totalPosts =
-                (state is FeedLoaded) ? state.posts.length : 0;
-            return _buildNowChip(colorScheme, totalPosts);
-          },
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: IconButton(
-              icon: Badge(
-                // This makes the dot appear or disappear
-                isLabelVisible: _hasNewNotifications,
-                // Leaving the label null creates the small red dot
-                child: const Icon(Icons.notifications_none_rounded),
-              ),
-              tooltip: 'Notifications',
-              onPressed: () => _showNotificationsDialog(context),
-              style: IconButton.styleFrom(
-                backgroundColor: Colors.black.withOpacity(0.4),
-                foregroundColor: Colors.white,
-                shape: const CircleBorder(),
-                elevation: 4,
-                shadowColor: Colors.black.withOpacity(0.5),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: EdgeInsets.only(top: statusBarHeight),
-        child: BlocConsumer<FeedBloc, FeedState>(
-          listener: (context, state) {
-            if (state is FeedLoaded) {
-              setState(() {
-                _posts = state.posts;
-                _authors = state.authors;
-              });
-              _manageControllerCache(0);
-            }
-          },
-          builder: (context, state) {
-            // LOADING STATE
-            if (state is FeedLoading || state is FeedInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            // ERROR STATE
-            if (state is FeedError) {
-              return Center(child: Text('Error: ${state.message}'));
-            }
-            if (_posts.isNotEmpty) {
-              return PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                itemCount: _posts.length,
-                itemBuilder: (context, index) {
-                  final post = _posts[index];
-                  final author = _authors[post.userId];
-                  return BlocProvider<ProfileBloc>(
-                      create: (context) => di.sl<ProfileBloc>()
-                        ..add(SubscribeToUserProfile(author!.id)),
-                      child: VideoPostItem(
-                          key: ValueKey(post.id),
-                          post: post,
-                          author: author,
-                          controller: _controllerCache[post.id],
-                          isCurrentPage: index == _currentPageIndex,
-                          onUserTapped: (userId) {
-                            context.push('/profile/$userId');
-                          }));
-                },
-              );
-            }
-            // Fallback for any other state
-            return const Center(
-              child: Text("No posts found."),
-            );
-          },
-        ),
-      ),
     );
   }
 
@@ -450,4 +369,109 @@ class _NowPageViewState extends State<_NowPageView>
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final statusBarHeight = MediaQuery.of(context).padding.top;
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        centerTitle: false,
+        excludeHeaderSemantics: true,
+        title: BlocBuilder<FeedBloc, FeedState>(
+          builder: (context, state) {
+            final int totalPosts =
+                (state is FeedLoaded) ? state.posts.length : 0;
+            return _buildNowChip(colorScheme, totalPosts);
+          },
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: IconButton(
+              icon: Badge(
+                // This makes the dot appear or disappear
+                isLabelVisible: _hasNewNotifications,
+                // Leaving the label null creates the small red dot
+                child: const Icon(Icons.notifications_none_rounded),
+              ),
+              tooltip: 'Notifications',
+              onPressed: () => _showNotificationsDialog(context),
+              style: IconButton.styleFrom(
+                backgroundColor: Colors.black.withOpacity(0.4),
+                foregroundColor: Colors.white,
+                shape: const CircleBorder(),
+                elevation: 4,
+                shadowColor: Colors.black.withOpacity(0.5),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: EdgeInsets.only(top: statusBarHeight),
+        child: BlocConsumer<FeedBloc, FeedState>(
+          listener: (context, state) {
+            if (state is FeedLoaded) {
+              setState(() {
+                _posts = state.posts;
+                _authors = state.authors;
+              });
+              _manageControllerCache(0);
+            }
+          },
+          builder: (context, state) {
+            // LOADING STATE
+            if (state is FeedLoading || state is FeedInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            // ERROR STATE
+            if (state is FeedError) {
+              return Center(child: Text('Error: ${state.message}'));
+            }
+            if (_posts.isNotEmpty) {
+              return PageView.builder(
+                controller: _pageController,
+                scrollDirection: Axis.vertical,
+                itemCount: _posts.length,
+                itemBuilder: (context, index) {
+                  final post = _posts[index];
+                  final author = _authors[post.userId];
+                  return BlocProvider<ProfileBloc>(
+                      create: (context) => di.sl<ProfileBloc>()
+                        ..add(SubscribeToUserProfile(author!.id)),
+                      child: VideoPostItem(
+                          key: ValueKey(post.id),
+                          post: post,
+                          author: author,
+                          controller: _controllerCache[post.id],
+                          isCurrentPage: index == _currentPageIndex,
+                          onUserTapped: (userId) {
+                            context.push('/profile/$userId');
+                          },
+                          // ✅ 5. Add a callback to notify when the user presses play.
+                          onPlayPressed: () {
+                            if (!_userHasInitiatedPlay.contains(post.id)) {
+                              setState(() {
+                                _userHasInitiatedPlay.add(post.id);
+                              });
+                            }
+                            _controllerCache[post.id]?.play();
+                          }));
+                },
+              );
+            }
+            // Fallback for any other state
+            return const Center(
+              child: Text("No posts found."),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+// ... Keep the rest of the file the same
 }
