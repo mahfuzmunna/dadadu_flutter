@@ -4,9 +4,13 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
+import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 
@@ -28,6 +32,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
   // This controller is used to get video duration for thumbnail generation
   late VideoPlayerController _videoController;
   late TextEditingController _captionController;
+
+  bool _isProcessing = false;
 
   List<Uint8List> _thumbnails = [];
   Uint8List? _selectedThumbnail;
@@ -114,7 +120,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     }
   }
 
-  void _publishPost() {
+  Future<void> _publishPost() async {
     if (_selectedThumbnail == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a thumbnail.')),
@@ -122,16 +128,61 @@ class _CreatePostPageState extends State<CreatePostPage> {
       return;
     }
 
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      // ✅ Dispatch the event to the UploadBloc
-      context.read<PostBloc>().add(UploadPost(
-            videoFile: File(widget.videoPath),
-            thumbnailBytes: _selectedThumbnail!,
+    setState(() {
+      _isProcessing = true;
+    });
+
+    try {
+      final tempDir = await getTemporaryDirectory();
+      final processedVideoPath =
+          '${tempDir.path}/processed.${DateTime.now().millisecondsSinceEpoch}.mp4';
+      // reduces file size
+      final command =
+          '-y -i "${widget.videoPath}" -c:v libx264 -preset veryfast -crf 28 -c:a aac "$processedVideoPath"';
+
+      // final command = '-y -i "${widget.videoPath}" -c:v libx264 -preset medium -crf 23 -vf "scale=-2:1080" -c:a aac -b:a 128k -movflags +faststart "$processedVideoPath".mp4';
+
+      // final command = '-y -i "${widget.videoPath}" -c:v libx264 -preset ultrafast -crf 23 -c:a aac "$processedVideoPath".mp4';
+
+      final session = await FFmpegKit.execute(command);
+      final returnCode = await session.getReturnCode();
+
+      if (ReturnCode.isSuccess(returnCode)) {
+        final authState = context.read<AuthBloc>().state;
+        if (authState is AuthAuthenticated) {
+          // ✅ Dispatch the event to the UploadBloc
+          context.read<PostBloc>().add(UploadPost(
+                // videoFile: File(widget.videoPath),
+                videoFile: File(processedVideoPath),
+                thumbnailBytes: _selectedThumbnail!,
             caption: _captionController.text.trim(),
             intent: _selectedIntent,
             userId: authState.user.id,
           ));
+        }
+      } else {
+        debugPrint('FFmpeg process failed with return code: $returnCode');
+        final logs = await session.getAllLogsAsString();
+        debugPrint('FFmpeg logs: $logs');
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Could not process video. Please try again.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error publishing post: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
     }
   }
 
@@ -158,7 +209,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
         );
       }
     }, builder: (context, state) {
-      final isLoading = state is UploadInProgress;
+      final isUploading = state is UploadInProgress;
+      final isBusy = _isProcessing || isUploading;
       return Scaffold(
         appBar: AppBar(
           title: const Text('New Post'),
@@ -166,7 +218,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
           // The publish button is now at the bottom of the page
         ),
         body: AbsorbPointer(
-          absorbing: isLoading,
+          absorbing: isUploading,
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -199,22 +251,27 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     SizedBox(
                       width: double.infinity,
                       child: FilledButton.icon(
-                        icon: isLoading
-                            ? const SizedBox.shrink()
+                    icon: isUploading
+                        ? const SizedBox.shrink()
                             : const Icon(Icons.publish_rounded),
-                        label: Text(isLoading
-                            ? 'Publishing... ${(state.progress * 100)
-                            .toStringAsFixed(0)}%'
-                            : 'Publish'),
-                        onPressed: isLoading ? null : _publishPost,
-                        style: FilledButton.styleFrom(
+                    label: Text(
+                      _isProcessing
+                          ? 'Processing...'
+                          : isUploading
+                              ? 'Publishing... ${(state.progress * 100).toStringAsFixed(0)}%'
+                              : 'Publish',
+                    ),
+                    onPressed: isBusy ? null : _publishPost,
+                    style: FilledButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 16)),
                       ),
                     ),
-                    if(isLoading) ...[
-                      const SizedBox(height: 16),
-                      LinearProgressIndicator(value: state.progress,),
-                    ]
+                if (isUploading) ...[
+                  const SizedBox(height: 16),
+                  LinearProgressIndicator(
+                    value: isUploading ? state.progress : null,
+                  ),
+                ]
                   ],
                 ),
               ),
