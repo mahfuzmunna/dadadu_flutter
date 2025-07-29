@@ -1,12 +1,15 @@
 import 'package:dadadu_app/features/chat/domain/entities/chat_message_entity.dart';
 
 class ChatMessageModel extends ChatMessageEntity {
-  const ChatMessageModel({
+  String? recepientUserId;
+
+  ChatMessageModel({
     required super.id,
     required super.senderId,
     required super.roomId,
     required super.content,
     required super.createdAt,
+    this.recepientUserId,
   });
 
   /// Creates a ChatMessageModel from a Supabase database map.
@@ -28,5 +31,23 @@ class ChatMessageModel extends ChatMessageEntity {
       'room_id': roomId,
       'content': content,
     };
+  }
+
+  ChatMessageModel copyWith({
+    String? id,
+    String? senderId,
+    String? roomId,
+    String? content,
+    DateTime? createdAt,
+    String? recepientUserId,
+  }) {
+    return ChatMessageModel(
+      id: id ?? this.id,
+      senderId: senderId ?? this.senderId,
+      roomId: roomId ?? this.roomId,
+      content: content ?? this.content,
+      createdAt: createdAt ?? this.createdAt,
+      recepientUserId: recepientUserId ?? this.recepientUserId,
+    );
   }
 }

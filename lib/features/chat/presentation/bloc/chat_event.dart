@@ -35,10 +35,11 @@ class SendMessage extends ChatEvent {
 
 /// Internal event used to push updates from the real-time stream into the BLoC.
 class _MessagesUpdated extends ChatEvent {
+  final String roomId;
   final List<ChatMessageEntity> messages;
 
-  const _MessagesUpdated(this.messages);
+  const _MessagesUpdated({required this.roomId, required this.messages});
 
   @override
-  List<Object> get props => [messages];
+  List<Object> get props => [messages, roomId];
 }

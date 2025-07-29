@@ -36,7 +36,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       (failure) => emit(ChatError(failure.message)),
       (stream) {
         _messagesSubscription = stream.listen((messages) {
-          add(_MessagesUpdated(messages));
+          add(_MessagesUpdated(messages: messages, roomId: event.roomId));
         });
       },
     );
@@ -53,7 +53,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   void _onMessagesUpdated(_MessagesUpdated event, Emitter<ChatState> emit) {
-    emit(ChatLoaded(event.messages));
+    emit(ChatLoaded(event.messages, event.roomId));
   }
 
   @override

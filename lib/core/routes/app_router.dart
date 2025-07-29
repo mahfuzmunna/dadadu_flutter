@@ -28,7 +28,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/pages/sign_up_page.dart';
-import '../../features/chat/presentation/pages/chat_page.dart';
+import '../../features/chat/presentation/pages/chat_page_s.dart';
 import '../../features/now/now_injection.dart' as di;
 import '../../features/posts/presentation/pages/create_post_camera_page.dart';
 import '../../features/posts/presentation/pages/create_post_page.dart';

@@ -1,0 +1,166 @@
+import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/chat/presentation/bloc/chat_bloc.dart';
+import 'package:dadadu_app/injection_container.dart';
+import 'package:dash_chat_3/dash_chat_3.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class ChatPage extends StatelessWidget {
+  final String roomId;
+
+  const ChatPage({super.key, required this.roomId});
+
+  @override
+  Widget build(BuildContext context) {
+    // Add an event to load the specific room details in addition to messages
+    return BlocProvider(
+      create: (context) => sl<ChatBloc>()..add(SubscribeToMessages(roomId)),
+      // ..add(LoadChatRoomDetails(roomId)), // Assumes you have this event
+      child: const _ChatView(),
+    );
+  }
+}
+
+class _ChatView extends StatelessWidget {
+  const _ChatView();
+
+  @override
+  Widget build(BuildContext context) {
+    final authState = context.watch<AuthBloc>().state;
+    if (authState is! AuthAuthenticated) {
+      return const Scaffold(body: Center(child: Text('Not Authenticated')));
+    }
+    final currentUser = authState.user;
+
+    // The ChatUser for the person using the app
+    final chatUser = ChatUser(
+      id: currentUser.id,
+      firstName: currentUser.fullName,
+      profileImage: currentUser.profilePhotoUrl,
+    );
+
+    return BlocBuilder<ChatBloc, ChatState>(
+      builder: (context, state) {
+        // Show loading spinner until the chat details and messages are loaded
+        if (state is ChatLoading || state is ChatInitial) {
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+        }
+        if (state is ChatError) {
+          return Scaffold(
+              appBar: AppBar(), body: Center(child: Text(state.message)));
+        }
+        if (state is ChatLoaded) {
+          final messages = state.messages.map((msg) {
+            return ChatMessage(
+              user: ChatUser(
+                id: msg.senderId,
+                // Pass other user's info for bubble avatars
+                // profileImage: msg.senderId != currentUser.id
+                //     ? state.otherParticipant?.profilePhotoUrl
+                //     : null,
+              ),
+              text: msg.content,
+              createdAt: msg.createdAt,
+            );
+          }).toList();
+
+          final theme = Theme.of(context);
+
+          return Scaffold(
+            // ✅ A contextual AppBar showing who you're talking to
+            appBar: AppBar(
+              leadingWidth: 40,
+              title: Row(
+                children: [
+                  // CircleAvatar(
+                  //   radius: 20,
+                  //   backgroundImage: state.otherParticipant?.profilePhotoUrl != null
+                  //       ? CachedNetworkImageProvider(state.otherParticipant!.profilePhotoUrl!)
+                  //       : null,
+                  //   child: state.otherParticipant?.profilePhotoUrl == null
+                  //       ? const Icon(Icons.person)
+                  //       : null,
+                  // ),
+                  // const SizedBox(width: 12),
+                  // Column(
+                  //   crossAxisAlignment: CrossAxisAlignment.start,
+                  //   children: [
+                  //     Text(
+                  //       state.otherParticipant?.fullName ?? 'Chat',
+                  //       style: theme.textTheme.titleMedium,
+                  //     ),
+                  //     Text(
+                  //       'Online', // TODO: Replace with otherParticipants Data
+                  //       style: theme.textTheme.bodySmall?.copyWith(
+                  //         color: theme.colorScheme.secondary,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
+                ],
+              ),
+              actions: [
+                IconButton(
+                    icon: const Icon(Icons.videocam_rounded), onPressed: () {}),
+                IconButton(
+                    icon: const Icon(Icons.call_rounded), onPressed: () {}),
+              ],
+            ),
+            body: DashChat3(
+              currentUser: chatUser,
+              onSend: (ChatMessage chatMessage) {
+                context.read<ChatBloc>().add(SendMessage(
+                      roomId: state.roomId,
+                      content: chatMessage.text,
+                      senderId: currentUser.id,
+                    ));
+              },
+              messages: messages,
+              // ✅ CUSTOM STYLING to match Material 3 theme
+              inputOptions: InputOptions(
+                inputDecoration: InputDecoration(
+                  hintText: 'Message...',
+                  filled: true,
+                  fillColor: theme.colorScheme.surfaceContainerHighest,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(24),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                sendButtonBuilder: (send) => IconButton(
+                  icon: Icon(Icons.send_rounded,
+                      color: theme.colorScheme.primary),
+                  onPressed: send, // DashChat handles this
+                ),
+                leading: [
+                  IconButton(
+                    icon: Icon(Icons.attach_file_rounded,
+                        color: theme.colorScheme.onSurfaceVariant),
+                    onPressed: () {
+                      // TODO: Implement file/image sending logic
+                    },
+                  ),
+                ],
+              ),
+              messageOptions: MessageOptions(
+                currentUserContainerColor: theme.colorScheme.primaryContainer,
+                currentUserTextColor: theme.colorScheme.onPrimaryContainer,
+                containerColor: theme.colorScheme.surfaceContainer,
+                textColor: theme.colorScheme.onSurface,
+                messageDecorationBuilder: (message, isCurrentUser, _) =>
+                    BoxDecoration(
+                  color: isCurrentUser != null
+                      ? theme.colorScheme.primaryContainer
+                      : theme.colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(18),
+                ),
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}

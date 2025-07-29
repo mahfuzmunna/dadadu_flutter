@@ -13,12 +13,13 @@ class ChatLoading extends ChatState {}
 
 /// State emitted when messages have been successfully loaded.
 class ChatLoaded extends ChatState {
+  final String roomId;
   final List<ChatMessageEntity> messages;
 
-  const ChatLoaded(this.messages);
+  const ChatLoaded(this.messages, this.roomId);
 
   @override
-  List<Object> get props => [messages];
+  List<Object> get props => [messages, roomId];
 }
 
 /// State emitted when an error occurs while fetching messages.
