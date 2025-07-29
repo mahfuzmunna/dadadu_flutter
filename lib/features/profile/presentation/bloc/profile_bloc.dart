@@ -127,7 +127,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onUpdateProfilePhoto(UpdateProfilePhoto event,
       Emitter<ProfileState> emit,) async {
-    emit(ProfileLoading());
+    emit(const ProfileLoading());
     final result = await _updateProfilePhotoUseCase(
       UpdateProfilePhotoParams(
           userId: event.userId, photoFile: event.photoFile),
