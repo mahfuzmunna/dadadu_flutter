@@ -10,6 +10,7 @@ import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart'
 import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -19,6 +20,10 @@ import 'core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
   try {
     await initializeCameras();
     await Supabase.initialize(
