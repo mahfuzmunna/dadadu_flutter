@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/discover/presentation/pages/vibe_users_page_s.dart';
 import 'package:dadadu_app/features/location/domain/usecases/get_location_name_usecase.dart';
@@ -9,9 +10,11 @@ import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart'
 import 'package:dadadu_app/injection_container.dart' as di;
 import 'package:dadadu_app/shared/widgets/pulsing_radar_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:lottie/lottie.dart';
+import 'package:share_plus/share_plus.dart';
 
 enum LocationPermissionStatus {
   initial,
@@ -22,27 +25,49 @@ enum LocationPermissionStatus {
   error,
 }
 
-class DiscoverPage extends StatefulWidget {
-  const DiscoverPage({super.key});
+class DiscoverPage extends StatelessWidget {
+  final String userId;
+
+  const DiscoverPage({required this.userId, super.key});
 
   @override
-  State<DiscoverPage> createState() => _DiscoverPageState();
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+            create: (context) =>
+                di.sl<ProfileBloc>()..add(SubscribeToUserProfile(userId))),
+      ],
+      child: const _DiscoverPageContent(),
+    );
+  }
 }
 
-class _DiscoverPageState extends State<DiscoverPage> {
+class _DiscoverPageContent extends StatefulWidget {
+  const _DiscoverPageContent({super.key});
+
+  @override
+  State<_DiscoverPageContent> createState() => _DiscoverPageContentState();
+}
+
+class _DiscoverPageContentState extends State<_DiscoverPageContent> {
   LocationPermissionStatus _locationStatus = LocationPermissionStatus.initial;
   String _locationErrorMessage = "";
   Position? _currentPosition;
   bool _isLocationListenerActive = false;
   double _selectedDistance = 1; // Default distance in km
+  bool _isDistanceLocked = false;
   bool _goToVide = false;
   String _selectedVibe = "";
   Position? _selectedCurrentPosition;
   double _selectedMaxDistance = 1;
+  final TextEditingController referralController = TextEditingController();
+  String? _referralLink;
+  int? _referralsCount;
+  List<UserEntity>? referred;
 
   final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
       GlobalKey<ScaffoldMessengerState>();
-  final PageController _videoPageController = PageController();
 
   StreamSubscription<Position>? _positionStreamSubscription;
 
@@ -62,9 +87,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
       // Test if location services are enabled.
       serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
-        if (mounted)
+        if (mounted) {
           setState(
               () => _locationStatus = LocationPermissionStatus.serviceDisabled);
+        }
         return;
       }
 
@@ -72,15 +98,17 @@ class _DiscoverPageState extends State<DiscoverPage> {
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
         if (permission == LocationPermission.denied) {
-          if (mounted)
+          if (mounted) {
             setState(() => _locationStatus = LocationPermissionStatus.denied);
+          }
           return;
         }
       }
       if (permission == LocationPermission.deniedForever) {
-        if (mounted)
+        if (mounted) {
           setState(
               () => _locationStatus = LocationPermissionStatus.deniedForever);
+        }
         return;
       }
 
@@ -168,15 +196,11 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   void _openLocationSettings() => Geolocator.openLocationSettings();
 
-  // --- Navigation & Other Callbacks (No Changes Needed) ---
-  void _navigateToUserProfile(String userId) {
-    // ... This entire method remains the same ...
-  }
 
   Widget _buildBody() {
     switch (_locationStatus) {
       case LocationPermissionStatus.initial:
-        return const Center(child: CircularProgressIndicator());
+      // return const Center(child: CircularProgressIndicator());
       case LocationPermissionStatus.granted:
         if (_goToVide) {
           return VibeUsersPage(
@@ -189,7 +213,38 @@ class _DiscoverPageState extends State<DiscoverPage> {
                 });
               });
         }
-        return _buildVibeSelectionPage();
+        return BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, state) {
+          // if (state is ProfileLoading || state is ProfileInitial) {
+          //   return const Scaffold(
+          //       body: Center(child: CircularProgressIndicator()));
+          // }
+          if (state is ProfileError) {
+            return Scaffold(body: Center(child: Text(state.message)));
+          }
+          if (state is ProfileLoaded) {
+            final currentUser = state.user;
+
+            _referralLink =
+                'https://dadadu.app/invite/${currentUser.id.substring(0, 8)}';
+            _referralsCount = currentUser.referralsCount;
+            referralController.text = _referralLink!;
+
+            _isDistanceLocked =
+                (_referralsCount != null && _referralsCount! >= 10)
+                    ? false
+                    : true;
+
+            // All UI is now built using the live data from the BLoC state
+            return _buildVibeSelectionPage();
+          }
+
+          return const Scaffold(
+              body: Center(child: CircularProgressIndicator()));
+
+          // return const Scaffold(
+          //     body: Center(child: Text('Something went wrong')));
+        });
       default:
         return _buildLocationErrorPage();
     }
@@ -327,7 +382,7 @@ class _DiscoverPageState extends State<DiscoverPage> {
               ),
               // Right Icon Button: Increase Limit
               _buildSelectorButton(
-                icon: Icons.lock_open_outlined,
+                icon: _isDistanceLocked ? Icons.lock : Icons.lock_open,
                 tooltip: 'Increase Distance Limit',
                 onPressed: () => _showIncreaseLimitDialog(),
               ),
@@ -368,66 +423,142 @@ class _DiscoverPageState extends State<DiscoverPage> {
 
   // NEW: Method to show the "Increase Limit" dialog
   void _showIncreaseLimitDialog() {
-    final authState = context.read<AuthBloc>().state;
-    int referralCount = 0;
-
-    // Safely get the referral count from the authenticated user
-    if (authState is AuthAuthenticated) {
-      // Assumption: Your UserEntity has a field like `referralCount`
-      referralCount = authState.user.referralsCount ?? 0;
-    }
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Row(
-            children: [
-              Icon(Icons.people_alt_outlined),
-              SizedBox(width: 10),
-              Text(
-                'Unlock More Distance',
-                style: TextStyle(fontSize: 20),
-              ),
-            ],
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                  'Refer 10 new users to unlock the ability to search for people further away!',
-                  style: TextStyle(fontSize: 16)),
-              const SizedBox(height: 20),
-              Center(
-                child: Text.rich(
-                  TextSpan(
-                    style: Theme.of(context).textTheme.titleMedium,
+        return BlocBuilder<ProfileBloc, ProfileState>(
+          builder: (context, state) {
+            if (!_isDistanceLocked) {
+              // --- UNLOCKED DIALOG ---
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                contentPadding: const EdgeInsets.all(24),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Lottie animation for a celebratory effect
+                    Lottie.asset(
+                      'assets/animations/globe.json', // Add your animation file
+                      height: 120,
+                      repeat: false,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Feature Unlocked!',
+                      style: Theme.of(context).textTheme.headlineSmall,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "Congratulations! You can now search for people at any distance.",
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+                actionsAlignment: MainAxisAlignment.center,
+                actions: [
+                  FilledButton(
+                    child: const Text('Awesome!'),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              );
+            } else {
+              // --- INVITE DIALOG (Your existing UI) ---
+              return AlertDialog(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+                title: const Row(
+                  children: [
+                    Icon(Icons.people_alt_outlined),
+                    SizedBox(width: 10),
+                    Text('Unlock More Distance',
+                        style: TextStyle(fontSize: 20)),
+                  ],
+                ),
+                content: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const TextSpan(text: 'Your referrals: '),
-                      TextSpan(
-                        text: '$referralCount / 10',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                      const Text(
+                          'Refer 10 new users to unlock the ability to search for people further away!',
+                          style: TextStyle(fontSize: 16)),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: Text.rich(
+                          TextSpan(
+                            style: Theme.of(context).textTheme.titleMedium,
+                            children: [
+                              const TextSpan(text: 'Your referrals: '),
+                              TextSpan(
+                                text: '$_referralsCount / 10',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      TextFormField(
+                        controller: referralController,
+                        readOnly: true,
+                        decoration: InputDecoration(
+                          labelText: 'Your Invite Link',
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
+                          border: const OutlineInputBorder(),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.copy_all_rounded),
+                            tooltip: 'Copy Link',
+                            onPressed: () {
+                              if (_referralLink != null) {
+                                Clipboard.setData(
+                                    ClipboardData(text: _referralLink!));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text('Link copied to clipboard!')),
+                                );
+                              }
+                            },
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: const Text('Got It'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
+                actions: [
+                  FilledButton.icon(
+                    icon: const Icon(Icons.share_rounded),
+                    label: const Text('Share'),
+                    onPressed: () {
+                      if (_referralLink != null) {
+                        Share.share(
+                          'Hey! Come join me on Dadadu, a new app for sharing moments. Use my link to sign up: $_referralLink',
+                          subject: 'Invitation to Dadadu!',
+                        );
+                      }
+                    },
+                  ),
+                  TextButton(
+                    child: const Text('Got It'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              );
+            }
+          },
         );
       },
     );

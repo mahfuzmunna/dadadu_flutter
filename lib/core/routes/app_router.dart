@@ -179,7 +179,16 @@ class AppRouter {
               routes: [
                 GoRoute(
                   path: '/discover',
-                  builder: (context, state) => DiscoverPage(),
+                  // builder: (context, state) => DiscoverPage(),
+                  builder: (BuildContext context, GoRouterState state) {
+                    final authState = context.read<AuthBloc>().state;
+                    if (authState is AuthAuthenticated) {
+                      // Pass the currently logged-in user to the ProfilePage
+                      return DiscoverPage(userId: authState.user.id);
+                    }
+                    // Fallback or loading state if needed
+                    return const Center(child: CircularProgressIndicator());
+                  },
                 ),
               ],
             ),

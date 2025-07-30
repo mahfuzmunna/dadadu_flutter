@@ -98,7 +98,7 @@ class CommentsView extends StatelessWidget {
                 },
               ),
             ),
-            // ✅ NEW: Comment input field at the bottom
+
             const Divider(),
             _CommentInputField(postId: postId),
           ],
@@ -108,9 +108,6 @@ class CommentsView extends StatelessWidget {
   }
 }
 
-// =======================================================================
-// ✅ NEW: WIDGET FOR THE COMMENT INPUT FIELD
-// =======================================================================
 class _CommentInputField extends StatefulWidget {
   final String postId;
 
@@ -133,11 +130,9 @@ class _CommentInputFieldState extends State<_CommentInputField> {
     final text = _textController.text.trim();
     if (text.isEmpty) return;
 
-    // ✅ FIXED: Read the AuthBloc state here, right when it's needed.
     final authState = context.read<AuthBloc>().state;
 
     if (authState is AuthAuthenticated) {
-      // Dispatch the event to the BLoC with all the required parameters.
       context.read<CommentsBloc>().add(AddComment(
             CommentParams(
               userId: authState.user.id,
@@ -146,15 +141,14 @@ class _CommentInputFieldState extends State<_CommentInputField> {
             ),
           ));
     } else {
-      // Handle the case where the user is not authenticated.
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('You must be logged in to comment.')),
       );
     }
   }
 
+  @override
   Widget build(BuildContext context) {
-    // ✅ NEW: BlocListener handles UI side-effects cleanly.
     return BlocListener<CommentsBloc, CommentsState>(
       listener: (context, state) {
         if (state is CommentAdded) {
@@ -189,8 +183,6 @@ class _CommentInputFieldState extends State<_CommentInputField> {
               ),
             ),
             const SizedBox(width: 8),
-            // The button's onPressed only dispatches the event.
-            // The BlocListener handles the result.
             IconButton(
               icon: const Icon(Icons.send_rounded),
               onPressed: _submitComment,
@@ -202,17 +194,23 @@ class _CommentInputFieldState extends State<_CommentInputField> {
   }
 }
 
-// =======================================================================
-// MODIFIED: COMMENT LIST WITH TRANSLATE BUTTON
-// =======================================================================
-class _CommentList extends StatelessWidget {
+class _CommentList extends StatefulWidget {
   final List<CommentEntity> comments;
   final ScrollController controller;
 
   const _CommentList({required this.comments, required this.controller});
 
   @override
+  State<_CommentList> createState() => _CommentListState();
+}
+
+class _CommentListState extends State<_CommentList> {
+  bool _isTranslating = false;
+
+  @override
   Widget build(BuildContext context) {
+    final comments = widget.comments;
+    final controller = widget.controller;
     if (comments.isEmpty) {
       return const Center(
           child:
@@ -225,6 +223,7 @@ class _CommentList extends StatelessWidget {
       itemBuilder: (context, index) {
         final comment = comments[index];
         return ListTile(
+          key: ValueKey(comment.comment),
           leading: CircleAvatar(
             backgroundImage: comment.author?.profilePhotoUrl != null
                 ? CachedNetworkImageProvider(comment.author!.profilePhotoUrl!)
@@ -235,27 +234,31 @@ class _CommentList extends StatelessWidget {
           ),
           title: Text(comment.author?.username ?? 'Anonymous',
               style: const TextStyle(fontWeight: FontWeight.bold)),
-          // ✅ MODIFIED: Subtitle is now a column to hold the translate button
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(comment.comment),
               const SizedBox(height: 4),
-              // ✅ NEW: Translate text button
-              InkWell(
-                onTap: () {
-                  // Placeholder for your translation logic
+              TextButton.icon(
+                icon: _isTranslating
+                    ? const SizedBox(
+                        height: 8, width: 8, child: CircularProgressIndicator())
+                    : null,
+                onPressed: () {
+                  setState(() {
+                    _isTranslating = true;
+                  });
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                         content:
                             Text('Translating comment: "${comment.comment}"')),
                   );
                 },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4.0),
+                label: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
                   child: Text(
-                    'Translate',
-                    style: TextStyle(
+                    _isTranslating ? 'Translating...' : 'Translate',
+                    style: const TextStyle(
                       color: Colors.blueAccent,
                       fontWeight: FontWeight.w600,
                       fontSize: 12,

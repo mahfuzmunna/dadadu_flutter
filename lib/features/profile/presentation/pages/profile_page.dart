@@ -82,9 +82,6 @@ class _ProfileView extends StatelessWidget {
     );
   }
 }
-
-/// This is the actual UI for the profile page.
-/// It's a StatefulWidget to manage its own helper methods and dialogs.
 class _ProfileContent extends StatefulWidget {
   final UserEntity user;
   final bool isMyProfile;
