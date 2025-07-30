@@ -378,6 +378,7 @@ class _NowPageViewState extends State<_NowPageView>
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+        scrolledUnderElevation: 0.0,
         centerTitle: false,
         excludeHeaderSemantics: true,
         title: BlocBuilder<FeedBloc, FeedState>(
@@ -436,6 +437,9 @@ class _NowPageViewState extends State<_NowPageView>
                 controller: _pageController,
                 scrollDirection: Axis.vertical,
                 itemCount: _posts.length,
+                physics: const BouncingScrollPhysics(),
+                // clipBehavior: Clip.none,
+
                 itemBuilder: (context, index) {
                   final post = _posts[index];
                   final author = _authors[post.userId];
