@@ -6,6 +6,7 @@ import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/injection_container.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
@@ -381,6 +382,9 @@ class _NowPageViewState extends State<_NowPageView>
         scrolledUnderElevation: 0.0,
         centerTitle: false,
         excludeHeaderSemantics: true,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: Brightness.light),
         title: BlocBuilder<FeedBloc, FeedState>(
           builder: (context, state) {
             final int totalPosts =
@@ -411,68 +415,65 @@ class _NowPageViewState extends State<_NowPageView>
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.only(top: statusBarHeight),
-        child: BlocConsumer<FeedBloc, FeedState>(
-          listener: (context, state) {
-            if (state is FeedLoaded) {
-              setState(() {
-                _posts = state.posts;
-                _authors = state.authors;
-              });
-              _manageControllerCache(0);
-            }
-          },
-          builder: (context, state) {
-            // LOADING STATE
-            if (state is FeedLoading || state is FeedInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            // ERROR STATE
-            if (state is FeedError) {
-              return Center(child: Text('Error: ${state.message}'));
-            }
-            if (_posts.isNotEmpty) {
-              return PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                itemCount: _posts.length,
-                physics: const BouncingScrollPhysics(),
-                // clipBehavior: Clip.none,
+      body: BlocConsumer<FeedBloc, FeedState>(
+        listener: (context, state) {
+          if (state is FeedLoaded) {
+            setState(() {
+              _posts = state.posts;
+              _authors = state.authors;
+            });
+            _manageControllerCache(0);
+          }
+        },
+        builder: (context, state) {
+          // LOADING STATE
+          if (state is FeedLoading || state is FeedInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          // ERROR STATE
+          if (state is FeedError) {
+            return Center(child: Text('Error: ${state.message}'));
+          }
+          if (_posts.isNotEmpty) {
+            return PageView.builder(
+              controller: _pageController,
+              scrollDirection: Axis.vertical,
+              itemCount: _posts.length,
+              physics: const BouncingScrollPhysics(),
+              // clipBehavior: Clip.none,
 
-                itemBuilder: (context, index) {
-                  final post = _posts[index];
-                  final author = _authors[post.userId];
-                  return BlocProvider<ProfileBloc>(
-                      create: (context) => di.sl<ProfileBloc>()
-                        ..add(SubscribeToUserProfile(author!.id)),
-                      child: VideoPostItem(
-                          key: ValueKey(post.id),
-                          post: post,
-                          author: author,
-                          controller: _controllerCache[post.id],
-                          isCurrentPage: index == _currentPageIndex,
-                          onUserTapped: (userId) {
-                            context.push('/profile/$userId');
-                          },
-                          // ✅ 5. Add a callback to notify when the user presses play.
-                          onPlayPressed: () {
-                            if (!_userHasInitiatedPlay.contains(post.id)) {
-                              setState(() {
-                                _userHasInitiatedPlay.add(post.id);
-                              });
-                            }
-                            _controllerCache[post.id]?.play();
-                          }));
-                },
-              );
-            }
-            // Fallback for any other state
-            return const Center(
-              child: Text("No posts found."),
+              itemBuilder: (context, index) {
+                final post = _posts[index];
+                final author = _authors[post.userId];
+                return BlocProvider<ProfileBloc>(
+                    create: (context) => di.sl<ProfileBloc>()
+                      ..add(SubscribeToUserProfile(author!.id)),
+                    child: VideoPostItem(
+                        key: ValueKey(post.id),
+                        post: post,
+                        author: author,
+                        controller: _controllerCache[post.id],
+                        isCurrentPage: index == _currentPageIndex,
+                        onUserTapped: (userId) {
+                          context.push('/profile/$userId');
+                        },
+                        // ✅ 5. Add a callback to notify when the user presses play.
+                        onPlayPressed: () {
+                          if (!_userHasInitiatedPlay.contains(post.id)) {
+                            setState(() {
+                              _userHasInitiatedPlay.add(post.id);
+                            });
+                          }
+                          _controllerCache[post.id]?.play();
+                        }));
+              },
             );
-          },
-        ),
+          }
+          // Fallback for any other state
+          return const Center(
+            child: Text("No posts found."),
+          );
+        },
       ),
     );
   }
