@@ -123,6 +123,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
+        height: 60,
         shape: const CircularNotchedRectangle(),
         notchMargin: 8.0,
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -134,7 +135,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
             IconButton(
               icon: AnimatedScale(
                 scale: selectedButtonIndex == 0 ? 1.2 : 1.0,
-                duration: Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 200),
                 child: Icon(
                   selectedButtonIndex == 0 ? Icons.home : Icons.home_outlined,
                   color: selectedButtonIndex == 0
@@ -148,7 +149,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
             IconButton(
               icon: AnimatedScale(
                 scale: selectedButtonIndex == 1 ? 1.2 : 1.0,
-                duration: Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 200),
                 child: Icon(
                   selectedButtonIndex == 1
                       ? Icons.camera_alt
@@ -182,7 +183,7 @@ class _ScaffoldWithNavBarState extends State<ScaffoldWithNavBar>
             IconButton(
               icon: AnimatedScale(
                 scale: selectedButtonIndex == 3 ? 1.2 : 1.0,
-                duration: Duration(milliseconds: 200),
+                duration: const Duration(milliseconds: 200),
                 child: Icon(
                   selectedButtonIndex == 3
                       ? Icons.person

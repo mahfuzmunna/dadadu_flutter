@@ -71,7 +71,7 @@ class _ChatView extends StatelessWidget {
             // ✅ A contextual AppBar showing who you're talking to
             appBar: AppBar(
               leadingWidth: 40,
-              title: Row(
+              title: const Row(
                 children: [
                   // CircleAvatar(
                   //   radius: 20,
@@ -100,12 +100,6 @@ class _ChatView extends StatelessWidget {
                   // ),
                 ],
               ),
-              actions: [
-                IconButton(
-                    icon: const Icon(Icons.videocam_rounded), onPressed: () {}),
-                IconButton(
-                    icon: const Icon(Icons.call_rounded), onPressed: () {}),
-              ],
             ),
             body: DashChat3(
               currentUser: chatUser,
@@ -133,15 +127,14 @@ class _ChatView extends StatelessWidget {
                       color: theme.colorScheme.primary),
                   onPressed: send, // DashChat handles this
                 ),
-                leading: [
-                  IconButton(
-                    icon: Icon(Icons.attach_file_rounded,
-                        color: theme.colorScheme.onSurfaceVariant),
-                    onPressed: () {
-                      // TODO: Implement file/image sending logic
-                    },
-                  ),
-                ],
+                // leading: [
+                //   IconButton(
+                //     icon: Icon(Icons.attach_file_rounded,
+                //         color: theme.colorScheme.onSurfaceVariant),
+                //     onPressed: () {
+                //     },
+                //   ),
+                // ],
               ),
               messageOptions: MessageOptions(
                 currentUserContainerColor: theme.colorScheme.primaryContainer,

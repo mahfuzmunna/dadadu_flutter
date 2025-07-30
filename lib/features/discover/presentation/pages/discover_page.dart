@@ -2,9 +2,7 @@
 
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
-import 'package:dadadu_app/features/discover/domain/usecases/find_users_by_vibe_usecase.dart';
 import 'package:dadadu_app/features/discover/presentation/pages/vibe_users_page_s.dart';
 import 'package:dadadu_app/features/location/domain/usecases/get_location_name_usecase.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
@@ -389,7 +387,10 @@ class _DiscoverPageState extends State<DiscoverPage> {
             children: [
               Icon(Icons.people_alt_outlined),
               SizedBox(width: 10),
-              Text('Unlock More Distance'),
+              Text(
+                'Unlock More Distance',
+                style: TextStyle(fontSize: 20),
+              ),
             ],
           ),
           content: Column(
@@ -397,7 +398,8 @@ class _DiscoverPageState extends State<DiscoverPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                  'Refer 10 new users to unlock the ability to search for people further away!'),
+                  'Refer 10 new users to unlock the ability to search for people further away!',
+                  style: TextStyle(fontSize: 16)),
               const SizedBox(height: 20),
               Center(
                 child: Text.rich(
@@ -527,69 +529,6 @@ class _DiscoverPageState extends State<DiscoverPage> {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10.0),
-        ),
-      ),
-    );
-  }
-}
-
-class _UserCard extends StatelessWidget {
-  final UserWithDistance userWithDistance;
-
-  const _UserCard({required this.userWithDistance});
-
-  @override
-  Widget build(BuildContext context) {
-    final user = userWithDistance.user;
-    final distance = userWithDistance.distanceInKm.toStringAsFixed(1);
-
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 35,
-              backgroundImage: user.profilePhotoUrl != null
-                  ? CachedNetworkImageProvider(user.profilePhotoUrl!)
-                  : null,
-              child: user.profilePhotoUrl == null
-                  ? const Icon(Icons.person)
-                  : null,
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(user.fullName ?? 'No Name',
-                      style: Theme.of(context).textTheme.titleLarge),
-                  if (user.username != null)
-                    Text('@${user.username!}',
-                        style: Theme.of(context).textTheme.bodyMedium),
-                  const SizedBox(height: 8),
-                  if (user.bio != null && user.bio!.isNotEmpty)
-                    Text(user.bio!,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      Icon(Icons.location_on,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.primary),
-                      const SizedBox(width: 4),
-                      Text(
-                          '$distance km away - ${user.location ?? 'Unknown Location'}',
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
         ),
       ),
     );

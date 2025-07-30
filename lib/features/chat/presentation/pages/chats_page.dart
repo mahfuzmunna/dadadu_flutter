@@ -36,6 +36,9 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
         onPressed: () {},
         child: const Icon(Icons.add_comment_rounded),
       ),
+      appBar: AppBar(
+        title: const Text('Chats'),
+      ),
       body: BlocBuilder<ChatListBloc, ChatListState>(
         builder: (context, state) {
           if (state is ChatListLoading || state is ChatListInitial) {
@@ -51,15 +54,6 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
             }
             return CustomScrollView(
               slivers: [
-                SliverAppBar.large(
-                  title: const Text('Chats'),
-                  actions: [
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () {},
-                    ),
-                  ],
-                ),
                 // ✅ Sticky header with filter chips
                 SliverPersistentHeader(
                   delegate: _SliverFilterHeader(
