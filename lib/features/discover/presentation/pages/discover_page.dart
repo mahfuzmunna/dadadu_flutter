@@ -329,15 +329,17 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
           height: 18,
         ),
         Text(
-          'Search within',
+          'Search ${_isDistanceLocked ? 'within' : 'around the'}',
           style: theme.textTheme.titleMedium
               ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
         const SizedBox(height: 4),
         Text(
-          _selectedDistance < 1
-              ? '${(_selectedDistance * 1000).round()} m'
-              : '${_selectedDistance.round()} km',
+          _isDistanceLocked
+              ? _selectedDistance < 1
+                  ? '${(_selectedDistance * 1000).round()} m'
+                  : '${_selectedDistance.round()} km'
+              : 'Globe',
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.primary,
@@ -360,14 +362,15 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
               ),
               // Center Slider
               Expanded(
-                child: Slider(
-                  value: _selectedDistance,
+                child: _isDistanceLocked
+                    ? Slider(
+                        value: _selectedDistance,
                   min: 0.1,
                   // Start at 100m
                   max: 1.0,
                   // Max at 1km (locked limit)
-                  divisions: 9,
-                  // Creates 100m steps
+                        divisions: 9,
+                        // Creates 100m steps
                   label: _selectedDistance < 1
                       ? '${(_selectedDistance * 1000).round()} m'
                       : '${_selectedDistance.round()} km',
@@ -378,7 +381,8 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                       _selectedDistance = value;
                     });
                   },
-                ),
+                      )
+                    : const Text(''),
               ),
               // Right Icon Button: Increase Limit
               _buildSelectorButton(
@@ -596,7 +600,8 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
             _goToVide = true;
             _selectedVibe = label;
             _selectedCurrentPosition = _currentPosition;
-            _selectedMaxDistance = _selectedDistance;
+            _selectedMaxDistance =
+                _isDistanceLocked ? _selectedDistance : 25000;
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
