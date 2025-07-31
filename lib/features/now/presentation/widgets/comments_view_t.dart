@@ -242,6 +242,7 @@ class _CommentListItem extends StatefulWidget {
 
 class _CommentListItemState extends State<_CommentListItem> {
   bool _isTranslating = false;
+  bool _isLikeUnlikeAction = false;
 
   // This widget now manages its own 'liked' state.
   late bool _isLiked;
@@ -291,6 +292,9 @@ class _CommentListItemState extends State<_CommentListItem> {
           );
 
     context.read<LikeUnlikeCommentBloc>().add(event);
+    setState(() {
+      _isLikeUnlikeAction = true;
+    });
   }
 
   @override
@@ -338,12 +342,14 @@ class _CommentListItemState extends State<_CommentListItem> {
           ),
         ],
       ),
-      trailing: IconButton(
-        onPressed: _toggleLike,
+        trailing: _isLikeUnlikeAction
+            ? Text('Sent')
+            : TextButton.icon(
+                onPressed: _toggleLike,
         icon: _isLiked
             ? const Icon(Icons.favorite, color: Colors.red)
             : const Icon(Icons.favorite_border),
-      ),
-    );
+                label: Text('${widget.comment.likes}'),
+              ));
   }
 }

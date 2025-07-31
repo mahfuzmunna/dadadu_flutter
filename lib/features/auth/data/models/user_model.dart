@@ -36,7 +36,7 @@ class UserModel extends UserEntity {
       fullName: map['full_name'],
       username: map['username'],
       bio: map['bio'] ?? '',
-      profilePhotoUrl: map['profile_photo_url'] ?? '',
+      profilePhotoUrl: map['profile_photo_url'],
       referralsCount: map['referrals_count'],
       createdAt: map['created_at'] != null
           ? DateTime.parse(map['created_at'])

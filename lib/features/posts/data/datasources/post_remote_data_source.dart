@@ -52,12 +52,12 @@ abstract class PostRemoteDataSource {
       required String postId,
       required String authorId});
 
-  Future<void> likeComment(
+  Future<Either<Failure, void>> likeComment(
       {required String userId,
       required String postId,
       required String commentId});
 
-  Future<void> unlikeComment(
+  Future<Either<Failure, void>> unlikeComment(
       {required String userId,
       required String postId,
       required String commentId});
@@ -350,7 +350,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
-  Future<void> likeComment(
+  Future<Either<Failure, void>> likeComment(
       {required String userId,
       required String postId,
       required String commentId}) async {
@@ -364,6 +364,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           'd_comment_id': commentId,
         },
       );
+      return const Right(null);
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -372,7 +373,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   }
 
   @override
-  Future<void> unlikeComment(
+  Future<Either<Failure, void>> unlikeComment(
       {required String userId,
       required String postId,
       required String commentId}) async {
@@ -386,6 +387,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           'd_comment_id': commentId,
         },
       );
+      return const Right(null);
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

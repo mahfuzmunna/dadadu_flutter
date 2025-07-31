@@ -34,6 +34,28 @@ class CommentModel extends CommentEntity {
     };
   }
 
+  factory CommentModel.fromJson(Map<String, dynamic> json) {
+    return CommentModel(
+      id: json['id'],
+      userId: json['user_id'],
+      comment: json['comment_text'],
+      timestamp: DateTime.parse(json['created_at']),
+      likes: json['likes'],
+      likedBy: List<String>.from(json['liked_by']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'user_id': userId,
+      'comment_text': comment,
+      'created_at': timestamp.toIso8601String(),
+      'likes': likes,
+      'liked_by': likedBy,
+    };
+  }
+
   CommentModel copyWith({
     String? id,
     String? userId,
