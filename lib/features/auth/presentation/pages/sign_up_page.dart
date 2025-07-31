@@ -1,3 +1,4 @@
+import 'package:dadadu_app/core/util/check_for_deferred.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -17,6 +18,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _passwordController = TextEditingController();
   final _fullNameController = TextEditingController();
   final _usernameController = TextEditingController();
+  String? _capturedReferralId;
 
   @override
   void dispose() {
@@ -27,6 +29,12 @@ class _SignUpPageState extends State<SignUpPage> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    _checkForReferral();
+    super.initState();
+  }
+
   void _onSignUpPressed() {
     if (_formKey.currentState?.validate() ?? false) {
       context.read<AuthBloc>().add(AuthSignUpRequested(
@@ -35,6 +43,15 @@ class _SignUpPageState extends State<SignUpPage> {
             fullName: _fullNameController.text.trim(),
             username: _usernameController.text.trim(),
           ));
+    }
+  }
+
+  Future<void> _checkForReferral() async {
+    final referralId = await checkForDeferredReferral();
+    if (mounted) {
+      setState(() {
+        _capturedReferralId = referralId;
+      });
     }
   }
 
@@ -115,6 +132,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: const Text('Continue'),
                       ),
                     ),
+                  _capturedReferralId != null
+                      ? Text('Referral ID: $_capturedReferralId')
+                      : SizedBox.shrink(),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

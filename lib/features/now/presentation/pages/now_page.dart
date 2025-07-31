@@ -445,27 +445,41 @@ class _NowPageViewState extends State<_NowPageView>
               itemBuilder: (context, index) {
                 final post = _posts[index];
                 final author = _authors[post.userId];
-                return BlocProvider<ProfileBloc>(
-                    create: (context) => di.sl<ProfileBloc>()
-                      ..add(SubscribeToUserProfile(author!.id)),
-                    child: VideoPostItem(
-                        key: ValueKey(post.id),
-                        post: post,
-                        author: author,
-                        controller: _controllerCache[post.id],
-                        isCurrentPage: index == _currentPageIndex,
-                        onUserTapped: (userId) {
-                          context.push('/profile/$userId');
-                        },
-                        // ✅ 5. Add a callback to notify when the user presses play.
-                        onPlayPressed: () {
-                          if (!_userHasInitiatedPlay.contains(post.id)) {
-                            setState(() {
-                              _userHasInitiatedPlay.add(post.id);
-                            });
-                          }
-                          _controllerCache[post.id]?.play();
-                        }));
+
+                final controller = _controllerCache[post.id];
+
+                if (controller == null) {
+                  // If it's not ready, show a placeholder. Using a thumbnail is a great UX.
+                  return Container(
+                    color: Colors.black,
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                } else {
+                  return BlocProvider<ProfileBloc>(
+                      create: (context) => di.sl<ProfileBloc>()
+                        ..add(SubscribeToUserProfile(author!.id)),
+                      child: VideoPostItem(
+                          key: ValueKey(post.id),
+                          post: post,
+                          author: author,
+                          controller: _controllerCache[post.id]
+                              as VideoPlayerController,
+                          isCurrentPage: index == _currentPageIndex,
+                          onUserTapped: (userId) {
+                            context.push('/profile/$userId');
+                          },
+                          // ✅ 5. Add a callback to notify when the user presses play.
+                          onPlayPressed: () {
+                            if (!_userHasInitiatedPlay.contains(post.id)) {
+                              setState(() {
+                                _userHasInitiatedPlay.add(post.id);
+                              });
+                            }
+                            _controllerCache[post.id]?.play();
+                          }));
+                }
               },
             );
           }

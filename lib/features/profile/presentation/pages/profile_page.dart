@@ -68,7 +68,7 @@ class _ProfileView extends StatelessWidget {
               ? authState.user.id == userToDisplay.id
               : false;
           final String referralLink =
-              'https://dadadu.app/invite/${userToDisplay.id.substring(0, 8)}';
+              'https://sqdqbmnqosfzhmrpbvqe.supabase.co/functions/v1/invite-handler?referred_by=${userToDisplay.id}';
 
           // All UI is now built using the live data from the BLoC state
           return _ProfileContent(

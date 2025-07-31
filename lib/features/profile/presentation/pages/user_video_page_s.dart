@@ -10,7 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../../injection_container.dart' as di;
-import '../../../now/presentation/widgets/video_post_item.dart';
+import '../../../now/presentation/widgets/video_post_item_s.dart';
 import '../../../posts/presentation/bloc/diamond_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../bloc/follow_bloc.dart';
@@ -319,27 +319,41 @@ class _UsersVideoViewState extends State<_UsersVideoView>
                   itemBuilder: (context, index) {
                     final post = usersPosts[index];
                     final author = _author;
-                    return BlocProvider<ProfileBloc>(
-                      create: (context) => di.sl<ProfileBloc>()
-                        ..add(SubscribeToUserProfile(author!.id)),
-                      child: VideoPostItem(
-                        key: ValueKey(post.id),
-                        post: post,
-                        author: author,
-                        controller: _controllerCache[post.id],
-                        isCurrentPage: index == _currentPageIndex,
-                        onPlayPressed: () {
-                          if (!_userHasInitiatedPlay.contains(post.id)) {
-                            setState(() {
-                              _userHasInitiatedPlay.add(post.id);
-                            });
-                          }
-                          _controllerCache[post.id]?.play();
-                        },
-                        onUserTapped: (userId) =>
-                            context.push('/profile/${userId}'),
-                      ),
-                    );
+
+                    final controller = _controllerCache[post.id];
+
+                    if (controller == null) {
+                      // If it's not ready, show a placeholder. Using a thumbnail is a great UX.
+                      return Container(
+                        color: Colors.black,
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
+                    } else {
+                      return BlocProvider<ProfileBloc>(
+                        create: (context) => di.sl<ProfileBloc>()
+                          ..add(SubscribeToUserProfile(author!.id)),
+                        child: VideoPostItem(
+                          key: ValueKey(post.id),
+                          post: post,
+                          author: author,
+                          controller: _controllerCache[post.id]
+                              as VideoPlayerController,
+                          isCurrentPage: index == _currentPageIndex,
+                          onPlayPressed: () {
+                            if (!_userHasInitiatedPlay.contains(post.id)) {
+                              setState(() {
+                                _userHasInitiatedPlay.add(post.id);
+                              });
+                            }
+                            _controllerCache[post.id]?.play();
+                          },
+                          onUserTapped: (userId) =>
+                              context.push('/profile/${userId}'),
+                        ),
+                      );
+                    }
                   });
             }
             // Fallback for any other state

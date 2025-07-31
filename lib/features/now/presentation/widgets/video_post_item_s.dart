@@ -31,7 +31,7 @@ class VideoPostItem extends StatefulWidget {
   final PostEntity post;
   final UserEntity? author;
   final bool isCurrentPage;
-  final VideoPlayerController? controller;
+  final VideoPlayerController controller;
   final Function(String userId) onUserTapped;
   final VoidCallback onPlayPressed;
 
@@ -230,7 +230,6 @@ class _VideoPostItemState extends State<VideoPostItem> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Your main content (Video Player, author info, etc.)
             if (controller != null && controller.value.isInitialized)
               Center(
                 child: AspectRatio(
