@@ -14,6 +14,7 @@ abstract class AuthRemoteDataSource {
     required String password,
     String? fullName, // NEW
     String? username, // NEW
+    String? referralId, // NEW
   });
 
   Future<UserModel> signInWithEmailAndPassword({
@@ -47,6 +48,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     String? fullName,
     String? username,
+    String? referralId,
   }) async {
     try {
       // 1. Sign up with Supabase Auth (email and password)
@@ -85,6 +87,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (response.isEmpty) {
         throw ServerException('Failed to create user profile.',
             code: 'PROFILE_CREATION_FAILED');
+      }
+
+      if (referralId != null && referralId.isNotEmpty) {
+        await supabaseClient.rpc(
+          'refer_success',
+          params: {'d_referrer': supabaseUser.id, 'd_referred': referralId},
+        );
       }
 
       // Return a UserModel created from the inserted profile data

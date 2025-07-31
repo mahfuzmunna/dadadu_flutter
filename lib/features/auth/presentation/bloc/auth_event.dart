@@ -28,12 +28,14 @@ class AuthSignUpRequested extends AuthEvent {
   final String password;
   final String fullName;
   final String username;
+  final String referralId;
 
   const AuthSignUpRequested(
       {required this.email,
       required this.password,
       required this.fullName,
-      required this.username});
+      required this.username,
+      required this.referralId});
 }
 
 /// Dispatched from the photo upload page to finalize the sign-up flow.

@@ -42,6 +42,7 @@ class _SignUpPageState extends State<SignUpPage> {
             password: _passwordController.text.trim(),
             fullName: _fullNameController.text.trim(),
             username: _usernameController.text.trim(),
+            referralId: _capturedReferralId ?? '',
           ));
     }
   }

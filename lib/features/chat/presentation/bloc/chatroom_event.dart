@@ -9,10 +9,10 @@ abstract class ChatRoomEvent extends Equatable {
 
 // Event to trigger the creation of a chat room
 class CreateChatRoom extends ChatRoomEvent {
-  final List<String> userIds;
+  final CreateChatRoomParams params;
 
-  const CreateChatRoom({required this.userIds});
+  const CreateChatRoom({required this.params});
 
   @override
-  List<Object> get props => [userIds];
+  List<Object> get props => [params];
 }

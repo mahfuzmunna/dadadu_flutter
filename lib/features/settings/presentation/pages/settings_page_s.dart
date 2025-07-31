@@ -4,8 +4,7 @@ import 'package:dadadu_app/core/theme/theme_cubit.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // ✅ Import shared_preferences
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher.dart'; // ❗️ Add url_launcher to your pubspec.yaml
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -16,40 +15,13 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool _notificationsEnabled = true;
-  String _selectedLanguage = 'English';
-
-  @override
-  void initState() {
-    super.initState();
-    // ✅ Load saved settings when the page is initialized
-    _loadSettings();
-  }
-
-  // ✅ NEW: Load settings from SharedPreferences
-  Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _notificationsEnabled = prefs.getBool('notificationsEnabled') ?? true;
-      _selectedLanguage = prefs.getString('selectedLanguage') ?? 'English';
-    });
-  }
-
-  // ✅ NEW: Save a boolean setting
-  Future<void> _saveBoolSetting(String key, bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(key, value);
-  }
-
-  // ✅ NEW: Save a string setting
-  Future<void> _saveStringSetting(String key, String value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(key, value);
-  }
+  String _selectedLanguage = 'English'; // Local state for language
 
   // Helper to launch URLs safely
   Future<void> _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      // Show an error snackbar if the URL can't be launched
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Could not launch $url')),
@@ -99,7 +71,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     ],
                     selected: {themeCubit.state},
                     onSelectionChanged: (newSelection) {
-                      // The ThemeCubit should handle saving its own state
                       themeCubit.updateTheme(newSelection.first);
                     },
                   ),
@@ -108,7 +79,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const SizedBox(height: 24),
-
           _buildSectionHeader(context, 'General'),
           Card(
             child: Column(
@@ -124,17 +94,16 @@ class _SettingsPageState extends State<SettingsPage> {
                       setState(() {
                         _notificationsEnabled = value;
                       });
-                      // ✅ Save the notification setting
-                      _saveBoolSetting('notificationsEnabled', value);
                     },
                   ),
                 ),
                 _buildDivider(),
+                // ✅ Language Selector Tile
                 _buildNavigationTile(
                   context,
                   icon: Icons.language_rounded,
                   title: 'Language',
-                  subtitle: _selectedLanguage,
+                  subtitle: _selectedLanguage, // Show the current language
                   onTap: () => _showLanguageDialog(context),
                 ),
                 _buildDivider(),
@@ -148,11 +117,11 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const SizedBox(height: 24),
-
           _buildSectionHeader(context, 'Support'),
           Card(
             child: Column(
               children: [
+                // ✅ Help & Support now opens a dialog
                 _buildNavigationTile(
                   context,
                   icon: Icons.help_center_rounded,
@@ -160,6 +129,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   onTap: () => _showHelpDialog(context),
                 ),
                 _buildDivider(),
+                // ✅ About now opens a web link
                 _buildNavigationTile(
                   context,
                   icon: Icons.info_rounded,
@@ -170,7 +140,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const SizedBox(height: 32),
-
           FilledButton.icon(
             icon: const Icon(Icons.logout_rounded),
             label: const Text('Sign Out'),
@@ -200,6 +169,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // ✅ Updated to include an optional subtitle
   Widget _buildNavigationTile(BuildContext context,
       {required IconData icon,
       required String title,
@@ -254,6 +224,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // ✅ NEW: Dialog for Help & Support
   void _showHelpDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -295,6 +266,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  // ✅ NEW: Dialog for Language Selection
   void _showLanguageDialog(BuildContext context) {
     final languages = ['English', 'Français', 'Deutsch', 'Español'];
     showDialog(
@@ -317,9 +289,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     if (value != null) {
                       setState(() {
                         _selectedLanguage = value;
+                        // TODO: Add logic to persist language setting
                       });
-                      // ✅ Save the new language setting
-                      _saveStringSetting('selectedLanguage', value);
                       Navigator.of(dialogContext).pop();
                     }
                   },

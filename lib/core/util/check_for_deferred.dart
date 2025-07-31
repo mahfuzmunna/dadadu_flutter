@@ -18,6 +18,7 @@ Future<String?> checkForDeferredReferral() async {
         .gte(
             'created_at',
             DateTime.now()
+                .toUtc()
                 .subtract(const Duration(minutes: 30))
                 .toIso8601String())
         .order('created_at', ascending: false)

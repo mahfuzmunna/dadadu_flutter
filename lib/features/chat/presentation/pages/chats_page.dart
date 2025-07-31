@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/chat/domain/entities/chat_room_entity.dart';
 import 'package:dadadu_app/features/chat/presentation/bloc/chat_list_bloc.dart';
@@ -6,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
+import '../../../../core/services/presence_service.dart';
 
 class ChatsPage extends StatelessWidget {
   const ChatsPage({super.key});
@@ -28,12 +32,36 @@ class _ChatsPageView extends StatefulWidget {
 
 class _ChatsPageViewState extends State<_ChatsPageView> {
   String _selectedFilter = 'All';
+  Set<String> _onlineUserIds = {};
+  late final StreamSubscription<Set<String>> _presenceSub;
+
+  @override
+  void initState() {
+    _presenceSub = PresenceService.instance.onlineUsersStream.listen((online) {
+      setState(() {
+        _onlineUserIds = online;
+      });
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _presenceSub.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invite more friends to unlock global search'),
+            ),
+          );
+        },
         child: const Icon(Icons.add_comment_rounded),
       ),
       appBar: AppBar(
@@ -71,6 +99,9 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
                   itemCount: rooms.length,
                   itemBuilder: (context, index) {
                     final room = rooms[index];
+                    final otherUserId = room.otherParticipant.id;
+                    final isOnline = _onlineUserIds.contains(otherUserId);
+
                     // ✅ Wrap tile in a Dismissible for swipe actions
                     return Dismissible(
                       key: ValueKey(room.id),
@@ -98,7 +129,7 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
                         icon: Icons.delete_forever_rounded,
                         alignment: Alignment.centerRight,
                       ),
-                      child: _ChatItemTile(room: room),
+                      child: _ChatItemTile(room: room, isOnline: isOnline),
                     );
                   },
                   separatorBuilder: (context, index) => Divider(
@@ -137,8 +168,9 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
 /// A custom widget for displaying a single chat item.
 class _ChatItemTile extends StatelessWidget {
   final ChatRoomEntity room;
+  final bool isOnline;
 
-  const _ChatItemTile({required this.room});
+  const _ChatItemTile({required this.room, required this.isOnline});
 
   String _formatTimestamp(BuildContext context, DateTime ts) {
     final now = DateTime.now();
@@ -161,10 +193,10 @@ class _ChatItemTile extends StatelessWidget {
     final otherUser = room.otherParticipant;
     // Placeholders for new UI features
     final bool isUnread = false;
-    final bool isOnline = true;
 
     return InkWell(
-      onTap: () => context.push('/chat/${room.id}'),
+      onTap: () =>
+          context.push('/chat/${room.id}', extra: room.otherParticipant.id),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Row(
@@ -327,7 +359,9 @@ class _SliverFilterHeader extends SliverPersistentHeaderDelegate {
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
       child: ListView(
         scrollDirection: Axis.horizontal,
-        children: ['All', 'Unread'].map((filter) {
+        children: [
+          'All',
+        ].map((filter) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: FilterChip(

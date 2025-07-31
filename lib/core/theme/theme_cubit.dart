@@ -10,18 +10,9 @@ class ThemeCubit extends Cubit<ThemeMode> {
   // Load the saved theme from device storage
   void _loadTheme() async {
     final prefs = await SharedPreferences.getInstance();
-    final themeIndex = prefs.getInt('themeMode') ?? 2; // Default to system
-    switch (themeIndex) {
-      case 0:
-        emit(ThemeMode.light);
-        break;
-      case 1:
-        emit(ThemeMode.dark);
-        break;
-      default:
-        emit(ThemeMode.system);
-        break;
-    }
+    // final themeIndex = prefs.getInt('themeMode') ?? 2; // Default to system
+    final themeIndex = prefs.getInt('themeMode') ?? ThemeMode.system.index;
+    emit(ThemeMode.values[themeIndex]);
   }
 
   // Update the theme and save the choice

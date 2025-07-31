@@ -42,9 +42,11 @@ class PostModel extends PostEntity {
       diamondGivers: map['diamond_givers'] != null
           ? List<String>.from(map['diamond_givers'].map((id) => id.toString()))
           : [],
-      comments: (map['comments'] as List<dynamic>)
-          .map((e) => CommentModel.fromJson(e))
-          .toList(),
+      comments: map['comments'] != null
+          ? (map['comments'] as List<dynamic>)
+              .map((e) => CommentModel.fromJson(e))
+              .toList()
+          : [],
       createdAt: map['created_at'] as String,
       isDisabled: map['is_disabled'] as bool,
       visibilityLevel: map['visibility_level'] as int,

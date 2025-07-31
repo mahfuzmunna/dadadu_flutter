@@ -16,7 +16,8 @@ abstract class ChatRemoteDataSource {
       required String content,
       required String senderId});
 
-  Future<String> createChatRoom({required List<String> participantIds});
+  Future<String> createChatRoom(
+      {required String userIdA, required String userIdB});
 }
 
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
@@ -56,8 +57,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
           .select()
           .single();
       await supabaseClient
-          .from('chat_rooms')
-          .update({'last_message_id': message['id']}).eq('id', roomId);
+          .from('chat_rooms').update({
+        'last_message_id': message['id'],
+        'updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', roomId);
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     }
@@ -73,7 +76,10 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       final stream = supabaseClient
           .from('chat_rooms')
           .stream(primaryKey: ['id'])
-          .order('created_at')
+          // .contains('participant_ids', [currentUserId])
+          // .in_('column', [value1, value2])
+          .eq('is_private', true)
+          .order('updated_at')
           .map((listOfRoomMaps) async {
             if (listOfRoomMaps.isEmpty) return <ChatRoomModel>[];
 
@@ -136,12 +142,14 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }
 
   @override
-  Future<String> createChatRoom({required List<String> participantIds}) async {
+  Future<String> createChatRoom(
+      {required String userIdA, required String userIdB}) async {
     try {
       // Call the database function we just created.
       final roomId = await supabaseClient.rpc(
-        'create_get_chat_room',
-        params: {'participant_ids_input': participantIds},
+        // 'create_get_chat_room',
+        'get_or_create_private_chat_room',
+        params: {'user_a': userIdA, 'user_b': userIdB},
       );
 
       // The RPC returns the room ID as a string.

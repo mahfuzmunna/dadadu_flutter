@@ -317,7 +317,7 @@ class _UsersVideoViewState extends State<_UsersVideoView>
                   scrollDirection: Axis.vertical,
                   itemCount: usersPosts.length,
                   itemBuilder: (context, index) {
-                    final post = usersPosts[index];
+                    final post = usersPosts[initialPageIndex];
                     final author = _author;
 
                     final controller = _controllerCache[post.id];
@@ -350,7 +350,7 @@ class _UsersVideoViewState extends State<_UsersVideoView>
                             _controllerCache[post.id]?.play();
                           },
                           onUserTapped: (userId) =>
-                              context.push('/profile/${userId}'),
+                              context.push('/profile/$userId'),
                         ),
                       );
                     }

@@ -137,7 +137,8 @@ class AppRouter {
           builder: (context, state) {
             // Extract the roomId from the path parameters
             final String roomId = state.pathParameters['roomId']!;
-            return ChatPage(roomId: roomId);
+            final room = state.extra as String;
+            return ChatPage(roomId: roomId, participantId: room);
           },
         ),
         GoRoute(

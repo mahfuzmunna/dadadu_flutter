@@ -3,6 +3,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/features/chat/domain/usecases/create_chat_room_usecase.dart';
 import 'package:dadadu_app/features/chat/presentation/bloc/chatroom_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/follow_bloc.dart';
@@ -180,7 +181,7 @@ class _ProfileContentState extends State<_ProfileContent> {
               // This handles side-effects like navigation or showing SnackBars
               if (state is ChatRoomCreated) {
                 // Navigate to the chat page on success
-                context.push('/chat/${state.roomId}');
+                context.push('/chat/${state.roomId}', extra: profileUser.id);
               }
               if (state is ChatRoomError) {
                 // Show an error message on failure
@@ -211,10 +212,10 @@ class _ProfileContentState extends State<_ProfileContent> {
                     ? null
                     : () {
                         // Dispatch the event to the BLoC
-                        context.read<ChatRoomBloc>().add(
-                              CreateChatRoom(
-                                  userIds: [currentUser.id, profileUser.id]),
-                            );
+                        context.read<ChatRoomBloc>().add(CreateChatRoom(
+                            params: CreateChatRoomParams(
+                                userIdA: currentUser.id,
+                                userIdB: profileUser.id)));
                       },
               );
             },

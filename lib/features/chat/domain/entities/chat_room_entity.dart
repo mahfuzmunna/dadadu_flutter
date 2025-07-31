@@ -4,19 +4,22 @@ import 'package:equatable/equatable.dart';
 
 class ChatRoomEntity extends Equatable {
   final String id;
-
-  // Details of the OTHER person in the chat
-  final UserEntity otherParticipant;
-
-  // The most recent message for preview
+  final List<String> participantIds;
+  final UserEntity otherParticipant; // The user you are chatting with
   final ChatMessageEntity? lastMessage;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   const ChatRoomEntity({
     required this.id,
+    required this.participantIds,
     required this.otherParticipant,
     this.lastMessage,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   @override
-  List<Object?> get props => [id, otherParticipant, lastMessage];
+  List<Object?> get props =>
+      [id, participantIds, otherParticipant, lastMessage, createdAt, updatedAt];
 }

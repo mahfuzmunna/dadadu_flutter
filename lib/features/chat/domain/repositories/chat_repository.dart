@@ -17,9 +17,7 @@ abstract class ChatRepository {
       required String content,
       required String senderId});
 
-  Future<Either<Failure, String>> createChatRoom({
-    required List<String> participantIds,
-  });
+  Future<Either<Failure, String>> createChatRoom({required String userIdA, required String userIdB});
 }
 
 class ChatRepositoryImpl implements ChatRepository {
@@ -78,12 +76,13 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<Either<Failure, String>> createChatRoom({
-    required List<String> participantIds,
+    required String userIdA,
+    required String userIdB,
   }) async {
     try {
       // Call the data source method.
-      final roomId =
-          await remoteDataSource.createChatRoom(participantIds: participantIds);
+      final roomId = await remoteDataSource.createChatRoom(
+          userIdA: userIdA, userIdB: userIdB);
 
       // On success, return the room ID wrapped in a Right.
       return Right(roomId);

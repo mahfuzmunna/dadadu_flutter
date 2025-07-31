@@ -20,7 +20,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
     emit(ChatRoomCreating());
 
     // 2. Call the use case
-    final result = await _createChatRoomUseCase(event.userIds);
+    final result = await _createChatRoomUseCase(event.params);
 
     // 3. Emit success or error based on the result
     result.fold(

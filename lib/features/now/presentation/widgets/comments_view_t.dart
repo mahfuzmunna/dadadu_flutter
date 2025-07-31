@@ -4,6 +4,7 @@ import 'package:dadadu_app/features/comments/presentation/bloc/like_unlike_comme
 import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usecase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../comments/domain/entities/comment_entity.dart';
@@ -300,15 +301,20 @@ class _CommentListItemState extends State<_CommentListItem> {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: CircleAvatar(
-        backgroundImage: widget.comment.author?.profilePhotoUrl != null
-            ? CachedNetworkImageProvider(
-                widget.comment.author!.profilePhotoUrl!)
-            : null,
-        child: widget.comment.author?.profilePhotoUrl == null
-            ? const Icon(Icons.person)
-            : null,
-      ),
+        leading: GestureDetector(
+          onTap: () {
+            context.push('/profile/${widget.comment.author?.id}');
+          },
+          child: CircleAvatar(
+            backgroundImage: widget.comment.author?.profilePhotoUrl != null
+                ? CachedNetworkImageProvider(
+                    widget.comment.author!.profilePhotoUrl!)
+                : null,
+            child: widget.comment.author?.profilePhotoUrl == null
+                ? const Icon(Icons.person)
+                : null,
+          ),
+        ),
       title: Text(widget.comment.author?.username ?? 'Anonymous',
           style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Column(

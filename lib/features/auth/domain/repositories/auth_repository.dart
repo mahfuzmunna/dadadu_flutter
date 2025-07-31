@@ -15,6 +15,7 @@ abstract class AuthRepository {
     required String password,
     String? fullName, // NEW
     String? username, // NEW
+    String? referralId, // NEW
   });
 
   Future<Either<Failure, UserEntity>> signIn({
@@ -48,6 +49,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     String? fullName, // NEW
     String? username, // NEWW
+    String? referralId, // NEW
   }) async {
     try {
       // Pass all signup data to the remote data source
@@ -56,6 +58,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
         fullName: fullName,
         username: username,
+        referralId: referralId,
       );
       return Right(user);
     } on ServerException catch (e) {

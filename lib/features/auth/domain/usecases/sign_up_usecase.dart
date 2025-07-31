@@ -20,6 +20,7 @@ class SignUpUseCase implements UseCase<UserEntity, SignUpParams> {
       fullName: params.fullName,
       // Pass new fields
       username: params.username,
+      referralId: params.referralId,
     );
   }
 }
@@ -29,14 +30,16 @@ class SignUpParams extends Equatable {
   final String password;
   final String? fullName; // NEW
   final String? username; // NEW
+  final String? referralId; // NEW
 
   const SignUpParams({
     required this.email,
     required this.password,
     this.fullName,
     this.username,
+    this.referralId,
   });
 
   @override
-  List<Object?> get props => [email, password, fullName, username];
+  List<Object?> get props => [email, password, fullName, username, referralId];
 }

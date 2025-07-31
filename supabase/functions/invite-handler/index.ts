@@ -10,20 +10,31 @@ Deno.serve(async (req) => {
   // 1. Log the click for fingerprinting
   if (referredById) {
     try {
-      const supabase = createClient(
-        Deno.env.get('https://sqdqbmnqosfzhmrpbvqe.supabase.co')!,
-        Deno.env.get('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNxZHFibW5xb3NmemhtcnBidnFlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI0NDUyODQsImV4cCI6MjA2ODAyMTI4NH0.O4SHLpBxaxKTXjyPiysYR4I57JXPS5LaBaktEbOY5IE')!
+      // ✅ FIX: Assert that env variables exist and create the client
+      const supabaseClient = createClient(
+        Deno.env.get('DADADU_SUPABASE_URL')!,
+        Deno.env.get('DADADU_SUPABASE_ANON_KEY')!,
+        {
+          global: {
+            // Pass auth headers to the client for RLS
+            headers: { Authorization: req.headers.get('Authorization')! },
+          },
+        }
       );
+
       // Get device info from request headers
       const ipAddress = req.headers.get('x-forwarded-for')?.split(',').shift();
       const userAgent = req.headers.get('user-agent');
 
-      await supabase.from('referral_clicks').insert({
+      // ✅ FIX: Use the correct client variable name
+      await supabaseClient.from('referral_clicks').insert({
         referral_id: referredById,
         ip_address: ipAddress,
         user_agent: userAgent,
       });
-    } catch (e) { console.error('Error logging referral click:', e); }
+    } catch (e) {
+      console.error('Error logging referral click:', e);
+    }
   }
 
   // 2. Redirect to the appropriate app store

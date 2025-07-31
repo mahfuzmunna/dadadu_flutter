@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'
     hide AuthState; // Hide AuthState to avoid conflict with bloc
 
+import '../../../../l10n/l10n.dart';
 import '../bloc/auth_bloc.dart';
 
 class SignInPage extends StatefulWidget {
@@ -19,18 +20,11 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
 
   void _showSnackBar(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
+          .showSnackBar(SnackBar(content: Text(message)));
     }
   }
 
@@ -40,13 +34,13 @@ class _SignInPageState extends State<SignInPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Sign In'),
+        title: Text(S.of(context)!.login),
         centerTitle: true,
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
-            _showSnackBar('Login failed: ${state.message}');
+            _showSnackBar('${Theme.of(context)}');
           } else if (state is AuthUnauthenticated && state.message != null) {
             _showSnackBar(state.message!);
           }
@@ -55,7 +49,7 @@ class _SignInPageState extends State<SignInPage> {
           final bool isLoading = state is AuthLoading;
           return Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(24.0),
               // More padding for Material 3 look
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -70,8 +64,8 @@ class _SignInPageState extends State<SignInPage> {
 
                   TextFormField(
                     controller: _emailController,
-                    decoration: const InputDecoration(
-                      labelText: 'Email',
+                    decoration: InputDecoration(
+                      labelText: S.of(context)?.emailHint as String,
                       hintText: 'your@example.com',
                       prefixIcon: Icon(Icons.email_outlined),
                       border:
@@ -83,12 +77,13 @@ class _SignInPageState extends State<SignInPage> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Password',
-                      hintText: 'Enter your password',
-                      prefixIcon: Icon(Icons.lock_outline),
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: InputDecoration(
+                        labelText:
+                            S.of(context) != null ? 'Password' : 'Password',
+                        hintText: S.of(context)?.passwordHint
+                        // prefixIcon: Icon(Icons.lock_outline),
+                        // border: OutlineInputBorder(),
+                        ),
                     obscureText: true,
                     enabled: !isLoading,
                   ),
