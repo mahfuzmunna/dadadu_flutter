@@ -28,3 +28,4 @@ class AddComment extends CommentsEvent {
   @override
   List<Object> get props => [params];
 }
+

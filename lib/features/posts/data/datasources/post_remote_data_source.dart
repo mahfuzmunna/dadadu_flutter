@@ -51,6 +51,16 @@ abstract class PostRemoteDataSource {
       {required String userId,
       required String postId,
       required String authorId});
+
+  Future<void> likeComment(
+      {required String userId,
+      required String postId,
+      required String commentId});
+
+  Future<void> unlikeComment(
+      {required String userId,
+      required String postId,
+      required String commentId});
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
@@ -332,6 +342,50 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         },
       );
       return const Right(null);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> likeComment(
+      {required String userId,
+      required String postId,
+      required String commentId}) async {
+    try {
+      // Assumes you have a Supabase RPC function named 'unsend_diamond'
+      await supabaseClient.rpc(
+        'like_comment',
+        params: {
+          'd_user_id': userId,
+          'd_post_id': postId,
+          'd_comment_id': commentId,
+        },
+      );
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> unlikeComment(
+      {required String userId,
+      required String postId,
+      required String commentId}) async {
+    try {
+      // Assumes you have a Supabase RPC function named 'unsend_diamond'
+      await supabaseClient.rpc(
+        'unlike_comment',
+        params: {
+          'd_user_id': userId,
+          'd_post_id': postId,
+          'd_comment_id': commentId,
+        },
+      );
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

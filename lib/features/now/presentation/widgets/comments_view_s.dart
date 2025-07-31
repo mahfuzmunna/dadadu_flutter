@@ -5,17 +5,6 @@ import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usec
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// You would add this event to your comments_event.dart file
-/*
-  class AddComment extends CommentsEvent {
-    final String postId;
-    final String commentText;
-
-    const AddComment({required this.postId, required this.commentText});
-  }
-*/
-
-// Domain and BLoC imports
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../comments/domain/entities/comment_entity.dart';
 import '../../../comments/presentation/bloc/comments_bloc.dart';
@@ -209,6 +198,7 @@ class _CommentList extends StatefulWidget {
   @override
   State<_CommentList> createState() => _CommentListState();
 }
+
 class _CommentListState extends State<_CommentList> {
   bool _isTranslating = false;
   bool _isLiked = false;

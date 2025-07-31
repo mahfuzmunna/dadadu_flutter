@@ -116,7 +116,6 @@ class _UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final user = userWithDistance.user;
     final distance =
         '${userWithDistance.distanceInKm < 1 ? (userWithDistance.distanceInKm * 1000).round() : userWithDistance.distanceInKm.toStringAsFixed(1)} ${userWithDistance.distanceInKm < 1 ? 'm' : 'km'}';

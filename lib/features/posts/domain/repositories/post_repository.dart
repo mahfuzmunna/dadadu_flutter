@@ -46,6 +46,18 @@ abstract class PostRepository {
       {required String userId,
       required String postId,
       required String comment});
+
+  Future<Either<Failure, void>> likeComment({
+    required String userId,
+    required String postId,
+    required String commentId,
+  });
+
+  Future<Either<Failure, void>> unlikeComment({
+    required String userId,
+    required String postId,
+    required String commentId,
+  });
 }
 
 class PostRepositoryImpl implements PostRepository {
@@ -215,6 +227,34 @@ class PostRepositoryImpl implements PostRepository {
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> likeComment(
+      {required String userId,
+      required String postId,
+      required String commentId}) async {
+    try {
+      await remoteDataSource.likeComment(
+          userId: userId, postId: postId, commentId: commentId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> unlikeComment(
+      {required String userId,
+      required String postId,
+      required String commentId}) async {
+    try {
+      await remoteDataSource.unlikeComment(
+          userId: userId, postId: postId, commentId: commentId);
+      return const Right(null);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
     }
   }
 }

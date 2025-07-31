@@ -22,10 +22,11 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../../../../injection_container.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../comments/presentation/bloc/comments_bloc.dart';
+import '../../../comments/presentation/bloc/like_unlike_comment_bloc.dart';
 import '../../../profile/presentation/bloc/follow_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart';
-import 'comments_view.dart';
+import 'comments_view_t.dart';
 
 class VideoPostItem extends StatefulWidget {
   final PostEntity post;
@@ -62,7 +63,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
   void initState() {
     super.initState();
 
-    widget.controller?.addListener(_onControllerUpdate);
+    widget.controller.addListener(_onControllerUpdate);
     _isPlaying = widget.controller?.value.isPlaying ?? false;
 
     if (mounted && _isVisible) widget.controller?.play();
@@ -71,7 +72,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
 
   void _onControllerUpdate() {
     if (!mounted) return;
-    final bool isPlaying = widget.controller?.value.isPlaying ?? false;
+    final bool isPlaying = widget.controller.value.isPlaying ?? false;
     if (_isPlaying != isPlaying) {
       setState(() {
         _isPlaying = isPlaying;
@@ -83,15 +84,15 @@ class _VideoPostItemState extends State<VideoPostItem> {
   void didUpdateWidget(covariant VideoPostItem oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      oldWidget.controller?.removeListener(_onControllerUpdate);
-      widget.controller?.addListener(_onControllerUpdate);
-      _isPlaying = widget.controller?.value.isPlaying ?? false;
+      oldWidget.controller.removeListener(_onControllerUpdate);
+      widget.controller.addListener(_onControllerUpdate);
+      _isPlaying = widget.controller.value.isPlaying ?? false;
     }
   }
 
   @override
   void dispose() {
-    widget.controller?.removeListener(_onControllerUpdate);
+    widget.controller.removeListener(_onControllerUpdate);
     super.dispose();
     // widget.controller?.dispose();
   }
@@ -211,15 +212,13 @@ class _VideoPostItemState extends State<VideoPostItem> {
       onVisibilityChanged: (info) {
         _isVisible = info.visibleFraction > 0.5;
         if (_isVisible) {
-          controller?.play();
+          controller.play();
         } else {
-          controller?.pause();
+          controller.pause();
         }
       },
       child: GestureDetector(
         onTap: () {
-          if (controller == null) return;
-
           if (controller.value.isPlaying) {
             controller.pause();
           } else {
@@ -230,7 +229,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            if (controller != null && controller.value.isInitialized)
+            if (controller.value.isInitialized)
               Center(
                 child: AspectRatio(
                     aspectRatio: controller.value.aspectRatio,
@@ -301,8 +300,8 @@ class _VideoPostItemState extends State<VideoPostItem> {
                 child: IconButton(
                   // ✅ Logic is now handled here directly.
                   onPressed: () {
-                    if (widget.controller?.value.isPlaying ?? false) {
-                      widget.controller?.pause();
+                    if (widget.controller.value.isPlaying ?? false) {
+                      widget.controller.pause();
                     } else {
                       widget.onPlayPressed();
                     }
@@ -318,7 +317,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
   }
 
   Widget _buildVideoPlayer() {
-    if (widget.controller != null && widget.controller!.value.isInitialized) {
+    if (widget.controller!.value.isInitialized) {
       return Center(
         child: AspectRatio(
           aspectRatio: widget.controller!.value.aspectRatio,
@@ -654,8 +653,15 @@ class _VideoPostItemState extends State<VideoPostItem> {
         expand: false,
         initialChildSize: 0.6,
         maxChildSize: 0.9,
-        builder: (context, scrollController) => BlocProvider(
-          create: (context) => sl<CommentsBloc>()..add(LoadComments(postId)),
+        builder: (context, scrollController) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+                create: (context) =>
+                    sl<CommentsBloc>()..add(LoadComments(postId))),
+            BlocProvider(
+              create: (context) => sl<LikeUnlikeCommentBloc>(),
+            ),
+          ],
           child:
               CommentsView(scrollController: scrollController, postId: postId),
         ),

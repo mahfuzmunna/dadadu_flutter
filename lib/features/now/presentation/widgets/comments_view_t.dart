@@ -5,17 +5,6 @@ import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usec
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// You would add this event to your comments_event.dart file
-/*
-  class AddComment extends CommentsEvent {
-    final String postId;
-    final String commentText;
-
-    const AddComment({required this.postId, required this.commentText});
-  }
-*/
-
-// Domain and BLoC imports
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../comments/domain/entities/comment_entity.dart';
 import '../../../comments/presentation/bloc/comments_bloc.dart';
@@ -198,135 +187,163 @@ class _CommentInputFieldState extends State<_CommentInputField> {
   }
 }
 
-class _CommentList extends StatefulWidget {
+// Replace your existing _CommentList and _CommentListState with these two widgets.
+
+class _CommentList extends StatelessWidget {
   final List<CommentEntity> comments;
   final ScrollController controller;
   final String postId;
 
-  const _CommentList(
-      {required this.comments, required this.controller, required this.postId});
-
-  @override
-  State<_CommentList> createState() => _CommentListState();
-}
-class _CommentListState extends State<_CommentList> {
-  bool _isTranslating = false;
-  bool _isLiked = false;
-  UserEntity? currentUser;
-
-  @override
-  void initState() {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      currentUser = authState.user;
-    }
-    super.initState();
-  }
-
-  void _likeComment(String commentId) {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      context.read<LikeUnlikeCommentBloc>().add(LikeComment(
-            userId: authState.user.id,
-            postId: widget.postId,
-            commentId: commentId,
-          ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to like.')),
-      );
-    }
-  }
-
-  void _unlikeComment(String commentId) {
-    final authState = context.read<AuthBloc>().state;
-    if (authState is AuthAuthenticated) {
-      context.read<LikeUnlikeCommentBloc>().add(UnlikeComment(
-            userId: authState.user.id,
-            postId: widget.postId,
-            commentId: commentId,
-          ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to unlike.')),
-      );
-    }
-  }
+  const _CommentList({
+    required this.comments,
+    required this.controller,
+    required this.postId,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final comments = widget.comments;
-    final controller = widget.controller;
     if (comments.isEmpty) {
       return const Center(
-          child:
-              Text("No comments yet.", style: TextStyle(color: Colors.grey)));
+        child: Text("No comments yet.", style: TextStyle(color: Colors.grey)),
+      );
     }
+
     return ListView.builder(
       controller: controller,
       itemCount: comments.length,
       padding: const EdgeInsets.only(top: 8),
       itemBuilder: (context, index) {
-        _isLiked = comments[index].likedBy.contains(currentUser?.id);
         final comment = comments[index];
-        return ListTile(
-          key: ValueKey(comment.comment),
-          leading: CircleAvatar(
-            backgroundImage: comment.author?.profilePhotoUrl != null
-                ? CachedNetworkImageProvider(comment.author!.profilePhotoUrl!)
-                : null,
-            child: comment.author?.profilePhotoUrl == null
-                ? const Icon(Icons.person)
-                : null,
-          ),
-          title: Text(comment.author?.username ?? 'Anonymous',
-              style: const TextStyle(fontWeight: FontWeight.bold)),
-          subtitle: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(comment.comment),
-              const SizedBox(height: 4),
-              TextButton.icon(
-                icon: _isTranslating
-                    ? const SizedBox(
-                        height: 8, width: 8, child: CircularProgressIndicator())
-                    : null,
-                onPressed: () {
-                  setState(() {
-                    _isTranslating = true;
-                  });
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content:
-                            Text('Translating comment: "${comment.comment}"')),
-                  );
-                },
-                label: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Text(
-                    _isTranslating ? 'Translating...' : 'Translate',
-                    style: const TextStyle(
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          trailing: IconButton(
-              onPressed: _isLiked
-                  ? () => _unlikeComment(comment.id)
-                  : () => _likeComment(comment.id),
-              icon: _isLiked
-                  ? const Icon(
-                      Icons.favorite,
-                      color: Colors.red,
-                    )
-                  : const Icon(Icons.favorite_border)),
+        // ✅ Use the new, self-contained widget for each item.
+        return _CommentListItem(
+          key: ValueKey(comment.id), // Use a unique key
+          comment: comment,
+          postId: postId,
         );
       },
+    );
+  }
+}
+
+// ✅ NEW: A dedicated StatefulWidget for each comment item.
+class _CommentListItem extends StatefulWidget {
+  final CommentEntity comment;
+  final String postId;
+
+  const _CommentListItem({
+    super.key,
+    required this.comment,
+    required this.postId,
+  });
+
+  @override
+  State<_CommentListItem> createState() => _CommentListItemState();
+}
+
+class _CommentListItemState extends State<_CommentListItem> {
+  bool _isTranslating = false;
+
+  // This widget now manages its own 'liked' state.
+  late bool _isLiked;
+  UserEntity? _currentUser;
+
+  @override
+  void initState() {
+    super.initState();
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      _currentUser = authState.user;
+    }
+    // Set the initial liked state for this specific comment.
+    _isLiked = widget.comment.likedBy.contains(_currentUser?.id);
+  }
+
+  // This ensures the UI updates if the comment data from the BLoC changes.
+  @override
+  void didUpdateWidget(covariant _CommentListItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.comment != oldWidget.comment) {
+      setState(() {
+        _isLiked = widget.comment.likedBy.contains(_currentUser?.id);
+      });
+    }
+  }
+
+  void _toggleLike() {
+    if (_currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in to like.')),
+      );
+      return;
+    }
+
+    // Dispatch the correct event based on the current liked state.
+    final event = _isLiked
+        ? UnlikeComment(
+            userId: _currentUser!.id,
+            postId: widget.postId,
+            commentId: widget.comment.id,
+          )
+        : LikeComment(
+            userId: _currentUser!.id,
+            postId: widget.postId,
+            commentId: widget.comment.id,
+          );
+
+    context.read<LikeUnlikeCommentBloc>().add(event);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      leading: CircleAvatar(
+        backgroundImage: widget.comment.author?.profilePhotoUrl != null
+            ? CachedNetworkImageProvider(
+                widget.comment.author!.profilePhotoUrl!)
+            : null,
+        child: widget.comment.author?.profilePhotoUrl == null
+            ? const Icon(Icons.person)
+            : null,
+      ),
+      title: Text(widget.comment.author?.username ?? 'Anonymous',
+          style: const TextStyle(fontWeight: FontWeight.bold)),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.comment.comment),
+          const SizedBox(height: 4),
+          TextButton.icon(
+            icon: _isTranslating
+                ? const SizedBox(
+                    height: 12,
+                    width: 12,
+                    child: CircularProgressIndicator(strokeWidth: 2))
+                : null,
+            onPressed: () {
+              // This setState now only affects this individual widget.
+              setState(() => _isTranslating = true);
+              // Simulate translation
+              Future.delayed(const Duration(seconds: 2), () {
+                if (mounted) setState(() => _isTranslating = false);
+              });
+            },
+            label: Text(
+              _isTranslating ? 'Translating...' : 'Translate',
+              style: const TextStyle(
+                color: Colors.blueAccent,
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+            ),
+          ),
+        ],
+      ),
+      trailing: IconButton(
+        onPressed: _toggleLike,
+        icon: _isLiked
+            ? const Icon(Icons.favorite, color: Colors.red)
+            : const Icon(Icons.favorite_border),
+      ),
     );
   }
 }

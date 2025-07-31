@@ -23,7 +23,6 @@ class SendDiamondUseCase implements UseCase<void, SendDiamondParams> {
 
 class UnsendDiamondUseCase implements UseCase<void, SendDiamondParams> {
   final PostRepository repository;
-
   UnsendDiamondUseCase(this.repository);
 
   @override

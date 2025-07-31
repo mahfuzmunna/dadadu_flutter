@@ -226,7 +226,7 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
             final currentUser = state.user;
 
             _referralLink =
-                'https://dadadu.app/invite/${currentUser.id.substring(0, 8)}';
+                'https://sqdqbmnqosfzhmrpbvqe.supabase.co/functions/v1/invite-handler?referred_by=${currentUser.id}';
             _referralsCount = currentUser.referralsCount;
             referralController.text = _referralLink!;
 
