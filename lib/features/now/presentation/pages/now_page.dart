@@ -14,7 +14,7 @@ import 'package:video_player/video_player.dart';
 import '../../../../injection_container.dart' as di;
 import '../../../profile/presentation/bloc/follow_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
-import '../widgets/video_post_item.dart';
+import '../widgets/video_post_item_s.dart';
 
 class NowPage extends StatelessWidget {
   const NowPage({super.key});
