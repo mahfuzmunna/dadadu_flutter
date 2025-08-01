@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/discover/domain/usecases/find_users_by_vibe_usecase.dart';
 import 'package:dadadu_app/features/discover/presentation/bloc/discover_bloc.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -59,7 +60,7 @@ class _VibeUsersPageState extends State<VibeUsersPage> {
             icon: const Icon(Icons.arrow_back),
             onPressed: widget.onBackPressed,
           ),
-          title: Text('${widget.vibe} Vibe'),
+          title: Text(AppLocalizations.of(context)!.vibeWith(widget.vibe)),
           centerTitle: true,
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -81,8 +82,9 @@ class _VibeUsersPageState extends State<VibeUsersPage> {
                   .where((user) => user.user.id != authState.user.id)
                   .toList();
               if (users.isEmpty) {
-                return const Center(
-                    child: Text('No users found nearby with this vibe.'));
+                return Center(
+                    child: Text(
+                        AppLocalizations.of(context)!.noUsersFoundWithVibe));
               }
 
               // UPDATED: Using PageView.builder for a swipeable layout
@@ -100,7 +102,8 @@ class _VibeUsersPageState extends State<VibeUsersPage> {
                 },
               );
             }
-            return const Center(child: Text('Finding users...'));
+            return Center(
+                child: Text(AppLocalizations.of(context)!.findingUsers));
           },
         ),
       ),
@@ -197,7 +200,7 @@ class _UserCard extends StatelessWidget {
             // --- USER IDENTITY ---
             // Using more expressive M3 typography roles for better hierarchy.
             Text(
-              user.fullName ?? 'Unknown User',
+              user.fullName ?? AppLocalizations.of(context)!.unknownUser,
               style: theme.textTheme.displaySmall?.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
@@ -286,7 +289,7 @@ class _UserCard extends StatelessWidget {
               width: double.infinity,
               child: FilledButton.icon(
                 icon: const Icon(Icons.person_search_outlined),
-                label: const Text('View Profile'),
+                label: Text(AppLocalizations.of(context)!.viewProfile),
                 onPressed: () {
                   // Logic remains unchanged
                   context.push('/profile/${user.id}');

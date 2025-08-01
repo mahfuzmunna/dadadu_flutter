@@ -12,6 +12,8 @@ import 'package:image_editor_plus/options.dart';
 import 'package:image_picker/image_picker.dart'; // Keep image_picker for selecting
 import 'package:path_provider/path_provider.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 class UploadProfilePhotoPage extends StatefulWidget {
   const UploadProfilePhotoPage({super.key});
 
@@ -67,8 +69,9 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
             UpdateProfilePhoto(userId: userId, photoFile: _editedImageFile!),
           );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Please select and edit an image first.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content:
+              Text(AppLocalizations.of(context)!.pleaseSelectAndEditImage)));
     }
     _finalizeOnboarding();
   }
@@ -105,7 +108,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Set Your Profile Photo'),
+        title: Text(AppLocalizations.of(context)!.setYourProfilePhoto),
         centerTitle: true,
       ),
       body: BlocConsumer<ProfileBloc, ProfileState>(
@@ -147,7 +150,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
                                 ),
                                 const SizedBox(height: 8),
                                 Text(
-                                  'Add Photo',
+                                  AppLocalizations.of(context)!.addPhoto,
                                   style: TextStyle(
                                       color: colorScheme.onPrimaryContainer,
                                       fontWeight: FontWeight.bold),
@@ -158,8 +161,8 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text(
-                    'Make a great first impression!',
+                  Text(
+                    AppLocalizations.of(context)!.greatFirstImpression,
                     style: TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 48),
@@ -171,7 +174,8 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
                       children: [
                         FilledButton.icon(
                           icon: const Icon(Icons.cloud_upload_rounded),
-                          label: const Text('Upload and Continue'),
+                          label: Text(
+                              AppLocalizations.of(context)!.uploadAndContinue),
                           style: FilledButton.styleFrom(
                               padding:
                                   const EdgeInsets.symmetric(vertical: 16)),
@@ -182,7 +186,7 @@ class _UploadProfilePhotoPageState extends State<UploadProfilePhotoPage> {
                         const SizedBox(height: 16),
                         TextButton(
                           onPressed: _finalizeOnboarding,
-                          child: const Text('Skip for Now'),
+                          child: Text(AppLocalizations.of(context)!.skipForNow),
                         ),
                       ],
                     ),

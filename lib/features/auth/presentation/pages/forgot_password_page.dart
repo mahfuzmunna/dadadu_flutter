@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
@@ -31,15 +32,16 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Forgot Password')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context)!.forgotPassword)),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthPasswordResetEmailSent) {
-            _showSnackBar(
-                'Password reset email sent to ${state.email}. Check your inbox.');
+            _showSnackBar(AppLocalizations.of(context)!
+                .passwordResetEmailSent(state.email));
             Navigator.of(context).pop(); // Go back to login
           } else if (state is AuthError) {
-            _showSnackBar('Password reset failed: ${state.message}');
+            _showSnackBar(AppLocalizations.of(context)!
+                .passwordResetFailed(state.message));
           }
         },
         builder: (context, state) {
@@ -52,7 +54,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 children: [
                   TextField(
                     controller: _emailController,
-                    decoration: const InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.email),
                     keyboardType: TextInputType.emailAddress,
                     enabled: !isLoading,
                   ),
@@ -65,7 +68,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         context.read<AuthBloc>().add(AuthPasswordResetRequested(
                             email: _emailController.text.trim()));
                       },
-                      child: const Text('Send Reset Link'),
+                      child: Text(AppLocalizations.of(context)!.sendResetLink),
                     ),
                 ],
               ),

@@ -5,6 +5,7 @@ import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
 import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dadadu_app/injection_container.dart';
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -282,7 +283,7 @@ class _NowPageViewState extends State<_NowPageView>
               onPressed: () {
                 Navigator.of(dialogContext).pop(); // Dismiss dialog
               },
-              child: const Text('Close'),
+              child: Text(AppLocalizations.of(context)!.close),
             ),
           ],
         );
@@ -344,7 +345,7 @@ class _NowPageViewState extends State<_NowPageView>
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  'NOW',
+                  AppLocalizations.of(context)!.now,
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -402,7 +403,7 @@ class _NowPageViewState extends State<_NowPageView>
                 // Leaving the label null creates the small red dot
                 child: const Icon(Icons.notifications_none_rounded),
               ),
-              tooltip: 'Notifications',
+              tooltip: AppLocalizations.of(context)!.notifications,
               onPressed: () => _showNotificationsDialog(context),
               style: IconButton.styleFrom(
                 backgroundColor: Colors.black.withOpacity(0.4),
@@ -484,8 +485,8 @@ class _NowPageViewState extends State<_NowPageView>
             );
           }
           // Fallback for any other state
-          return const Center(
-            child: Text("No posts found."),
+          return Center(
+            child: Text(AppLocalizations.of(context)!.noPostsFound),
           );
         },
       ),

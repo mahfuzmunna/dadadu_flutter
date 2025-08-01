@@ -16,7 +16,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'core/locale/locale_cubit.dart';
 import 'core/theme/app_theme.dart';
+import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -73,6 +75,7 @@ class _MyAppState extends State<MyApp> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => ThemeCubit()),
+        BlocProvider(create: (context) => LocaleCubit()),
         BlocProvider<AuthBloc>.value(value: _authBloc),
         BlocProvider(create: (_) => di.sl<FeedBloc>()),
         BlocProvider(create: (_) => di.sl<ProfileBloc>()),
@@ -81,14 +84,19 @@ class _MyAppState extends State<MyApp> {
         builder: (context, themeMode) {
           return Provider<GoRouter>.value(
             value: _router,
-            child: MaterialApp.router(
-              debugShowCheckedModeBanner: false,
-              title: 'Dadadu',
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              themeMode: themeMode,
-              routerConfig: _router, // 🚀 Stable router
-            ),
+            child: BlocBuilder<LocaleCubit, Locale>(builder: (context, locale) {
+              return MaterialApp.router(
+                debugShowCheckedModeBanner: false,
+                title: 'Dadadu',
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                locale: locale,
+                theme: AppTheme.lightTheme,
+                darkTheme: AppTheme.darkTheme,
+                themeMode: themeMode,
+                routerConfig: _router, // 🚀 Stable router
+              );
+            }),
           );
         },
       ),

@@ -1,0 +1,374 @@
+{
+  "@@locale": "en",
+  "settings": "Settings",
+  "appearance": "Appearance",
+  "theme": "Theme",
+  "light": "Light",
+  "dark": "Dark",
+  "system": "System",
+  "general": "General",
+  "pushNotifications": "Push Notifications",
+  "language": "Language",
+  "privacySettings": "Privacy Settings",
+  "support": "Support",
+  "helpAndSupport": "Help & Support",
+  "aboutDadadu": "About Dadadu",
+  "signOut": "Sign Out",
+  "confirmSignOut": "Confirm Sign Out",
+  "areYouSureSignOut": "Are you sure you want to sign out?",
+  "cancel": "Cancel",
+  "privacyPolicy": "Privacy Policy",
+  "deleteAccount": "Delete Account",
+  "close": "Close",
+  "selectLanguage": "Select Language",
+  "couldNotLaunchUrl": "Could not launch {url}",
+  "@couldNotLaunchUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "login": "Login",
+  "loginFailed": "Login failed: {message}",
+  "@loginFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "email": "Email",
+  "emailHint": "your@example.com",
+  "password": "Password",
+  "passwordHint": "Enter your password",
+  "signIn": "Sign In",
+  "forgotPassword": "Forgot Password?",
+  "or": "OR",
+  "signInWithGoogle": "Sign In with Google",
+  "dontHaveAnAccount": "Don't have an account?",
+  "signUp": "Sign Up",
+  "pleaseCompleteAllFields": "Please complete all fields.",
+  "man": "Man",
+  "woman": "Woman",
+  "interestedIn": "Interested in",
+  "lookingFor": "Looking for",
+  "createAccount": "Create Account",
+  "signUpSuccess": "Success! Please check your email to verify.",
+  "signUpFailed": "Sign up failed: {message}",
+  "@signUpFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "fullName": "Full Name",
+  "pleaseEnterYourName": "Please enter your name",
+  "username": "Username",
+  "pleaseEnterAUsername": "Please enter a username",
+  "pleaseEnterAnEmail": "Please enter an email",
+  "passwordTooShort": "Password must be at least 6 characters",
+  "continueButton": "Continue",
+  "referralId": "Referral ID: {referralId}",
+  "@referralId": {
+    "placeholders": {
+      "referralId": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyHaveAnAccount": "Already have an account?",
+  "setYourProfilePhoto": "Set Your Profile Photo",
+  "pleaseSelectAndEditImage": "Please select and edit an image first.",
+  "addPhoto": "Add Photo",
+  "greatFirstImpression": "Make a great first impression!",
+  "uploadAndContinue": "Upload and Continue",
+  "skipForNow": "Skip for Now",
+  "forgotPasswordTitle": "Forgot Password",
+  "passwordResetEmailSent": "Password reset email sent to {email}. Check your inbox.",
+  "@passwordResetEmailSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "passwordResetFailed": "Password reset failed: {message}",
+  "@passwordResetFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "sendResetLink": "Send Reset Link",
+  "notifications": "Notifications",
+  "now": "NOW",
+  "errorWithMessage": "Error: {message}",
+  "@errorWithMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "noPostsFound": "No posts found.",
+  "recent": "Recent",
+  "popular": "Popular",
+  "noCommentsYet": "No comments yet.",
+  "mustBeLoggedInToComment": "You must be logged in to comment.",
+  "commentSubmitted": "Comment submitted!",
+  "addAComment": "Add a comment...",
+  "mustBeLoggedInToLike": "You must be logged in to like.",
+  "anonymous": "Anonymous",
+  "translating": "Translating...",
+  "translate": "Translate",
+  "sent": "Sent",
+  "storagePermissionRequired": "Storage permission is required to save videos.",
+  "videoSavedToGallery": "Video saved to gallery!",
+  "failedToSaveVideo": "Failed to save video.",
+  "errorSavingVideo": "An error occurred while saving the video.",
+  "loading": "loading...",
+  "originalSoundBy": "Original Sound - {username}",
+  "@originalSoundBy": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "follow": "Follow",
+  "following": "Following",
+  "save": "Save",
+  "saving": "Saving...",
+  "share": "Share",
+  "shareVideoMessage": "Check out this video! https://dadadu.app/{postId}",
+  "@shareVideoMessage": {
+    "placeholders": {
+      "postId": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotGiveDiamondToSelf": "You can't give a diamond to yourself.",
+  "newPost": "New Post",
+  "postPublishedSuccess": "Post published successfully!",
+  "uploadFailed": "Upload failed: {message}",
+  "@uploadFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseACover": "Choose a cover",
+  "selectAnIntent": "Select an Intent",
+  "processing": "Processing...",
+  "publishing": "Publishing... {progress}%",
+  "@publishing": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "publish": "Publish",
+  "addACaption": "Add a caption...",
+  "couldNotGenerateThumbnails": "Could not generate thumbnails.",
+  "love": "Love",
+  "business": "Business",
+  "entertainment": "Entertainment",
+  "pleaseSelectAThumbnail": "Please select a thumbnail.",
+  "couldNotProcessVideo": "Could not process video. Please try again.",
+  "errorPublishingPost": "Error publishing post: {error}",
+  "@errorPublishingPost": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aspectRatio_1_1": "1:1",
+  "somethingWentWrong": "Something went wrong",
+  "editProfile": "Edit Profile",
+  "unfollow": "Unfollow",
+  "myProfile": "My Profile",
+  "profile": "Profile",
+  "followers": "Followers",
+  "videos": "Videos",
+  "inviteFriendsAndEarn": "Invite Friends & Earn Diamonds!",
+  "inviteFriendsDescription": "Share your unique referral link and earn 100 💎 for every friend who signs up!",
+  "copy": "Copy",
+  "referralLinkCopied": "Referral link copied!",
+  "joinMeOnDadadu": "Join me on Dadadu! Use my link to sign up: {referralLink}",
+  "@joinMeOnDadadu": {
+    "placeholders": {
+      "referralLink": {
+        "type": "String"
+      }
+    }
+  },
+  "matchHistory": "Match History",
+  "noMatchHistory": "No match history yet.",
+  "uploadedVideos": "Uploaded Videos ({postCount})",
+  "@uploadedVideos": {
+    "placeholders": {
+      "postCount": {
+        "type": "String"
+      }
+    }
+  },
+  "youHaveNoVideos": "You haven't uploaded any videos yet.",
+  "userHasNoVideos": "This user has no videos.",
+  "moodWithStatus": "Mood: {moodStatus}",
+  "@moodWithStatus": {
+    "placeholders": {
+      "moodStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "setMood": "Set Mood",
+  "howBadgesWork": "How Badges Work",
+  "selectYourMood": "Select Your Mood",
+  "moodUpdated": "Mood updated to {mood}!",
+  "@moodUpdated": {
+    "placeholders": {
+      "mood": {
+        "type": "String"
+      }
+    }
+  },
+  "dadaduBadgeSystem": "Dadadu Badge System",
+  "earnBadgesDescription": "Earn badges by achieving various milestones!",
+  "badgeLeafTitle": "LEAF (0 - 9,999 diamonds)",
+  "badgeLeafDescription": "Starting level for new users.",
+  "badgeThreeleafTitle": "THREELEAF (10K - 999K diamonds)",
+  "badgeThreeleafDescription": "Active community member.",
+  "badgeFiveleafTitle": "FIVELEAF (1M - 9.9M diamonds)",
+  "badgeFiveleafDescription": "Popular creator status.",
+  "badgeDadalordTitle": "DADALORD (10M+ diamonds)",
+  "badgeDadalordDescription": "Elite status worth $10,000+ with +2% per million diamonds.",
+  "badgesPrestigeInfo": "📈 Higher badges = more prestige + marketplace value",
+  "gotIt": "Got It!",
+  "userNotAuthenticated": "User not authenticated.",
+  "profileSavedSuccess": "Profile saved successfully!",
+  "failedToUpdateProfile": "Failed to update: {message}",
+  "@failedToUpdateProfile": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameCannotBeEmpty": "Username cannot be empty",
+  "bio": "Bio",
+  "saveChanges": "Save Changes",
+  "chats": "Chats",
+  "inviteFriendsToUnlockSearch": "Invite more friends to unlock global search",
+  "userDismissed": "{fullName} dismissed",
+  "@userDismissed": {
+    "placeholders": {
+      "fullName": {
+        "type": "String"
+      }
+    }
+  },
+  "undo": "Undo",
+  "unknownUser": "Unknown User",
+  "yesterday": "Yesterday",
+  "inboxEmpty": "Your Inbox is Empty",
+  "startConversationPrompt": "Start a conversation by tapping the new chat button.",
+  "all": "All",
+  "notAuthenticated": "Not Authenticated",
+  "chat": "Chat",
+  "online": "Online",
+  "messageHint": "Message...",
+  "discover": "Discover",
+  "whatsYourVibe": "What's your vibe today?",
+  "searchWithin": "Search within",
+  "searchAroundThe": "Search around the",
+  "distanceMeters": "{distance} m",
+  "@distanceMeters": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "distanceKilometers": "{distance} km",
+  "@distanceKilometers": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "globe": "Globe",
+  "updateMyLocation": "Update My Location",
+  "updatingYourLocation": "Updating your location...",
+  "increaseDistanceLimit": "Increase Distance Limit",
+  "featureUnlocked": "Feature Unlocked!",
+  "congratulationsUnlocked": "Congratulations! You can now search for people at any distance.",
+  "awesome": "Awesome!",
+  "unlockMoreDistance": "Unlock More Distance",
+  "unlockDistanceDescription": "Refer 10 new users to unlock the ability to search for people further away!",
+  "yourReferrals": "Your referrals: ",
+  "referralProgress": "{count} / 10",
+  "@referralProgress": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "yourInviteLink": "Your Invite Link",
+  "copyLink": "Copy Link",
+  "linkCopied": "Link copied to clipboard!",
+  "gettingYourLocation": "Getting your location, please wait...",
+  "locationErrorMessage": "An error occurred while checking location: {error}",
+  "@locationErrorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "openAppSettings": "Open App Settings",
+  "openLocationSettings": "Open Location Settings",
+  "retryPermission": "Retry Permission",
+  "locationTrackingError": "Location tracking error.",
+  "couldNotGetLocationName": "Could not get location name.",
+  "locationUpdatedTo": "Location updated to {locationName}!",
+  "@locationUpdatedTo": {
+    "placeholders": {
+      "locationName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToUpdateLocation": "Failed to update location.",
+  "vibeWith": "{vibe} Vibe",
+  "@vibeWith": {
+    "placeholders": {
+      "vibe": {
+        "type": "String"
+      }
+    }
+  },
+  "noUsersFoundWithVibe": "No users found nearby with this vibe.",
+  "findingUsers": "Finding users...",
+  "distanceAway": "{distance} away",
+  "@distanceAway": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "viewProfile": "View Profile",
+  "likedYourVideo": "liked your video.",
+  "startedFollowingYou": "started following you.",
+  "commentedAwesome": "commented: \"Awesome!\""
+}

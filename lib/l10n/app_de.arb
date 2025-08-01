@@ -1,0 +1,263 @@
+{
+  "@@locale": "de",
+  "settings": "Einstellungen",
+  "appearance": "Erscheinungsbild",
+  "theme": "Thema",
+  "light": "Hell",
+  "dark": "Dunkel",
+  "system": "System",
+  "general": "Allgemein",
+  "pushNotifications": "Push-Benachrichtigungen",
+  "language": "Sprache",
+  "privacySettings": "Datenschutzeinstellungen",
+  "support": "Support",
+  "helpAndSupport": "Hilfe & Support",
+  "aboutDadadu": "Über Dadadu",
+  "signOut": "Abmelden",
+  "confirmSignOut": "Abmeldung bestätigen",
+  "areYouSureSignOut": "Möchten Sie sich wirklich abmelden?",
+  "cancel": "Abbrechen",
+  "privacyPolicy": "Datenschutz-Bestimmungen",
+  "deleteAccount": "Konto löschen",
+  "close": "Schließen",
+  "selectLanguage": "Sprache auswählen",
+  "couldNotLaunchUrl": "URL konnte nicht geöffnet werden: {url}",
+  "@couldNotLaunchUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "login": "Anmelden",
+  "loginFailed": "Anmeldung fehlgeschlagen: {message}",
+  "@loginFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "email": "E-Mail",
+  "emailHint": "deine@example.com",
+  "password": "Passwort",
+  "passwordHint": "Gib dein Passwort ein",
+  "signIn": "Anmelden",
+  "forgotPassword": "Passwort vergessen?",
+  "or": "ODER",
+  "signInWithGoogle": "Mit Google anmelden",
+  "dontHaveAnAccount": "Du hast noch kein Konto?",
+  "signUp": "Registrieren",
+  "createAccount": "Konto erstellen",
+  "signUpSuccess": "Erfolg! Bitte überprüfe deine E-Mails zur Bestätigung.",
+  "signUpFailed": "Registrierung fehlgeschlagen: {message}",
+  "@signUpFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "fullName": "Vollständiger Name",
+  "pleaseEnterYourName": "Bitte gib deinen Namen ein",
+  "username": "Benutzername",
+  "pleaseEnterAUsername": "Bitte gib einen Benutzernamen ein",
+  "pleaseEnterAnEmail": "Bitte gib eine E-Mail-Adresse ein",
+  "passwordTooShort": "Das Passwort muss mindestens 6 Zeichen lang sein",
+  "continueButton": "Weiter",
+  "referralId": "Empfehlungs-ID: {referralId}",
+  "@referralId": {
+    "placeholders": {
+      "referralId": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyHaveAnAccount": "Du hast bereits ein Konto?",
+  "setYourProfilePhoto": "Profilbild festlegen",
+  "pleaseSelectAndEditImage": "Bitte wähle zuerst ein Bild aus und bearbeite es.",
+  "addPhoto": "Foto hinzufügen",
+  "greatFirstImpression": "Hinterlasse einen großartigen ersten Eindruck!",
+  "uploadAndContinue": "Hochladen und weiter",
+  "skipForNow": "Fürs Erste überspringen",
+  "forgotPasswordTitle": "Passwort vergessen",
+  "passwordResetEmailSent": "E-Mail zum Zurücksetzen des Passworts an {email} gesendet. Überprüfe deinen Posteingang.",
+  "@passwordResetEmailSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "passwordResetFailed": "Zurücksetzen des Passworts fehlgeschlagen: {message}",
+  "@passwordResetFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "sendResetLink": "Link zum Zurücksetzen senden",
+  "notifications": "Benachrichtigungen",
+  "now": "JETZT",
+  "errorWithMessage": "Fehler: {message}",
+  "@errorWithMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "noPostsFound": "Keine Beiträge gefunden.",
+  "recent": "Neueste",
+  "popular": "Beliebt",
+  "noCommentsYet": "Noch keine Kommentare.",
+  "mustBeLoggedInToComment": "Du musst angemeldet sein, um zu kommentieren.",
+  "commentSubmitted": "Kommentar abgeschickt!",
+  "addAComment": "Einen Kommentar hinzufügen...",
+  "mustBeLoggedInToLike": "Du musst angemeldet sein, um zu liken.",
+  "anonymous": "Anonym",
+  "translating": "Übersetze...",
+  "translate": "Übersetzen",
+  "sent": "Gesendet",
+  "storagePermissionRequired": "Speicherberechtigung zum Speichern von Videos erforderlich.",
+  "videoSavedToGallery": "Video in der Galerie gespeichert!",
+  "failedToSaveVideo": "Video konnte nicht gespeichert werden.",
+  "errorSavingVideo": "Beim Speichern des Videos ist ein Fehler aufgetreten.",
+  "loading": "lädt...",
+  "originalSoundBy": "Originalton - {username}",
+  "@originalSoundBy": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "follow": "Folgen",
+  "following": "Gefolgt",
+  "save": "Speichern",
+  "saving": "Speichert...",
+  "share": "Teilen",
+  "shareVideoMessage": "Schau dir dieses Video an! https://dadadu.app/{postId}",
+  "@shareVideoMessage": {
+    "placeholders": {
+      "postId": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotGiveDiamondToSelf": "Du kannst dir nicht selbst einen Diamanten geben.",
+  "newPost": "Neuer Beitrag",
+  "postPublishedSuccess": "Beitrag erfolgreich veröffentlicht!",
+  "uploadFailed": "Upload fehlgeschlagen: {message}",
+  "@uploadFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseACover": "Wähle ein Cover",
+  "selectAnIntent": "Wähle eine Absicht",
+  "processing": "Verarbeite...",
+  "publishing": "Veröffentliche... {progress}%",
+  "@publishing": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "publish": "Veröffentlichen",
+  "addACaption": "Füge eine Bildunterschrift hinzu...",
+  "couldNotGenerateThumbnails": "Thumbnails konnten nicht generiert werden.",
+  "love": "Liebe",
+  "business": "Geschäftlich",
+  "entertainment": "Unterhaltung",
+  "pleaseSelectAThumbnail": "Bitte wähle ein Thumbnail aus.",
+  "couldNotProcessVideo": "Video konnte nicht verarbeitet werden. Bitte versuche es erneut.",
+  "errorPublishingPost": "Fehler beim Veröffentlichen des Beitrags: {error}",
+  "@errorPublishingPost": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aspectRatio_1_1": "1:1",
+  "somethingWentWrong": "Etwas ist schiefgelaufen",
+  "editProfile": "Profil bearbeiten",
+  "unfollow": "Nicht mehr folgen",
+  "myProfile": "Mein Profil",
+  "profile": "Profil",
+  "followers": "Follower",
+  "videos": "Videos",
+  "inviteFriendsAndEarn": "Freunde einladen & Diamanten verdienen!",
+  "inviteFriendsDescription": "Teile deinen einzigartigen Empfehlungslink und verdiene 100 💎 für jeden Freund, der sich anmeldet!",
+  "copy": "Kopieren",
+  "referralLinkCopied": "Empfehlungslink kopiert!",
+  "joinMeOnDadadu": "Komm zu mir auf Dadadu! Nutze meinen Link zur Anmeldung: {referralLink}",
+  "@joinMeOnDadadu": {
+    "placeholders": {
+      "referralLink": {
+        "type": "String"
+      }
+    }
+  },
+  "matchHistory": "Match-Verlauf",
+  "noMatchHistory": "Noch kein Match-Verlauf.",
+  "uploadedVideos": "Hochgeladene Videos ({postCount})",
+  "@uploadedVideos": {
+    "placeholders": {
+      "postCount": {
+        "type": "String"
+      }
+    }
+  },
+  "youHaveNoVideos": "Du hast noch keine Videos hochgeladen.",
+  "userHasNoVideos": "Dieser Benutzer hat keine Videos.",
+  "moodWithStatus": "Stimmung: {moodStatus}",
+  "@moodWithStatus": {
+    "placeholders": {
+      "moodStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "setMood": "Stimmung festlegen",
+  "howBadgesWork": "Wie Abzeichen funktionieren",
+  "selectYourMood": "Wähle deine Stimmung",
+  "moodUpdated": "Stimmung auf {mood} aktualisiert!",
+  "@moodUpdated": {
+    "placeholders": {
+      "mood": {
+        "type": "String"
+      }
+    }
+  },
+  "dadaduBadgeSystem": "Dadadu-Abzeichensystem",
+  "earnBadgesDescription": "Verdiene Abzeichen durch das Erreichen verschiedener Meilensteine!",
+  "badgeLeafTitle": "BLATT (0 - 9.999 Diamanten)",
+  "badgeLeafDescription": "Anfangslevel für neue Benutzer.",
+  "badgeThreeleafTitle": "DREIBLATT (10K - 999K Diamanten)",
+  "badgeThreeleafDescription": "Aktives Community-Mitglied.",
+  "badgeFiveleafTitle": "FÜNFBLATT (1M - 9.9M Diamanten)",
+  "badgeFiveleafDescription": "Status eines beliebten Erstellers.",
+  "badgeDadalordTitle": "DADALORD (10M+ Diamanten)",
+  "badgeDadalordDescription": "Elite-Status im Wert von über 10.000 $ mit +2% pro Million Diamanten.",
+  "badgesPrestigeInfo": "📈 Höhere Abzeichen = mehr Prestige + Marktwert",
+  "gotIt": "Verstanden!",
+  "userNotAuthenticated": "Benutzer nicht authentifiziert.",
+  "profileSavedSuccess": "Profil erfolgreich gespeichert!",
+  "failedToUpdateProfile": "Aktualisierung fehlgeschlagen: {message}",
+  "@failedToUpdateProfile": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameCannotBeEmpty": "Benutzername darf nicht leer sein",
+  "bio": "Bio",
+  "saveChanges": "Änderungen speichern"
+}

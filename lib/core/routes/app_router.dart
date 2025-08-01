@@ -9,7 +9,7 @@ import 'package:dadadu_app/core/pages/splash_page.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
 // If you have a ForgotPasswordPage, make sure to import it too
 import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
-import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page_s.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo_page.dart';
 import 'package:dadadu_app/features/chat/presentation/pages/chats_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
@@ -27,7 +27,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/presentation/pages/sign_up_page.dart';
+import '../../features/auth/presentation/pages/sign_up_page_s.dart';
 import '../../features/chat/presentation/pages/chat_page_s.dart';
 import '../../features/now/now_injection.dart' as di;
 import '../../features/posts/presentation/pages/create_post_camera_page.dart';

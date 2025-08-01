@@ -4,12 +4,14 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/chat/domain/entities/chat_room_entity.dart';
 import 'package:dadadu_app/features/chat/presentation/bloc/chat_list_bloc.dart';
 import 'package:dadadu_app/injection_container.dart';
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/services/presence_service.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 class ChatsPage extends StatelessWidget {
   const ChatsPage({super.key});
@@ -31,9 +33,9 @@ class _ChatsPageView extends StatefulWidget {
 }
 
 class _ChatsPageViewState extends State<_ChatsPageView> {
-  String _selectedFilter = 'All';
   Set<String> _onlineUserIds = {};
   late final StreamSubscription<Set<String>> _presenceSub;
+  List<ChatRoomEntity>? usersRoom;
 
   @override
   void initState() {
@@ -57,18 +59,20 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Invite more friends to unlock global search'),
+            SnackBar(
+              content: Text(
+                  AppLocalizations.of(context)!.inviteFriendsToUnlockSearch),
             ),
           );
         },
         child: const Icon(Icons.add_comment_rounded),
       ),
       appBar: AppBar(
-        title: const Text('Chats'),
+        title: Text(AppLocalizations.of(context)!.chats),
       ),
       body: BlocBuilder<ChatListBloc, ChatListState>(
         builder: (context, state) {
+          final authState = context.read<AuthBloc>().state;
           if (state is ChatListLoading || state is ChatListInitial) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -77,18 +81,29 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
           }
           if (state is ChatListLoaded) {
             final rooms = state.rooms;
-            if (rooms.isEmpty) {
+
+            if (authState is AuthAuthenticated) {
+              usersRoom = rooms.where((room) {
+                // This condition keeps the room only if the participant list contains the user's ID
+                return room.participantIds.contains(authState.user.id);
+              }).toList();
+            }
+
+            if (usersRoom != null && usersRoom!.isEmpty) {
               return const _EmptyChatView();
             }
+
+            String selectedFilter = AppLocalizations.of(context)!.all;
             return CustomScrollView(
               slivers: [
                 // ✅ Sticky header with filter chips
+
                 SliverPersistentHeader(
                   delegate: _SliverFilterHeader(
-                    selectedFilter: _selectedFilter,
+                    selectedFilter: selectedFilter,
                     onFilterChanged: (filter) {
                       setState(() {
-                        _selectedFilter = filter;
+                        selectedFilter = filter;
                         // TODO: Add BLoC event to filter chats
                       });
                     },
@@ -96,23 +111,24 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
                   pinned: true,
                 ),
                 SliverList.separated(
-                  itemCount: rooms.length,
+                  itemCount: usersRoom?.length,
                   itemBuilder: (context, index) {
-                    final room = rooms[index];
-                    final otherUserId = room.otherParticipant.id;
+                    final room = usersRoom?[index];
+                    final otherUserId = usersRoom?[index].otherParticipant.id;
                     final isOnline = _onlineUserIds.contains(otherUserId);
 
                     // ✅ Wrap tile in a Dismissible for swipe actions
                     return Dismissible(
-                      key: ValueKey(room.id),
+                      key: ValueKey(room?.id),
                       onDismissed: (direction) {
                         // TODO: Add BLoC event to delete or archive chat
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
-                            content: Text(
-                                '${room.otherParticipant.fullName} dismissed'),
+                            content: Text(AppLocalizations.of(context)!
+                                .userDismissed(
+                                    room.otherParticipant.fullName ?? '')),
                             action: SnackBarAction(
-                                label: 'Undo',
+                                label: AppLocalizations.of(context)!.undo,
                                 onPressed: () {
                                   // TODO: Add BLoC event to undo dismissal
                                 }),
@@ -129,7 +145,7 @@ class _ChatsPageViewState extends State<_ChatsPageView> {
                         icon: Icons.delete_forever_rounded,
                         alignment: Alignment.centerRight,
                       ),
-                      child: _ChatItemTile(room: room, isOnline: isOnline),
+                      child: _ChatItemTile(room: room!, isOnline: isOnline),
                     );
                   },
                   separatorBuilder: (context, index) => Divider(
@@ -181,7 +197,7 @@ class _ChatItemTile extends StatelessWidget {
     if (date == today) {
       return DateFormat.jm().format(ts.toLocal());
     } else if (date == yesterday) {
-      return 'Yesterday';
+      return AppLocalizations.of(context)!.yesterday;
     } else {
       return DateFormat.MMMd().format(ts.toLocal());
     }
@@ -237,7 +253,8 @@ class _ChatItemTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    otherUser.fullName ?? 'Unknown User',
+                    otherUser.fullName ??
+                        AppLocalizations.of(context)!.unknownUser,
                     style: theme.textTheme.titleMedium,
                   ),
                   const SizedBox(height: 2),
@@ -323,13 +340,13 @@ class _EmptyChatView extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               Text(
-                'Your Inbox is Empty',
+                AppLocalizations.of(context)!.inboxEmpty,
                 style: Theme.of(context).textTheme.headlineSmall,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
-                'Start a conversation by tapping the new chat button.',
+                AppLocalizations.of(context)!.startConversationPrompt,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
@@ -360,7 +377,7 @@ class _SliverFilterHeader extends SliverPersistentHeaderDelegate {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          'All',
+          AppLocalizations.of(context)!.all,
         ].map((filter) {
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),

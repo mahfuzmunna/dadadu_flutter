@@ -8,6 +8,7 @@ import 'package:dadadu_app/features/discover/presentation/pages/vibe_users_page_
 import 'package:dadadu_app/features/location/domain/usecases/get_location_name_usecase.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:dadadu_app/shared/widgets/pulsing_radar_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -126,7 +127,8 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
     } catch (e) {
       setState(() {
         _locationStatus = LocationPermissionStatus.error;
-        _locationErrorMessage = 'An error occurred while checking location: $e';
+        _locationErrorMessage =
+            AppLocalizations.of(context)!.locationErrorMessage(e.toString());
       });
       debugPrint('Location Error: $e');
     }
@@ -150,7 +152,8 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
       },
       onError: (error) {
         debugPrint('Error in location stream: $error');
-        _showSnackBar('Location tracking error.', isError: true);
+        _showSnackBar(AppLocalizations.of(context)!.locationTrackingError,
+            isError: true);
       },
     );
     setState(() {
@@ -172,8 +175,9 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
           lat: position.latitude, lon: position.longitude));
 
       result.fold(
-        (failure) =>
-            _showSnackBar('Could not get location name.', isError: true),
+        (failure) => _showSnackBar(
+            AppLocalizations.of(context)!.couldNotGetLocationName,
+            isError: true),
         (locationName) {
           debugPrint("Location name : $locationName");
           // Dispatch event to ProfileBloc to update the database
@@ -183,12 +187,14 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                 longitude: position.longitude,
                 locationName: locationName,
               ));
-          _showSnackBar('Location updated to $locationName!');
+          _showSnackBar(
+              AppLocalizations.of(context)!.locationUpdatedTo(locationName));
         },
       );
     } catch (e) {
       debugPrint('Failed to update profile location: $e');
-      _showSnackBar('Failed to update location.', isError: true);
+      _showSnackBar(AppLocalizations.of(context)!.failedToUpdateLocation,
+          isError: true);
     }
   }
 
@@ -280,7 +286,7 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                       child: Lottie.asset('assets/animations/globe.json'),
                     ),
                     const SizedBox(width: 8),
-                    const Text('Discover'),
+                    Text(AppLocalizations.of(context)!.discover),
                   ],
                 ),
               ),
@@ -303,14 +309,17 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
             children: [
               const PulsingRadarIcon(),
               const SizedBox(height: 24),
-              const Text("What's your vibe today?",
+              Text(AppLocalizations.of(context)!.whatsYourVibe,
                   style: TextStyle(fontSize: 24)),
               const SizedBox(height: 40),
-              _buildVibeButton("Love", Icons.favorite, Colors.pink),
+              _buildVibeButton(AppLocalizations.of(context)!.love,
+                  Icons.favorite, Colors.pink),
               const SizedBox(height: 20),
-              _buildVibeButton("Business", Icons.business_center, Colors.blue),
+              _buildVibeButton(AppLocalizations.of(context)!.business,
+                  Icons.business_center, Colors.blue),
               const SizedBox(height: 20),
-              _buildVibeButton("Entertainment", Icons.movie, Colors.purple),
+              _buildVibeButton(AppLocalizations.of(context)!.entertainment,
+                  Icons.movie, Colors.purple),
 
               // NEW: Distance Selector UI
               _buildDistanceSelector(),
@@ -329,7 +338,9 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
           height: 18,
         ),
         Text(
-          'Search ${_isDistanceLocked ? 'within' : 'around the'}',
+          _isDistanceLocked
+              ? AppLocalizations.of(context)!.searchWithin
+              : AppLocalizations.of(context)!.searchAroundThe,
           style: theme.textTheme.titleMedium
               ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
         ),
@@ -337,9 +348,11 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
         Text(
           _isDistanceLocked
               ? _selectedDistance < 1
-                  ? '${(_selectedDistance * 1000).round()} m'
-                  : '${_selectedDistance.round()} km'
-              : 'Globe',
+                  ? AppLocalizations.of(context)!.distanceMeters(
+                      (_selectedDistance * 1000).round() as String)
+                  : AppLocalizations.of(context)!
+                      .distanceKilometers(_selectedDistance.round() as String)
+              : AppLocalizations.of(context)!.globe,
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.primary,
@@ -354,9 +367,10 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
               // Left Icon Button: Update Location
               _buildSelectorButton(
                 icon: Icons.my_location,
-                tooltip: 'Update My Location',
+                tooltip: AppLocalizations.of(context)!.updateMyLocation,
                 onPressed: () {
-                  _showSnackBar('Updating your location...');
+                  _showSnackBar(
+                      AppLocalizations.of(context)!.updatingYourLocation);
                   _checkLocationPermissionAndService();
                 },
               ),
@@ -372,9 +386,11 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                         divisions: 9,
                         // Creates 100m steps
                   label: _selectedDistance < 1
-                      ? '${(_selectedDistance * 1000).round()} m'
-                      : '${_selectedDistance.round()} km',
-                  activeColor: theme.colorScheme.primary,
+                            ? AppLocalizations.of(context)!.distanceMeters(
+                                (_selectedDistance * 1000).round() as String)
+                            : AppLocalizations.of(context)!.distanceKilometers(
+                                _selectedDistance.round() as String),
+                        activeColor: theme.colorScheme.primary,
                   inactiveColor: theme.colorScheme.surfaceContainerHighest,
                   onChanged: (double value) {
                     setState(() {
@@ -387,7 +403,7 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
               // Right Icon Button: Increase Limit
               _buildSelectorButton(
                 icon: _isDistanceLocked ? Icons.lock : Icons.lock_open,
-                tooltip: 'Increase Distance Limit',
+                tooltip: AppLocalizations.of(context)!.increaseDistanceLimit,
                 onPressed: () => _showIncreaseLimitDialog(),
               ),
             ],
@@ -449,13 +465,13 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Feature Unlocked!',
+                      AppLocalizations.of(context)!.featureUnlocked,
                       style: Theme.of(context).textTheme.headlineSmall,
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      "Congratulations! You can now search for people at any distance.",
+                      AppLocalizations.of(context)!.congratulationsUnlocked,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color:
@@ -467,7 +483,7 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                 actionsAlignment: MainAxisAlignment.center,
                 actions: [
                   FilledButton(
-                    child: const Text('Awesome!'),
+                    child: Text(AppLocalizations.of(context)!.awesome),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
@@ -477,11 +493,11 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
               return AlertDialog(
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
-                title: const Row(
+                title: Row(
                   children: [
                     Icon(Icons.people_alt_outlined),
                     SizedBox(width: 10),
-                    Text('Unlock More Distance',
+                    Text(AppLocalizations.of(context)!.unlockMoreDistance,
                         style: TextStyle(fontSize: 20)),
                   ],
                 ),
@@ -490,8 +506,9 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                          'Refer 10 new users to unlock the ability to search for people further away!',
+                      Text(
+                          AppLocalizations.of(context)!
+                              .unlockDistanceDescription,
                           style: TextStyle(fontSize: 16)),
                       const SizedBox(height: 20),
                       Center(
@@ -499,9 +516,13 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                           TextSpan(
                             style: Theme.of(context).textTheme.titleMedium,
                             children: [
-                              const TextSpan(text: 'Your referrals: '),
                               TextSpan(
-                                text: '$_referralsCount / 10',
+                                  text: AppLocalizations.of(context)!
+                                      .yourReferrals),
+                              TextSpan(
+                                text: AppLocalizations.of(context)!
+                                    .referralProgress(
+                                        _referralsCount as String),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).colorScheme.primary,
@@ -516,21 +537,23 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                         controller: referralController,
                         readOnly: true,
                         decoration: InputDecoration(
-                          labelText: 'Your Invite Link',
+                          labelText:
+                              AppLocalizations.of(context)!.yourInviteLink,
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 12),
                           border: const OutlineInputBorder(),
                           suffixIcon: IconButton(
                             icon: const Icon(Icons.copy_all_rounded),
-                            tooltip: 'Copy Link',
+                            tooltip: AppLocalizations.of(context)!.copyLink,
                             onPressed: () {
                               if (_referralLink != null) {
                                 Clipboard.setData(
                                     ClipboardData(text: _referralLink!));
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Link copied to clipboard!')),
+                                  SnackBar(
+                                      content: Text(
+                                          AppLocalizations.of(context)!
+                                              .linkCopied)),
                                 );
                               }
                             },
@@ -543,7 +566,7 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                 actions: [
                   FilledButton.icon(
                     icon: const Icon(Icons.share_rounded),
-                    label: const Text('Share'),
+                    label: Text(AppLocalizations.of(context)!.share),
                     onPressed: () {
                       if (_referralLink != null) {
                         Share.share(
@@ -554,7 +577,7 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                     },
                   ),
                   TextButton(
-                    child: const Text('Got It'),
+                    child: Text(AppLocalizations.of(context)!.gotIt),
                     onPressed: () {
                       Navigator.of(context).pop();
                     },
@@ -604,8 +627,9 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                 _isDistanceLocked ? _selectedDistance : 25000;
           });
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Getting your location, please wait...')));
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.gettingYourLocation)));
         }
       },
     );
@@ -639,11 +663,11 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
               },
               child: Text(
                 _locationStatus == LocationPermissionStatus.deniedForever
-                    ? 'Open App Settings'
+                    ? AppLocalizations.of(context)!.openAppSettings
                     : _locationStatus ==
                             LocationPermissionStatus.serviceDisabled
-                        ? 'Open Location Settings'
-                        : 'Retry Permission',
+                        ? AppLocalizations.of(context)!.openLocationSettings
+                        : AppLocalizations.of(context)!.retryPermission,
               ),
             ),
           ],

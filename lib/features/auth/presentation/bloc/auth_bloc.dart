@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:dadadu_app/core/services/presence_service.dart';
 import 'package:dadadu_app/features/profile/domain/usecases/get_user_profile_data_usecase.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -160,50 +159,50 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
 // TODO: changed
-  // void _onUserChanged(_AuthUserChanged event, Emitter<AuthState> emit) {
-  //   if (state is AuthSignUpSuccess)
-  //     return; // Don't interrupt the onboarding flow
-  //   if (event.user != null) {
-  //     emit(AuthAuthenticated(user: event.user!));
-  //     _authStatusController.add(AuthenticationStatus.authenticated);
-  //   } else {
-  //     emit(const AuthUnauthenticated());
-  //     _authStatusController.add(AuthenticationStatus.unauthenticated);
-  //   }
-  // }
-
-  void _onUserChanged(_AuthUserChanged event, Emitter<AuthState> emit) async {
-    if (state is AuthSignUpSuccess) return; // Don't interrupt onboarding flow
-
-    // Tear down previous presence listener if any
-    await _onlineUsersSubscription?.cancel();
-    _onlineUsersController.add(const {}); // reset
-
+  void _onUserChanged(_AuthUserChanged event, Emitter<AuthState> emit) {
+    if (state is AuthSignUpSuccess)
+      return; // Don't interrupt the onboarding flow
     if (event.user != null) {
-      // Initialize presence tracking for this user
-      await PresenceService.instance.init(
-        event.user!.id,
-        metadata: {
-          'platform': 'flutter',
-          'started_at': DateTime.now().toIso8601String(),
-        },
-      );
-
-      // Subscribe to global online users stream and re-broadcast
-      _onlineUsersSubscription =
-          PresenceService.instance.onlineUsersStream.listen((onlineSet) {
-        _onlineUsersController.add(onlineSet);
-      });
-
       emit(AuthAuthenticated(user: event.user!));
       _authStatusController.add(AuthenticationStatus.authenticated);
     } else {
-      // Clean up presence on sign-out / unauthenticated
-      await PresenceService.instance.dispose();
       emit(const AuthUnauthenticated());
       _authStatusController.add(AuthenticationStatus.unauthenticated);
     }
   }
+
+  // void _onUserChanged(_AuthUserChanged event, Emitter<AuthState> emit) async {
+  //   if (state is AuthSignUpSuccess) return; // Don't interrupt onboarding flow
+  //
+  //   // Tear down previous presence listener if any
+  //   await _onlineUsersSubscription?.cancel();
+  //   _onlineUsersController.add(const {}); // reset
+  //
+  //   if (event.user != null) {
+  //     // Initialize presence tracking for this user
+  //     await PresenceService.instance.init(
+  //       event.user!.id,
+  //       metadata: {
+  //         'platform': 'flutter',
+  //         'started_at': DateTime.now().toIso8601String(),
+  //       },
+  //     );
+  //
+  //     // Subscribe to global online users stream and re-broadcast
+  //     _onlineUsersSubscription =
+  //         PresenceService.instance.onlineUsersStream.listen((onlineSet) {
+  //       _onlineUsersController.add(onlineSet);
+  //     });
+  //
+  //     emit(AuthAuthenticated(user: event.user!));
+  //     _authStatusController.add(AuthenticationStatus.authenticated);
+  //   } else {
+  //     // Clean up presence on sign-out / unauthenticated
+  //     await PresenceService.instance.dispose();
+  //     emit(const AuthUnauthenticated());
+  //     _authStatusController.add(AuthenticationStatus.unauthenticated);
+  //   }
+  // }
 
 /*  Future<void> _onAuthOnboardingComplete(AuthOnboardingComplete event,
       Emitter<AuthState> emit,) async {

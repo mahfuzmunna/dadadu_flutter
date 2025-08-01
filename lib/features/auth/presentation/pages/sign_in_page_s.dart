@@ -1,12 +1,12 @@
 // lib/features/auth/presentation/pages/sign_in_page.dart
 
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/core/locale/locale_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'
-    hide AuthState; // Hide AuthState to avoid conflict with bloc
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
+import '../../../../l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 
 class SignInPage extends StatefulWidget {
@@ -20,12 +20,47 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   void _showSnackBar(String message) {
     if (mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(message)));
     }
+  }
+
+  // ✅ NEW: Helper widget for the language selection menu
+  Widget _buildLanguageSelector(BuildContext context) {
+    final localeCubit = context.read<LocaleCubit>();
+    // Map of display names to Locale objects
+    const supportedLocales = {
+      'English': Locale('en'),
+      'Français': Locale('fr'),
+      'Deutsch': Locale('de'),
+      'Español': Locale('es'),
+    };
+
+    return PopupMenuButton<Locale>(
+      icon: const Icon(Icons.language_rounded),
+      tooltip: 'Select Language',
+      onSelected: (Locale locale) {
+        // Call the cubit's method to update the app's language
+        localeCubit.updateLocale(locale);
+      },
+      itemBuilder: (BuildContext context) {
+        return supportedLocales.entries.map((entry) {
+          return PopupMenuItem<Locale>(
+            value: entry.value,
+            child: Text(entry.key),
+          );
+        }).toList();
+      },
+    );
   }
 
   @override
@@ -37,11 +72,17 @@ class _SignInPageState extends State<SignInPage> {
       appBar: AppBar(
         title: Text(l10n.login),
         centerTitle: true,
+        // ✅ Add the language selector to the AppBar actions
+        actions: [
+          _buildLanguageSelector(context),
+          const SizedBox(width: 8),
+        ],
       ),
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
-            _showSnackBar('${Theme.of(context)}');
+            // Use the translated string with a placeholder
+            _showSnackBar(l10n.loginFailed(state.message));
           } else if (state is AuthUnauthenticated && state.message != null) {
             _showSnackBar(state.message!);
           }
@@ -50,27 +91,21 @@ class _SignInPageState extends State<SignInPage> {
           final bool isLoading = state is AuthLoading;
           return Center(
             child: SingleChildScrollView(
-              padding: EdgeInsets.all(24.0),
-              // More padding for Material 3 look
+              padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // App Logo at the top
                   Image.asset(
                     'assets/icons/logo_v2.png',
-                    // Replace with your actual logo path
-                    height: 120, // Adjust size as needed
+                    height: 120,
                   ),
                   const SizedBox(height: 48),
-
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
                       labelText: l10n.email,
                       hintText: l10n.emailHint,
-                      prefixIcon: Icon(Icons.email_outlined),
-                      border:
-                          OutlineInputBorder(), // Material 3 uses OutlineInputBorder by default
+                      prefixIcon: const Icon(Icons.email_outlined),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     enabled: !isLoading,
@@ -81,36 +116,27 @@ class _SignInPageState extends State<SignInPage> {
                     decoration: InputDecoration(
                       labelText: l10n.password,
                       hintText: l10n.passwordHint,
-                      prefixIcon: Icon(Icons.lock_outline),
-                      // border: OutlineInputBorder(),
-                        ),
+                      prefixIcon: const Icon(Icons.lock_outline),
+                    ),
                     obscureText: true,
                     enabled: !isLoading,
                   ),
                   const SizedBox(height: 24),
-
                   if (isLoading)
                     const CircularProgressIndicator()
                   else
                     Column(
                       children: [
                         SizedBox(
-                          width: double.infinity, // Full width button
+                          width: double.infinity,
                           child: FilledButton(
-                            // Material 3 FilledButton
                             onPressed: () {
                               context.read<AuthBloc>().add(AuthSignInRequested(
                                     email: _emailController.text.trim(),
                                     password: _passwordController.text.trim(),
                                   ));
                             },
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(l10n.login),
+                            child: Text(l10n.signIn),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -121,7 +147,6 @@ class _SignInPageState extends State<SignInPage> {
                           child: Text(l10n.forgotPassword),
                         ),
                         const SizedBox(height: 20),
-
                         Divider(
                           height: 40,
                           thickness: 1,
@@ -133,11 +158,9 @@ class _SignInPageState extends State<SignInPage> {
                             style:
                                 TextStyle(color: colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 20),
-
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            // OutlinedButton for social login
                             onPressed: () {
                               context
                                   .read<AuthBloc>()
@@ -148,20 +171,9 @@ class _SignInPageState extends State<SignInPage> {
                             icon: Image.asset('assets/google_logo.png',
                                 height: 24),
                             label: Text(l10n.signInWithGoogle),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              foregroundColor: colorScheme.onSurface,
-                              side: BorderSide(color: colorScheme.outline),
-                            ),
                           ),
                         ),
-                        // Add other social login buttons here (e.g., Apple, Facebook)
                         const SizedBox(height: 32),
-
-                        // Link to Sign Up Page
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [

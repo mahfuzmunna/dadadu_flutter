@@ -64,9 +64,9 @@ class _VideoPostItemState extends State<VideoPostItem> {
     super.initState();
 
     widget.controller.addListener(_onControllerUpdate);
-    _isPlaying = widget.controller?.value.isPlaying ?? false;
+    _isPlaying = widget.controller.value.isPlaying ?? false;
 
-    if (mounted && _isVisible) widget.controller?.play();
+    if (mounted && _isVisible) widget.controller.play();
     setState(() {});
   }
 

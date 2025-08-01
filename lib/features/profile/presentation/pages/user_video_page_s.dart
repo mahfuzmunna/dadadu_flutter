@@ -266,8 +266,26 @@ class _UsersVideoViewState extends State<_UsersVideoView>
           listener: (context, state) {
             if (state is FeedLoaded) {
               setState(() {
-                _posts = state.posts;
+                // _posts = state.posts;
+
+                final PostEntity initialPost = state.posts
+                    .firstWhere((post) => post.id == widget.initialPostId);
+                _author = _authors[initialPost.userId];
+
                 _authors = state.authors;
+                _posts = state.posts
+                    .where((post) => post.userId == initialPost.userId)
+                    .toList()
+                  ..sort((a, b) {
+                    if (a.id == initialPost.id)
+                      return -1; // initialPost always comes first
+                    if (b.id == initialPost.id)
+                      return 1; // All other posts go after
+
+                    // Optional: Add a secondary sort for the rest of the posts (e.g., newest first)
+                    // return b.createdAt.compareTo(a.createdAt);
+                    return 0;
+                  });
               });
               _manageControllerCache(0);
             }
@@ -283,15 +301,34 @@ class _UsersVideoViewState extends State<_UsersVideoView>
             }
             // LOADED STATE
             if (_posts.isNotEmpty) {
-              final PostEntity initialPost =
-                  _posts.firstWhere((post) => post.id == widget.initialPostId);
-              _author = _authors[initialPost.userId];
+              // final PostEntity initialPost =
+              //     _posts.firstWhere((post) => post.id == widget.initialPostId);
+              // _author = _authors[initialPost.userId];
+              //
+              // final usersPosts = _posts
+              //     .where((post) => post.userId == initialPost.userId)
+              //     .toList();
+              //
+              //
+              // usersPosts.sort((a, b) {
+              //   // If post 'a' is the initial post, it should come before 'b'.
+              //   if (a.id == initialPost.id) {
+              //     return -1; // a comes first
+              //   }
+              //   // If post 'b' is the initial post, it should come before 'a'.
+              //   if (b.id == initialPost.id) {
+              //     return 1; // b comes first
+              //   }
+              //
+              //   // Optional: For all other posts, you can add a secondary sort condition.
+              //   // For example, to sort by creation date (newest first).
+              //   // return b.createdAt.compareTo(a.createdAt);
+              //
+              //   // If no other sorting is needed, keep their relative order.
+              //   return 0;
+              // });
 
-              final usersPosts = _posts
-                  .where((post) => post.userId == initialPost.userId)
-                  .toList();
-              final initialPageIndex =
-                  usersPosts.indexWhere((post) => post.id == initialPost.id);
+              // final initialPageIndex = usersPosts.indexWhere((post) => post.id == initialPost.id);
 
               // if (_pageController.initialPage != initialPageIndex) {
               //   _pageController = PageController(initialPage: initialPageIndex);
@@ -308,17 +345,17 @@ class _UsersVideoViewState extends State<_UsersVideoView>
               //   });
               // }
 
-              if (usersPosts.isEmpty) {
+              if (_posts.isEmpty) {
                 return const Center(child: Text("This user has no posts."));
               }
 
               return PageView.builder(
                   controller: _pageController,
                   scrollDirection: Axis.vertical,
-                  itemCount: usersPosts.length,
+                  itemCount: _posts.length,
                   itemBuilder: (context, index) {
-                    final post = usersPosts[initialPageIndex];
-                    final author = _author;
+                    final post = _posts[index];
+                    final author = _authors[post.userId];
 
                     final controller = _controllerCache[post.id];
 

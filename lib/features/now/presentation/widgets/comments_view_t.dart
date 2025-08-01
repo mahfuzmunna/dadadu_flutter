@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/comments/presentation/bloc/like_unlike_comment_bloc.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usecase.dart';
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -22,7 +23,7 @@ class CommentsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // This padding ensures the input field moves up with the keyboard
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -64,10 +65,10 @@ class CommentsView extends StatelessWidget {
                       length: 2,
                       child: Column(
                         children: [
-                          const TabBar(
+                          TabBar(
                             tabs: [
-                              Tab(text: 'Recent'),
-                              Tab(text: 'Popular'),
+                              Tab(text: l10n.recent),
+                              Tab(text: l10n.popular),
                             ],
                           ),
                           Expanded(
@@ -136,7 +137,9 @@ class _CommentInputFieldState extends State<_CommentInputField> {
           ));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to comment.')),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.mustBeLoggedInToComment)),
       );
     }
   }
@@ -149,7 +152,8 @@ class _CommentInputFieldState extends State<_CommentInputField> {
           _textController.clear();
           FocusScope.of(context).unfocus();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Comment submitted!')),
+            SnackBar(
+                content: Text(AppLocalizations.of(context)!.commentSubmitted)),
           );
         }
         if (state is CommentsError) {
@@ -165,9 +169,9 @@ class _CommentInputFieldState extends State<_CommentInputField> {
             Expanded(
               child: TextField(
                 controller: _textController,
-                decoration: const InputDecoration(
-                  hintText: 'Add a comment...',
-                  border: OutlineInputBorder(
+                decoration: InputDecoration(
+                  hintText: AppLocalizations.of(context)!.addAComment,
+                  border: const OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(24.0)),
                     borderSide: BorderSide.none,
                   ),
@@ -204,8 +208,9 @@ class _CommentList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (comments.isEmpty) {
-      return const Center(
-        child: Text("No comments yet.", style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noCommentsYet,
+            style: TextStyle(color: Colors.grey)),
       );
     }
 
@@ -274,7 +279,8 @@ class _CommentListItemState extends State<_CommentListItem> {
   void _toggleLike() {
     if (_currentUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('You must be logged in to like.')),
+        SnackBar(
+            content: Text(AppLocalizations.of(context)!.mustBeLoggedInToLike)),
       );
       return;
     }
@@ -315,8 +321,10 @@ class _CommentListItemState extends State<_CommentListItem> {
                 : null,
           ),
         ),
-      title: Text(widget.comment.author?.username ?? 'Anonymous',
-          style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+            widget.comment.author?.username ??
+                AppLocalizations.of(context)!.anonymous,
+            style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -338,8 +346,10 @@ class _CommentListItemState extends State<_CommentListItem> {
               });
             },
             label: Text(
-              _isTranslating ? 'Translating...' : 'Translate',
-              style: const TextStyle(
+                _isTranslating
+                    ? AppLocalizations.of(context)!.translating
+                    : AppLocalizations.of(context)!.translate,
+                style: const TextStyle(
                 color: Colors.blueAccent,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
@@ -349,7 +359,7 @@ class _CommentListItemState extends State<_CommentListItem> {
         ],
       ),
         trailing: _isLikeUnlikeAction
-            ? Text('Sent')
+            ? Text(AppLocalizations.of(context)!.sent)
             : TextButton.icon(
                 onPressed: _toggleLike,
         icon: _isLiked

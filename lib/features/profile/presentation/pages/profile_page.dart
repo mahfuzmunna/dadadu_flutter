@@ -16,6 +16,7 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../injection_container.dart' as di;
+import '../../../../l10n/app_localizations.dart';
 import '../../../now/presentation/bloc/feed_bloc.dart';
 import '../../../upload/domain/entities/post_entity.dart'; // For sharing content
 
@@ -114,7 +115,7 @@ class _ProfileContentState extends State<_ProfileContent> {
       // Edit Profile Button
       return FilledButton.icon(
         icon: const Icon(Icons.edit_rounded),
-        label: const Text('Edit Profile'),
+        label: Text(AppLocalizations.of(context)!.editProfile),
         onPressed: () => context.push('/editProfile'),
       );
     } else {
@@ -154,7 +155,9 @@ class _ProfileContentState extends State<_ProfileContent> {
                 icon: Icon(isFollowing
                     ? Icons.person_remove_rounded
                     : Icons.person_add_rounded),
-                label: Text(isFollowing ? 'Unfollow' : 'Follow'),
+                label: Text(isFollowing
+                    ? AppLocalizations.of(context)!.unfollow
+                    : AppLocalizations.of(context)!.follow),
                 onPressed: () {
                   final event = isFollowing
                       ? UnfollowUser(
@@ -237,8 +240,8 @@ class _ProfileContentState extends State<_ProfileContent> {
                     color: Theme.of(context).colorScheme.primary)),
         leadingWidth: 84,
         title: Text(widget.isMyProfile
-            ? 'My Profile'
-            : (widget.user.fullName ?? 'Profile')),
+            ? AppLocalizations.of(context)!.myProfile
+            : (widget.user.fullName ?? AppLocalizations.of(context)!.profile)),
         centerTitle: true,
         actions: [
           if (widget.isMyProfile)

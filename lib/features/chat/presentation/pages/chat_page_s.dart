@@ -4,6 +4,7 @@ import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/injection_container.dart';
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:dash_chat_3/dash_chat_3.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -54,7 +55,9 @@ class _ChatViewState extends State<_ChatView> {
   Widget build(BuildContext context) {
     final authState = context.watch<AuthBloc>().state;
     if (authState is! AuthAuthenticated) {
-      return const Scaffold(body: Center(child: Text('Not Authenticated')));
+      return Scaffold(
+          body: Center(
+              child: Text(AppLocalizations.of(context)!.notAuthenticated)));
     }
     final currentUser = authState.user;
 
@@ -172,7 +175,7 @@ class _ChatViewState extends State<_ChatView> {
                 // ✅ CUSTOM STYLING to match Material 3 theme
                 inputOptions: InputOptions(
                   inputDecoration: InputDecoration(
-                    hintText: 'Message...',
+                    hintText: AppLocalizations.of(context)!.messageHint,
                     filled: true,
                     fillColor: theme.colorScheme.surfaceContainerHighest,
                     border: OutlineInputBorder(
