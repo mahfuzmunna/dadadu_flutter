@@ -370,5 +370,32 @@
   "badgeDadalordTitle": "DADALORD (10M+ diamonds)",
   "badgeDadalordDescription": "Elite status worth $10,000+ with +2% per million diamonds.",
   "badgesPrestigeInfo": "📈 Higher badges = more prestige + marketplace value",
-  "gotIt": "Got It!"
+  "gotIt": "Got It!",
+  "back": "Back",
+  "userHasNoPosts": "This user has no posts.",
+  "permissionsRequired": "Camera and microphone permissions are required.",
+  "zoomLevel": "{zoomValue}x",
+  "@zoomLevel": {
+    "placeholders": {
+      "zoomValue": {
+        "type": "String"
+      }
+    }
+  },
+  "recordingTimer": "0:{seconds}",
+  "@recordingTimer": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "timeSelectorSeconds": "{seconds}s",
+  "@timeSelectorSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  }
 }

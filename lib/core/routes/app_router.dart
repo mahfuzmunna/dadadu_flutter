@@ -33,7 +33,6 @@ import '../../features/now/now_injection.dart' as di;
 import '../../features/posts/presentation/pages/create_post_camera_page.dart';
 import '../../features/posts/presentation/pages/create_post_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
-import '../../features/upload/presentation/pages/camera_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
@@ -101,10 +100,10 @@ class AppRouter {
             parentNavigatorKey: _rootNavigatorKey,
             builder: (context, state) => const SettingsPage()),
 
-        GoRoute(
-          path: '/camera',
-          builder: (context, state) => const CameraScreen(),
-        ),
+        // GoRoute(
+        //   path: '/camera',
+        //   builder: (context, state) => const CameraScreen(),
+        // ),
         GoRoute(
           path: '/createPost',
           builder: (context, state) {

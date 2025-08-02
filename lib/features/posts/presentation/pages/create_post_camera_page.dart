@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -80,8 +81,8 @@ class _CreatePostCameraPageState extends State<CreatePostCameraPage>
       }
     } else {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('Camera and microphone permissions are required.')));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(AppLocalizations.of(context)!.permissionsRequired)));
       }
     }
   }
@@ -412,7 +413,8 @@ class _CreatePostCameraPageState extends State<CreatePostCameraPage>
           ),
           const SizedBox(width: 8),
           Text(
-            '0:${_recordSeconds.toString().padLeft(2, '0')}',
+            AppLocalizations.of(context)!
+                .recordingTimer(_recordSeconds.toString().padLeft(2, '0')),
             style: const TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -430,8 +432,8 @@ class _CreatePostCameraPageState extends State<CreatePostCameraPage>
 
     return Chip(
       // The main text content of the chip
-      label: const Text(
-        '20s',
+      label: Text(
+        AppLocalizations.of(context)!.timeSelectorSeconds(20.toString()),
         style: TextStyle(fontWeight: FontWeight.bold),
       ),
 

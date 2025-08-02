@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:ffmpeg_kit_flutter_new/return_code.dart';
 import 'package:flutter/material.dart';
@@ -123,7 +124,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
   Future<void> _publishPost() async {
     if (_selectedThumbnail == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a thumbnail.')),
+        SnackBar(
+            content:
+                Text(AppLocalizations.of(context)!.pleaseSelectAThumbnail)),
       );
       return;
     }
@@ -166,15 +169,18 @@ class _CreatePostPageState extends State<CreatePostPage> {
         debugPrint('FFmpeg logs: $logs');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-                content: Text('Could not process video. Please try again.')),
+            SnackBar(
+                content:
+                    Text(AppLocalizations.of(context)!.couldNotProcessVideo)),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error publishing post: $e')),
+          SnackBar(
+              content:
+                  Text(AppLocalizations.of(context)!.errorPublishingPost(''))),
         );
       }
     } finally {
@@ -194,8 +200,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
       // ✅ This listener handles the navigation after the upload is complete.
       if (state is UploadSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Post published successfully!'),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.postPublishedSuccess),
             backgroundColor: Colors.green,
           ),
         );
@@ -203,7 +209,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       } else if (state is UploadFailure) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Upload failed: ${state.message}'),
+            content: Text(AppLocalizations.of(context)!.uploadFailed('')),
             backgroundColor: theme.colorScheme.error,
           ),
         );
@@ -213,7 +219,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       final isBusy = _isProcessing || isUploading;
       return Scaffold(
         appBar: AppBar(
-          title: const Text('New Post'),
+          title: Text(AppLocalizations.of(context)!.newPost),
           centerTitle: true,
           // The publish button is now at the bottom of the page
         ),
@@ -236,13 +242,15 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 const SizedBox(height: 24),
 
                 // --- Thumbnail Selector ---
-                    Text('Choose a cover', style: theme.textTheme.titleMedium),
-                    const SizedBox(height: 12),
+                Text(AppLocalizations.of(context)!.chooseACover,
+                    style: theme.textTheme.titleMedium),
+                const SizedBox(height: 12),
                     _buildThumbnailSelector(),
                     const SizedBox(height: 24),
 
                 // --- Intent/Category Selector ---
-                Text('Select an Intent', style: theme.textTheme.titleMedium),
+                Text(AppLocalizations.of(context)!.selectAnIntent,
+                    style: theme.textTheme.titleMedium),
                 const SizedBox(height: 12),
                 _buildIntentSelector(),
                 const SizedBox(height: 48), // Extra space before button
@@ -256,10 +264,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             : const Icon(Icons.publish_rounded),
                     label: Text(
                       _isProcessing
-                          ? 'Processing...'
+                          ? AppLocalizations.of(context)!.processing
                           : isUploading
-                              ? 'Publishing... ${(state.progress * 100).toStringAsFixed(0)}%'
-                              : 'Publish',
+                              ? AppLocalizations.of(context)!.publishing(
+                                  (state.progress * 100).toStringAsFixed(0))
+                              : AppLocalizations.of(context)!.publish,
                     ),
                     onPressed: isBusy ? null : _publishPost,
                     style: FilledButton.styleFrom(
@@ -326,8 +335,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
       height: 180, // Match the height of the thumbnail preview
       child: TextFormField(
         controller: _captionController,
-        decoration: const InputDecoration(
-          hintText: 'Add a caption...',
+        decoration: InputDecoration(
+          hintText: AppLocalizations.of(context)!.addACaption,
           border: OutlineInputBorder(),
           contentPadding: EdgeInsets.all(12),
         ),
@@ -347,9 +356,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
           height: 100, child: Center(child: CircularProgressIndicator()));
     }
     if (_thumbnails.isEmpty) {
-      return const SizedBox(
+      return SizedBox(
           height: 100,
-          child: Center(child: Text('Could not generate thumbnails.')));
+          child: Center(
+              child: Text(
+                  AppLocalizations.of(context)!.couldNotGenerateThumbnails)));
     }
 
     return SizedBox(
@@ -403,18 +414,18 @@ class _CreatePostPageState extends State<CreatePostPage> {
     return SizedBox(
       width: double.infinity,
       child: SegmentedButton<String>(
-        segments: const [
+        segments: [
           ButtonSegment(
               value: 'Love',
-              label: Text('Love'),
+              label: Text(AppLocalizations.of(context)!.love),
               icon: Icon(Icons.favorite_border)),
           ButtonSegment(
               value: 'Business',
-              label: Text('Business'),
+              label: Text(AppLocalizations.of(context)!.business),
               icon: Icon(Icons.business_center_outlined)),
           ButtonSegment(
               value: 'Entertainment',
-              label: Text('Entertainment'),
+              label: Text(AppLocalizations.of(context)!.entertainment),
               icon: Icon(Icons.movie_outlined)),
         ],
         selected: {_selectedIntent},

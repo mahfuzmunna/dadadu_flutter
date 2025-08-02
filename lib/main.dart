@@ -7,7 +7,7 @@ import 'package:dadadu_app/core/theme/theme_cubit.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
-import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
+// import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,7 +27,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   try {
-    await initializeCameras();
+    // await initializeCameras();
     await Supabase.initialize(
       url: 'https://sqdqbmnqosfzhmrpbvqe.supabase.co',
       anonKey:

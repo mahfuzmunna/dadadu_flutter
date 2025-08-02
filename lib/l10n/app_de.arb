@@ -39,7 +39,7 @@
     }
   },
   "email": "E-Mail",
-  "emailHint": "deine@example.com",
+  "emailHint": "deine@beispiel.com",
   "password": "Passwort",
   "passwordHint": "Gib dein Passwort ein",
   "signIn": "Anmelden",
@@ -48,6 +48,11 @@
   "signInWithGoogle": "Mit Google anmelden",
   "dontHaveAnAccount": "Du hast noch kein Konto?",
   "signUp": "Registrieren",
+  "pleaseCompleteAllFields": "Bitte fülle alle Felder aus.",
+  "man": "Mann",
+  "woman": "Frau",
+  "interestedIn": "Interessiert an",
+  "lookingFor": "Suche nach",
   "createAccount": "Konto erstellen",
   "signUpSuccess": "Erfolg! Bitte überprüfe deine E-Mails zur Bestätigung.",
   "signUpFailed": "Registrierung fehlgeschlagen: {message}",
@@ -185,6 +190,125 @@
     }
   },
   "aspectRatio_1_1": "1:1",
+  "userNotAuthenticated": "Benutzer nicht authentifiziert.",
+  "profileSavedSuccess": "Profil erfolgreich gespeichert!",
+  "failedToUpdateProfile": "Aktualisierung fehlgeschlagen: {message}",
+  "@failedToUpdateProfile": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameCannotBeEmpty": "Benutzername darf nicht leer sein",
+  "bio": "Bio",
+  "saveChanges": "Änderungen speichern",
+  "chats": "Chats",
+  "inviteFriendsToUnlockSearch": "Lade mehr Freunde ein, um die globale Suche freizuschalten",
+  "userDismissed": "{fullName} entfernt",
+  "@userDismissed": {
+    "placeholders": {
+      "fullName": {
+        "type": "String"
+      }
+    }
+  },
+  "undo": "Rückgängig",
+  "unknownUser": "Unbekannter Benutzer",
+  "yesterday": "Gestern",
+  "inboxEmpty": "Dein Posteingang ist leer",
+  "startConversationPrompt": "Beginne ein Gespräch, indem du auf die Schaltfläche für einen neuen Chat tippst.",
+  "all": "Alle",
+  "notAuthenticated": "Nicht authentifiziert",
+  "chat": "Chat",
+  "online": "Online",
+  "messageHint": "Nachricht...",
+  "discover": "Entdecken",
+  "whatsYourVibe": "Was ist heute deine Stimmung?",
+  "searchWithin": "Suche innerhalb von",
+  "searchAroundThe": "Suche rund um den",
+  "distanceMeters": "{distance} m",
+  "@distanceMeters": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "distanceKilometers": "{distance} km",
+  "@distanceKilometers": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "globe": "Globus",
+  "updateMyLocation": "Meinen Standort aktualisieren",
+  "updatingYourLocation": "Dein Standort wird aktualisiert...",
+  "increaseDistanceLimit": "Entfernungslimit erhöhen",
+  "featureUnlocked": "Funktion freigeschaltet!",
+  "congratulationsUnlocked": "Herzlichen Glückwunsch! Du kannst jetzt nach Personen in beliebiger Entfernung suchen.",
+  "awesome": "Fantastisch!",
+  "unlockMoreDistance": "Mehr Entfernung freischalten",
+  "unlockDistanceDescription": "Empfehle 10 neue Benutzer, um die Möglichkeit freizuschalten, nach weiter entfernten Personen zu suchen!",
+  "yourReferrals": "Deine Empfehlungen: ",
+  "referralProgress": "{count} / 10",
+  "@referralProgress": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "yourInviteLink": "Dein Einladungslink",
+  "copyLink": "Link kopieren",
+  "linkCopied": "Link in die Zwischenablage kopiert!",
+  "gettingYourLocation": "Dein Standort wird ermittelt, bitte warte...",
+  "locationErrorMessage": "Beim Überprüfen des Standorts ist ein Fehler aufgetreten: {error}",
+  "@locationErrorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "openAppSettings": "App-Einstellungen öffnen",
+  "openLocationSettings": "Standorteinstellungen öffnen",
+  "retryPermission": "Berechtigung erneut versuchen",
+  "locationTrackingError": "Fehler bei der Standortverfolgung.",
+  "couldNotGetLocationName": "Standortname konnte nicht abgerufen werden.",
+  "locationUpdatedTo": "Standort aktualisiert auf {locationName}!",
+  "@locationUpdatedTo": {
+    "placeholders": {
+      "locationName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToUpdateLocation": "Standort konnte nicht aktualisiert werden.",
+  "vibeWith": "{vibe}-Stimmung",
+  "@vibeWith": {
+    "placeholders": {
+      "vibe": {
+        "type": "String"
+      }
+    }
+  },
+  "noUsersFoundWithVibe": "Keine Benutzer in der Nähe mit dieser Stimmung gefunden.",
+  "findingUsers": "Benutzer werden gesucht...",
+  "distanceAway": "{distance} entfernt",
+  "@distanceAway": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "viewProfile": "Profil ansehen",
+  "likedYourVideo": "hat dein Video geliked.",
+  "startedFollowingYou": "hat angefangen, dir zu folgen.",
+  "commentedAwesome": "kommentierte: „Fantastisch!“",
   "somethingWentWrong": "Etwas ist schiefgelaufen",
   "editProfile": "Profil bearbeiten",
   "unfollow": "Nicht mehr folgen",
@@ -247,17 +371,6 @@
   "badgeDadalordDescription": "Elite-Status im Wert von über 10.000 $ mit +2% pro Million Diamanten.",
   "badgesPrestigeInfo": "📈 Höhere Abzeichen = mehr Prestige + Marktwert",
   "gotIt": "Verstanden!",
-  "userNotAuthenticated": "Benutzer nicht authentifiziert.",
-  "profileSavedSuccess": "Profil erfolgreich gespeichert!",
-  "failedToUpdateProfile": "Aktualisierung fehlgeschlagen: {message}",
-  "@failedToUpdateProfile": {
-    "placeholders": {
-      "message": {
-        "type": "String"
-      }
-    }
-  },
-  "usernameCannotBeEmpty": "Benutzername darf nicht leer sein",
-  "bio": "Bio",
-  "saveChanges": "Änderungen speichern"
+  "back": "Zurück",
+  "userHasNoPosts": "Dieser Benutzer hat keine Beiträge."
 }
