@@ -43,6 +43,7 @@ class _SignInPageState extends State<SignInPage> {
       'Français': Locale('fr'),
       'Deutsch': Locale('de'),
       'Español': Locale('es'),
+      'Portuguese': Locale('pt'),
     };
 
     return PopupMenuButton<Locale>(

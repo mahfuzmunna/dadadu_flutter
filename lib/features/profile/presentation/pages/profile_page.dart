@@ -17,8 +17,9 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../injection_container.dart' as di;
 import '../../../../l10n/app_localizations.dart';
+import '../../../../shared/utils/rank_info.dart';
 import '../../../now/presentation/bloc/feed_bloc.dart';
-import '../../../upload/domain/entities/post_entity.dart'; // For sharing content
+import '../../../posts/domain/entities/post_entity.dart'; // For sharing content
 
 /// This widget acts as a router.
 /// It decides whether to show the current user's profile (passed via constructor)
@@ -121,7 +122,7 @@ class _ProfileContentState extends State<_ProfileContent> {
       );
     } else {
       final bool isFollowing =
-          currentUser.followingIds.contains(profileUser.id);
+          currentUser.followingIds?.contains(profileUser.id) ?? false;
 
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -336,32 +337,30 @@ class _ProfileContentState extends State<_ProfileContent> {
     );
   }
 
-  String getRankEmoji(String? rank) {
-    switch (rank?.toLowerCase()) {
-      case 'leaf':
-        return '🍃';
-      case 'threeleaf':
-        return '☘️';
-      case 'fiveleaf':
-        return '🌟'; // A star for a higher rank
-      case 'dadalord':
-        return '👑'; // A crown for the highest rank
-      default:
-        return ''; // Return an empty string for unknown ranks
+  RankInfo getRankInfo(int diamondCount) {
+    if (diamondCount >= 10000000) {
+      return const RankInfo('DADALORD', '👑');
+    } else if (diamondCount >= 1000000) {
+      return const RankInfo('FIVELEAF', '🎀');
+    } else if (diamondCount >= 10000) {
+      return const RankInfo('THREELEAF', '☘️');
+    } else {
+      // Default rank for counts 0 - 9,999
+      return const RankInfo('LEAF', '🍃');
     }
   }
 
-  IconData getMoodIcon(String? moodStatus) {
-    switch (moodStatus?.toLowerCase()) {
-      case 'happy':
+  IconData getMoodIcon(int moodStatus) {
+    switch (moodStatus) {
+      case 1:
         return Icons.sentiment_very_satisfied_rounded;
-      case 'sad':
+      case 2:
         return Icons.sentiment_very_dissatisfied_rounded;
-      case 'excited':
+      case 3:
         return Icons.celebration_rounded;
-      case 'calm':
+      case 4:
         return Icons.self_improvement_rounded;
-      case 'angry':
+      case 5:
         return Icons.sentiment_dissatisfied_rounded;
       default:
         return Icons
@@ -372,7 +371,7 @@ class _ProfileContentState extends State<_ProfileContent> {
   // --- WIDGET BUILDER METHODS ---
 
   Widget _buildProfileHeader(bool isMyProfile) {
-    final rank = widget.user.rank;
+    final rankInfo = getRankInfo(widget.user.diamonds ?? 0);
     return Column(
       children: [
         Stack(
@@ -410,7 +409,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                   radius: 20,
                   backgroundColor: Theme.of(context).colorScheme.secondary,
                   child: Icon(
-                    getMoodIcon(widget.user.moodStatus),
+                    getMoodIcon(widget.user.moodStatus ?? 0),
                     size: 20,
                     color: Theme.of(context).colorScheme.onSecondary,
                   ),
@@ -428,16 +427,14 @@ class _ProfileContentState extends State<_ProfileContent> {
               ?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
-        if (rank != null)
-          if (rank.isNotEmpty)
             Chip(
-              avatar: EmojiIcon(
-                getRankEmoji(rank),
-                size: 16,
+          avatar: EmojiIcon(
+            rankInfo.emoji,
+            size: 16,
               ),
               label: Text(
-                rank,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+            rankInfo.title,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).colorScheme.onSecondaryContainer),
               ),
@@ -453,51 +450,6 @@ class _ProfileContentState extends State<_ProfileContent> {
       ],
     );
   }
-
-  // Widget _buildDynamicActionButton(bool isMyProfile) {
-  //   if (isMyProfile) {
-  //     return SizedBox(
-  //       width: 200,
-  //       child: FilledButton.icon(
-  //         icon: const Icon(Icons.edit_rounded),
-  //         label: const Text('Edit Profile'),
-  //         onPressed: () => context.push('/editProfile'),
-  //         style: FilledButton.styleFrom(
-  //           padding: const EdgeInsets.symmetric(vertical: 12),
-  //           shape: RoundedRectangleBorder(
-  //             borderRadius: BorderRadius.circular(24),
-  //           ),
-  //         ),
-  //       ),
-  //     );
-  //   } else {
-  //     bool isFollowing = false; // Placeholder
-  //     return SizedBox(
-  //       width: 200,
-  //       child: FilledButton.icon(
-  //         icon: Icon(isFollowing
-  //             ? Icons.person_remove_rounded
-  //             : Icons.person_add_rounded),
-  //         label: Text(isFollowing ? 'Unfollow' : 'Follow'),
-  //         onPressed: () {
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             SnackBar(
-  //                 content: Text(
-  //                     '${isFollowing ? 'Unfollowing' : 'Following'} ${widget.user.username}')),
-  //           );
-  //         },
-  //         style: FilledButton.styleFrom(
-  //           backgroundColor: isFollowing
-  //               ? Colors.grey
-  //               : Theme.of(context).colorScheme.primary,
-  //           padding: const EdgeInsets.symmetric(vertical: 12),
-  //           shape:
-  //               RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-  //         ),
-  //       ),
-  //     );
-  //   }
-  // }
 
   Widget _buildMoodAndBadgesSection() {
     return Row(
@@ -540,13 +492,13 @@ class _ProfileContentState extends State<_ProfileContent> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildStatColumn(context, Icons.people_alt_rounded,
-            '${widget.user.followerIds.length}',
+            '${widget.user.followerIds?.length}',
             AppLocalizations.of(context)!.followers),
         _buildStatColumn(context, Icons.person_add_alt_1_rounded,
-            '${widget.user.followingIds.length}',
+            '${widget.user.followingIds?.length}',
             AppLocalizations.of(context)!.following),
         _buildStatColumn(context, Icons.ondemand_video_rounded,
-            '${widget.user.postIds.length}',
+            '${widget.user.postIds?.length}',
             AppLocalizations.of(context)!.videos),
       ],
     );
@@ -680,7 +632,7 @@ class _ProfileContentState extends State<_ProfileContent> {
       children: [
         Text(
           AppLocalizations.of(context)!
-              .uploadedVideos(widget.user.postIds.length.toString()),
+              .uploadedVideos(widget.user.postIds!.length.toString()),
           style: Theme.of(context)
               .textTheme
               .titleLarge
@@ -709,18 +661,18 @@ class _ProfileContentState extends State<_ProfileContent> {
               mainAxisSpacing: 10,
               childAspectRatio: 0.7,
             ),
-            itemCount: widget.user.postIds.length,
+            itemCount: widget.user.postIds?.length,
             itemBuilder: (context, index) {
               return BlocProvider<PostBloc>(
                 create: (context) => di.sl<PostBloc>()
-                  ..add(LoadPost(widget.user.postIds[index])),
+                  ..add(LoadPost(widget.user.postIds![index])),
                 child: Card(
                   clipBehavior: Clip.antiAlias,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12)),
                   child: InkWell(
                     onTap: () {
-                      context.push('/home/${widget.user.postIds[index]}');
+                      context.push('/home/${widget.user.postIds?[index]}');
                     },
                     child: Stack(
                       fit: StackFit.expand,
@@ -808,18 +760,37 @@ class _ProfileContentState extends State<_ProfileContent> {
     );
   }
 
+  String _getTranslatedMoodName(String moodKey, AppLocalizations l10n) {
+    switch (moodKey) {
+      case 'happy':
+        return l10n.moodHappy;
+      case 'sad':
+        return l10n.moodSad;
+      case 'excited':
+        return l10n.moodExcited;
+      case 'calm':
+        return l10n.moodCalm;
+      case 'angry':
+        return l10n.moodAngry;
+      default:
+        return moodKey;
+    }
+  }
+
   void _showMoodSelectionBottomSheet(BuildContext context) {
     // This is the currently authenticated user, whose mood we can change.
     final authState = context.read<AuthBloc>().state;
     if (authState is! AuthAuthenticated) return;
     final currentUser = authState.user;
+    final l10n = AppLocalizations.of(context)!;
 
+    // ✅ Use non-translatable keys for data map
     final moods = {
-      'Happy': '😊',
-      'Sad': '😞',
-      'Excited': '🎉',
-      'Calm': '😌',
-      'Angry': '😠',
+      'happy': {'emoji': '😊', 'value': 1},
+      'sad': {'emoji': '😞', 'value': 2},
+      'excited': {'emoji': '🎉', 'value': 3},
+      'calm': {'emoji': '😌', 'value': 4},
+      'angry': {'emoji': '😠', 'value': 5},
     };
 
     showModalBottomSheet(
@@ -832,20 +803,26 @@ class _ProfileContentState extends State<_ProfileContent> {
                 style: Theme.of(context).textTheme.titleLarge),
           ),
           ...moods.entries.map((entry) {
+            final moodKey = entry.key;
+            final moodData = entry.value;
+            final moodEmoji = moodData['emoji'] as String;
+            final moodValue = moodData['value'] as int;
+
+            // ✅ Get the translated name for display
+            final translatedMoodName = _getTranslatedMoodName(moodKey, l10n);
+
             return ListTile(
-              leading: Text(entry.value, style: const TextStyle(fontSize: 24)),
-              title: Text(entry.key),
+              leading: Text(moodEmoji, style: const TextStyle(fontSize: 24)),
+              title: Text(translatedMoodName), // Use the translated name
               onTap: () {
-                // ✅ Dispatch the event to the ProfileBloc
                 context.read<ProfileBloc>().add(
-                      UpdateUserMood(userId: currentUser.id, mood: entry.key),
+                      UpdateUserMood(userId: currentUser.id, mood: moodValue),
                     );
 
-                // Show immediate feedback
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                      content: Text(AppLocalizations.of(context)!
-                          .moodUpdated(entry.key))),
+                      // Use the translated name in the feedback message
+                      content: Text(l10n.moodUpdated(translatedMoodName))),
                 );
                 Navigator.pop(bc);
               },

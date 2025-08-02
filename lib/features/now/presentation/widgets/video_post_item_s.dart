@@ -23,9 +23,9 @@ import '../../../../injection_container.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../comments/presentation/bloc/comments_bloc.dart';
 import '../../../comments/presentation/bloc/like_unlike_comment_bloc.dart';
+import '../../../posts/domain/entities/post_entity.dart';
 import '../../../profile/presentation/bloc/follow_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
-import '../../../upload/domain/entities/post_entity.dart';
 import 'comments_view_t.dart';
 
 class VideoPostItem extends StatefulWidget {
@@ -481,7 +481,8 @@ class _VideoPostItemState extends State<VideoPostItem> {
     if (currentUser.id == author.id) {
       return const SizedBox.shrink();
     }
-    final bool isFollowing = currentUser.followingIds.contains(author.id);
+    final bool isFollowing =
+        currentUser.followingIds?.contains(author.id) ?? false;
 
     return BlocConsumer<FollowBloc, FollowState>(
       listener: (context, state) {

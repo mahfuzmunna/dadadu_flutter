@@ -4,7 +4,7 @@ import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart';
-import '../../../upload/data/models/post_model.dart';
+import '../../../posts/data/models/post_model.dart';
 
 // NEW or UPDATED: Pagination Result Class
 class PostsPaginationResult {

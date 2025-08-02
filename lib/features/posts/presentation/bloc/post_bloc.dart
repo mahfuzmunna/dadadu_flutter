@@ -9,7 +9,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../profile/domain/repositories/profile_repository.dart';
-import '../../../upload/domain/entities/post_entity.dart';
+import '../../domain/entities/post_entity.dart';
 
 part 'post_event.dart';
 part 'post_state.dart';

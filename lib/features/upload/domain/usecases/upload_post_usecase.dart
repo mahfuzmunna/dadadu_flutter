@@ -6,7 +6,7 @@ import 'package:equatable/equatable.dart'; // For Equatable
 
 import '../../../../core/errors/failures.dart'; // For Failure
 import '../../../../core/usecases/usecase.dart'; // For UseCase abstract class
-import '../entities/post_entity.dart'; // For PostEntity
+import '../../../posts/domain/entities/post_entity.dart'; // For PostEntity
 import '../repositories/post_repository.dart'; // For PostRepository
 
 /// UseCase for uploading a new video post, including its thumbnail.

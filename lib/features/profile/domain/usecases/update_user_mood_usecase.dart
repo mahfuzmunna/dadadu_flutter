@@ -17,7 +17,7 @@ class UpdateUserMoodUseCase implements UseCase<void, UpdateUserMoodParams> {
 
 class UpdateUserMoodParams extends Equatable {
   final String userId;
-  final String moodStatus;
+  final int moodStatus;
 
   const UpdateUserMoodParams({required this.userId, required this.moodStatus});
 

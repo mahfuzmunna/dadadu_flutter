@@ -9,7 +9,7 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../auth/domain/entities/user_entity.dart'; // Reusing UserEntity for profile data
 import '../../../discover/domain/usecases/find_users_by_vibe_usecase.dart';
-import '../../../upload/domain/entities/post_entity.dart';
+import '../../../posts/domain/entities/post_entity.dart';
 import '../../data/datasources/profile_remote_data_source.dart';
 import '../usecases/update_user_location_usecase.dart';
 import '../usecases/update_user_mood_usecase.dart'; // Assuming PostEntity exists
@@ -208,16 +208,16 @@ class ProfileRepositoryImpl implements ProfileRepository {
       // 2. Calculate distance, filter, and sort on the client-side
       final List<UserWithDistance> nearbyUsers = [];
       for (final user in users) {
-        if (user.latitude != null &&
-            user.longitude != null &&
-            user.latitude!.isNotEmpty &&
-            user.longitude!.isNotEmpty) {
+        if (user.location?.latitude != null &&
+            user.location?.longitude != null) {
           final distanceInMeters = Geolocator.distanceBetween(
             params.currentLatitude,
             params.currentLongitude,
-            double.parse(user.latitude!),
-            double.parse(user.longitude!),
-          );
+              user.location?.latitude as double,
+              user.location?.longitude as double
+              // double.parse(user.latitude!),
+              // double.parse(user.longitude!),
+              );
           final distanceInKm = distanceInMeters / 1000;
 
           if (distanceInKm <= params.maxDistanceInKm) {

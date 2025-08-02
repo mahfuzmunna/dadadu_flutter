@@ -3,7 +3,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
+import 'package:dadadu_app/features/posts/domain/entities/post_entity.dart';
 import 'package:dadadu_app/features/upload/domain/repositories/post_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/cupertino.dart';

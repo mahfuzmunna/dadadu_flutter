@@ -1,9 +1,10 @@
 // lib/features/upload/domain/repositories/upload_post_repository.dart
 
 import 'dart:io';
-import 'package:dartz/dartz.dart';
+
 import 'package:dadadu_app/core/errors/failures.dart';
-import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
+import 'package:dadadu_app/features/posts/domain/entities/post_entity.dart';
+import 'package:dartz/dartz.dart';
 
 abstract class UploadPostRepository {
   Future<Either<Failure, String>> uploadVideo(File videoFile, String userId, String postId);

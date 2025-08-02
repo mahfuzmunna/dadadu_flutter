@@ -192,6 +192,8 @@ class _SettingsPageState extends State<SettingsPage> {
         return 'Deutsch';
       case 'es':
         return 'Español';
+      case 'pt':
+        return 'Portuguese';
       case 'en':
       default:
         return 'English';
@@ -317,6 +319,7 @@ class _SettingsPageState extends State<SettingsPage> {
       'Français': const Locale('fr'),
       'Deutsch': const Locale('de'),
       'Español': const Locale('es'),
+      'Portuguese': const Locale('pt'),
     };
 
     showDialog(

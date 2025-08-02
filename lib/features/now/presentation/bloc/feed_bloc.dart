@@ -3,8 +3,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
+import 'package:dadadu_app/features/posts/domain/entities/post_entity.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/stream_feed_usecase.dart';
-import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
 

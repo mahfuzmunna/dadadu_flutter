@@ -1,7 +1,7 @@
 // lib/features/upload/data/models/post_model.dart
 
 import 'package:dadadu_app/features/comments/domain/entities/comment_entity.dart';
-import 'package:dadadu_app/features/upload/domain/entities/post_entity.dart';
+import 'package:dadadu_app/features/posts/domain/entities/post_entity.dart';
 
 import '../../../comments/data/models/comment_model.dart';
 

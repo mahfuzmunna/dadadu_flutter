@@ -81,7 +81,7 @@ class UpdateUserLocation extends ProfileEvent {
 
 class UpdateUserMood extends ProfileEvent {
   final String userId;
-  final String mood;
+  final int mood;
 
   const UpdateUserMood({required this.userId, required this.mood});
 

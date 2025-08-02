@@ -13,7 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/errors/failures.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
-import '../../../upload/data/models/post_model.dart';
+import '../models/post_model.dart';
 
 abstract class PostRemoteDataSource {
   Future<void> uploadPost({

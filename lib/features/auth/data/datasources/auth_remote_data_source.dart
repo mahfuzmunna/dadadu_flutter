@@ -240,56 +240,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
             if (profileData.isNotEmpty) {
               return UserModel.fromMap(profileData.first);
-            } else {
-              // If profile not found, return a basic UserModel from auth user
-              return UserModel(
-                id: currentUser.id,
-                email: currentUser.email,
-                fullName: currentUser.userMetadata?['full_name'] as String?,
-                // Or username, if you store it there
-                username: currentUser.userMetadata?['username'] as String?,
-                bio: currentUser.userMetadata?['bio'] as String?,
-                profilePhotoUrl:
-                    currentUser.userMetadata?['profile_photo_url'] as String?,
-                  createdAt: DateTime.now(),
-                  updatedAt: DateTime.now(),
-                  rank: 'Leaf',
-                referralLink: '',
-                moodStatus: '',
-                language: '',
-                discoverMode: 'Entertainment',
-                isEmailConfirmed: false,
-                  latitude: '0.0',
-                  longitude: '0.0',
-                  location: '',
-                  diamonds: 0,
-                  referralsCount: 0);
             }
           } catch (e) {
             debugPrint('Error fetching user profile in AuthStateChange: $e');
             // Fallback: return basic user if profile fetch fails
-            return UserModel(
-              id: currentUser.id,
-              email: currentUser.email,
-              fullName: currentUser.userMetadata?['full_name'] as String?,
-              // Or username, if you store it there
-              username: currentUser.userMetadata?['username'] as String?,
-              bio: currentUser.userMetadata?['bio'] as String?,
-              profilePhotoUrl:
-                  currentUser.userMetadata?['profile_photo_url'] as String?,
-                createdAt: DateTime.now(),
-                updatedAt: DateTime.now(),
-                rank: 'Leaf',
-              referralLink: '',
-              moodStatus: '',
-              language: '',
-              discoverMode: 'Entertainment',
-              isEmailConfirmed: false,
-                latitude: '0.0',
-                longitude: '0.0',
-                location: '',
-                diamonds: 0,
-                referralsCount: 0);
           }
         }
       }

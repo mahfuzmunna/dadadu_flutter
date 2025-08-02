@@ -8,7 +8,7 @@ import 'package:path/path.dart' as p; // For path manipulation
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/exceptions.dart';
-import '../models/post_model.dart';
+import '../../../posts/data/models/post_model.dart';
 
 /// Abstract interface for a remote data source handling post-related operations.
 abstract class PostRemoteDataSource {

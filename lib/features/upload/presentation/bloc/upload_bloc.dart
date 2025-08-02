@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/usecases/usecase.dart'; // For NoParams
 import '../../../auth/domain/entities/user_entity.dart'; // To get current user ID
 import '../../../auth/domain/usecases/get_current_user_usecase.dart'; // To get current user ID
-import '../../domain/entities/post_entity.dart';
+import '../../../posts/domain/entities/post_entity.dart';
 import '../../domain/usecases/upload_post_usecase.dart';
 
 part 'upload_event.dart'; // Links to post_event.dart

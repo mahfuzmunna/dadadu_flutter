@@ -21,7 +21,19 @@ class AppConfig {
       String.fromEnvironment('SUPABASE_USER_TABLE', defaultValue: 'users_data');
 
   static const String supabasePostTable =
-      String.fromEnvironment('SUPABASE_POST_TABLE', defaultValue: 'posts');
+      String.fromEnvironment('SUPABASE_POST_TABLE', defaultValue: 'posts_data');
+
+  static const String supabaseCommentsTable = String.fromEnvironment(
+      'SUPABASE_COMMENTS_TABLE',
+      defaultValue: 'comments_data');
+
+  static const String supabaseChatroomsTable = String.fromEnvironment(
+      'SUPABASE_CHATROOMS_TABLE',
+      defaultValue: 'chat_rooms_data');
+
+  static const String supabaseMessagesTable = String.fromEnvironment(
+      'SUPABASE_MESSAGES_TABLE',
+      defaultValue: 'messages_data');
 
 // If using flutter_dotenv:
 // static final String wasabiAccessKey = dotenv.env['WASABI_ACCESS_KEY']!;

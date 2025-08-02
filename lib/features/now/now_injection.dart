@@ -1,6 +1,5 @@
 // lib/features/now/now_injection.dart
 
-import 'package:dadadu_app/config/app_config.dart';
 import 'package:dadadu_app/features/now/data/datasources/home_remote_data_source.dart';
 import 'package:dadadu_app/features/now/data/repositories/home_repository_impl.dart';
 import 'package:dadadu_app/features/now/domain/repositories/home_repository.dart';
@@ -11,8 +10,6 @@ import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/stream_feed_usecase.dart';
 import 'package:get_it/get_it.dart';
 
-import '../upload/data/datasources/post_remote_data_source.dart';
-import '../upload/domain/repositories/post_repository.dart';
 
 // No need to redeclare 'final sl = GetIt.instance;' if it's already global via injection_container.dart
 // You can use the existing 'sl' if it's imported correctly.
@@ -58,22 +55,4 @@ Future<void> nowInjection() async {
       supabaseClient: sl(),
     ),
   );
-}
-
-Future<void> feedPostInjection() async {
-  // Register new Post related dependencies
-  sl.registerFactory(() => FeedBloc(streamFeedUseCase: sl()));
-
-  sl.registerLazySingleton<PostRepository>(
-    () => PostRepositoryImpl(remoteDataSource: sl()),
-  );
-  sl.registerLazySingleton<PostRemoteDataSource>(
-    () => PostRemoteDataSourceImpl(sl(),
-        wasabiAccessKey: AppConfig.wasabiAccessKey,
-        wasabiSecretKey: AppConfig.wasabiSecretKey,
-        wasabiEndpoint: AppConfig.wasabiEndpoint,
-        wasabiBucketName: AppConfig.wasabiBucketName,
-        bunnyCdnHostname: AppConfig.bunnyCdnHostname),
-  );
-  // ... rest of your existing injection setup
 }

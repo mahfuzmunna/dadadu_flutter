@@ -13,7 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../auth/data/models/user_model.dart';
 import '../../../auth/domain/entities/user_entity.dart';
-import '../../../upload/data/models/post_model.dart';
+import '../../../posts/data/models/post_model.dart';
 import '../../domain/usecases/update_user_location_usecase.dart';
 import '../../domain/usecases/update_user_mood_usecase.dart';
 
@@ -382,7 +382,9 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       final users = response.map((map) => UserModel.fromMap(map)).toList();
 
       final withLocation = users
-          .where((user) => user.latitude != null && user.longitude != null)
+          .where((user) =>
+              user.location?.latitude != null &&
+              user.location?.longitude != null)
           .toList();
 
       return withLocation;

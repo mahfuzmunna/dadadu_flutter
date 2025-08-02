@@ -8,8 +8,8 @@ import '../../../../core/errors/exceptions.dart';
 import '../../../auth/domain/entities/user_entity.dart';
 import '../../../comments/data/models/comment_model.dart';
 import '../../../comments/domain/entities/comment_entity.dart';
-import '../../../upload/domain/entities/post_entity.dart';
 import '../../data/datasources/post_remote_data_source.dart';
+import '../entities/post_entity.dart';
 
 abstract class PostRepository {
   Future<Either<Failure, void>> uploadPost({

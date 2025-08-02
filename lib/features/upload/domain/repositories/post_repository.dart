@@ -5,8 +5,8 @@ import 'package:dartz/dartz.dart'; // For the Either type (from dartz package)
 
 import '../../../../core/errors/exceptions.dart'; // For ServerException
 import '../../../../core/errors/failures.dart'; // For your custom Failure types
+import '../../../posts/domain/entities/post_entity.dart'; // For the PostEntity
 import '../../data/datasources/post_remote_data_source.dart';
-import '../entities/post_entity.dart'; // For the PostEntity
 
 /// Abstract interface for the Post Repository.
 /// This defines the contract that the data layer's repository implementation

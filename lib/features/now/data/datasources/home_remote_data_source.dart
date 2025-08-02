@@ -5,7 +5,7 @@
 
 import 'package:dadadu_app/core/errors/exceptions.dart';
 import 'package:dadadu_app/features/auth/data/models/user_model.dart'; // Ensure UserModel is updated for Supabase
-import 'package:dadadu_app/features/upload/data/models/post_model.dart'; // Ensure PostModel is updated for Supabase
+import 'package:dadadu_app/features/posts/data/models/post_model.dart'; // Ensure PostModel is updated for Supabase
 import 'package:supabase_flutter/supabase_flutter.dart'; // NEW: Supabase Client
 
 abstract class HomeRemoteDataSource {
