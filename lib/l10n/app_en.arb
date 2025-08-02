@@ -397,5 +397,10 @@
         "type": "String"
       }
     }
-  }
+  },
+  "moodHappy": "Happy",
+  "moodSad": "Sad",
+  "moodExcited": "Excited",
+  "moodCalm": "Calm",
+  "moodAngry": "Angry"
 }

@@ -1,0 +1,401 @@
+{
+  "@@locale": "pt",
+  "settings": "Configurações",
+  "appearance": "Aparência",
+  "theme": "Tema",
+  "light": "Claro",
+  "dark": "Escuro",
+  "system": "Sistema",
+  "general": "Geral",
+  "pushNotifications": "Notificações push",
+  "language": "Idioma",
+  "privacySettings": "Configurações de privacidade",
+  "support": "Suporte",
+  "helpAndSupport": "Ajuda e Suporte",
+  "aboutDadadu": "Sobre o Dadadu",
+  "signOut": "Sair",
+  "confirmSignOut": "Confirmar saída",
+  "areYouSureSignOut": "Tem certeza de que deseja sair?",
+  "cancel": "Cancelar",
+  "privacyPolicy": "Política de Privacidade",
+  "deleteAccount": "Excluir conta",
+  "close": "Fechar",
+  "selectLanguage": "Selecionar idioma",
+  "couldNotLaunchUrl": "Não foi possível abrir {url}",
+  "@couldNotLaunchUrl": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "login": "Entrar",
+  "loginFailed": "Falha no login: {message}",
+  "@loginFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "email": "E-mail",
+  "emailHint": "seu@exemplo.com",
+  "password": "Senha",
+  "passwordHint": "Digite sua senha",
+  "signIn": "Entrar",
+  "forgotPassword": "Esqueceu a senha?",
+  "or": "OU",
+  "signInWithGoogle": "Entrar com o Google",
+  "dontHaveAnAccount": "Não tem uma conta?",
+  "signUp": "Cadastre-se",
+  "pleaseCompleteAllFields": "Por favor, preencha todos os campos.",
+  "man": "Homem",
+  "woman": "Mulher",
+  "interestedIn": "Interessado(a) em",
+  "lookingFor": "Procurando por",
+  "createAccount": "Criar conta",
+  "signUpSuccess": "Sucesso! Verifique seu e-mail para confirmar.",
+  "signUpFailed": "Falha no cadastro: {message}",
+  "@signUpFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "fullName": "Nome completo",
+  "pleaseEnterYourName": "Por favor, digite seu nome",
+  "username": "Nome de usuário",
+  "pleaseEnterAUsername": "Por favor, digite um nome de usuário",
+  "pleaseEnterAnEmail": "Por favor, digite um e-mail",
+  "passwordTooShort": "A senha deve ter pelo menos 6 caracteres",
+  "continueButton": "Continuar",
+  "referralId": "ID de indicação: {referralId}",
+  "@referralId": {
+    "placeholders": {
+      "referralId": {
+        "type": "String"
+      }
+    }
+  },
+  "alreadyHaveAnAccount": "Já tem uma conta?",
+  "setYourProfilePhoto": "Defina sua foto de perfil",
+  "pleaseSelectAndEditImage": "Por favor, selecione e edite uma imagem primeiro.",
+  "addPhoto": "Adicionar foto",
+  "greatFirstImpression": "Cause uma ótima primeira impressão!",
+  "uploadAndContinue": "Carregar e continuar",
+  "skipForNow": "Pular por enquanto",
+  "forgotPasswordTitle": "Esqueceu a senha",
+  "passwordResetEmailSent": "E-mail de redefinição de senha enviado para {email}. Verifique sua caixa de entrada.",
+  "@passwordResetEmailSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "passwordResetFailed": "Falha ao redefinir a senha: {message}",
+  "@passwordResetFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "sendResetLink": "Enviar link de redefinição",
+  "notifications": "Notificações",
+  "now": "AGORA",
+  "errorWithMessage": "Erro: {message}",
+  "@errorWithMessage": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "noPostsFound": "Nenhuma publicação encontrada.",
+  "recent": "Recentes",
+  "popular": "Populares",
+  "noCommentsYet": "Ainda não há comentários.",
+  "mustBeLoggedInToComment": "Você precisa estar logado para comentar.",
+  "commentSubmitted": "Comentário enviado!",
+  "addAComment": "Adicionar um comentário...",
+  "mustBeLoggedInToLike": "Você precisa estar logado para curtir.",
+  "anonymous": "Anônimo",
+  "translating": "Traduzindo...",
+  "translate": "Traduzir",
+  "sent": "Enviado",
+  "storagePermissionRequired": "É necessária permissão de armazenamento para salvar vídeos.",
+  "videoSavedToGallery": "Vídeo salvo na galeria!",
+  "failedToSaveVideo": "Falha ao salvar o vídeo.",
+  "errorSavingVideo": "Ocorreu um erro ao salvar o vídeo.",
+  "loading": "carregando...",
+  "originalSoundBy": "Som original - {username}",
+  "@originalSoundBy": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "follow": "Seguir",
+  "following": "Seguindo",
+  "save": "Salvar",
+  "saving": "Salvando...",
+  "share": "Compartilhar",
+  "shareVideoMessage": "Confira este vídeo! https://dadadu.app/{postId}",
+  "@shareVideoMessage": {
+    "placeholders": {
+      "postId": {
+        "type": "String"
+      }
+    }
+  },
+  "cannotGiveDiamondToSelf": "Você не pode dar um diamante para si mesmo.",
+  "newPost": "Nova publicação",
+  "postPublishedSuccess": "Publicação bem-sucedida!",
+  "uploadFailed": "Falha no upload: {message}",
+  "@uploadFailed": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseACover": "Escolha uma capa",
+  "selectAnIntent": "Selecione uma intenção",
+  "processing": "Processando...",
+  "publishing": "Publicando... {progress}%",
+  "@publishing": {
+    "placeholders": {
+      "progress": {
+        "type": "String"
+      }
+    }
+  },
+  "publish": "Publicar",
+  "addACaption": "Adicione uma legenda...",
+  "couldNotGenerateThumbnails": "Não foi possível gerar as miniaturas.",
+  "love": "Amor",
+  "business": "Negócios",
+  "entertainment": "Entretenimento",
+  "pleaseSelectAThumbnail": "Por favor, selecione uma miniatura.",
+  "couldNotProcessVideo": "Não foi possível processar o vídeo. Tente novamente.",
+  "errorPublishingPost": "Erro ao publicar: {error}",
+  "@errorPublishingPost": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aspectRatio_1_1": "1:1",
+  "userNotAuthenticated": "Usuário não autenticado.",
+  "profileSavedSuccess": "Perfil salvo com sucesso!",
+  "failedToUpdateProfile": "Falha ao atualizar: {message}",
+  "@failedToUpdateProfile": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
+  },
+  "usernameCannotBeEmpty": "O nome de usuário não pode estar vazio",
+  "bio": "Biografia",
+  "saveChanges": "Salvar alterações",
+  "chats": "Conversas",
+  "inviteFriendsToUnlockSearch": "Convide mais amigos para desbloquear a busca global",
+  "userDismissed": "{fullName} dispensado",
+  "@userDismissed": {
+    "placeholders": {
+      "fullName": {
+        "type": "String"
+      }
+    }
+  },
+  "undo": "Desfazer",
+  "unknownUser": "Usuário desconhecido",
+  "yesterday": "Ontem",
+  "inboxEmpty": "Sua caixa de entrada está vazia",
+  "startConversationPrompt": "Inicie uma conversa tocando no botão de nova conversa.",
+  "all": "Todos",
+  "notAuthenticated": "Não autenticado",
+  "chat": "Conversa",
+  "online": "Online",
+  "messageHint": "Mensagem...",
+  "discover": "Descobrir",
+  "whatsYourVibe": "Qual é a sua vibe hoje?",
+  "searchWithin": "Buscar em",
+  "searchAroundThe": "Buscar ao redor do",
+  "distanceMeters": "{distance} m",
+  "@distanceMeters": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "distanceKilometers": "{distance} km",
+  "@distanceKilometers": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "globe": "Globo",
+  "updateMyLocation": "Atualizar minha localização",
+  "updatingYourLocation": "Atualizando sua localização...",
+  "increaseDistanceLimit": "Aumentar limite de distância",
+  "featureUnlocked": "Recurso desbloqueado!",
+  "congratulationsUnlocked": "Parabéns! Agora você pode procurar pessoas a qualquer distância.",
+  "awesome": "Incrível!",
+  "unlockMoreDistance": "Desbloquear mais distância",
+  "unlockDistanceDescription": "Indique 10 novos usuários para desbloquear a capacidade de procurar pessoas mais distantes!",
+  "yourReferrals": "Suas indicações: ",
+  "referralProgress": "{count} / 10",
+  "@referralProgress": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "yourInviteLink": "Seu link de convite",
+  "copyLink": "Copiar link",
+  "linkCopied": "Link copiado para a área de transferência!",
+  "gettingYourLocation": "Obtendo sua localização, aguarde...",
+  "locationErrorMessage": "Ocorreu um erro ao verificar a localização: {error}",
+  "@locationErrorMessage": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "openAppSettings": "Abrir configurações do aplicativo",
+  "openLocationSettings": "Abrir configurações de localização",
+  "retryPermission": "Tentar permissão novamente",
+  "locationTrackingError": "Erro no rastreamento de localização.",
+  "couldNotGetLocationName": "Não foi possível obter o nome da localização.",
+  "locationUpdatedTo": "Localização atualizada para {locationName}!",
+  "@locationUpdatedTo": {
+    "placeholders": {
+      "locationName": {
+        "type": "String"
+      }
+    }
+  },
+  "failedToUpdateLocation": "Falha ao atualizar a localização.",
+  "vibeWith": "Vibe de {vibe}",
+  "@vibeWith": {
+    "placeholders": {
+      "vibe": {
+        "type": "String"
+      }
+    }
+  },
+  "noUsersFoundWithVibe": "Nenhum usuário encontrado por perto com esta vibe.",
+  "findingUsers": "Encontrando usuários...",
+  "distanceAway": "a {distance} de distância",
+  "@distanceAway": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "viewProfile": "Ver perfil",
+  "likedYourVideo": "curtiu seu vídeo.",
+  "startedFollowingYou": "começou a te seguir.",
+  "commentedAwesome": "comentou: \"Incrível!\"",
+  "somethingWentWrong": "Algo deu errado",
+  "editProfile": "Editar perfil",
+  "unfollow": "Deixar de seguir",
+  "myProfile": "Meu perfil",
+  "profile": "Perfil",
+  "followers": "Seguidores",
+  "videos": "Vídeos",
+  "inviteFriendsAndEarn": "Convide amigos e ganhe diamantes!",
+  "inviteFriendsDescription": "Compartilhe seu link de indicação exclusivo e ganhe 100 💎 para cada amigo que se cadastrar!",
+  "copy": "Copiar",
+  "referralLinkCopied": "Link de indicação copiado!",
+  "joinMeOnDadadu": "Junte-se a mim no Dadadu! Use meu link para se cadastrar: {referralLink}",
+  "@joinMeOnDadadu": {
+    "placeholders": {
+      "referralLink": {
+        "type": "String"
+      }
+    }
+  },
+  "matchHistory": "Histórico de partidas",
+  "noMatchHistory": "Ainda não há histórico de partidas.",
+  "uploadedVideos": "Vídeos carregados ({postCount})",
+  "@uploadedVideos": {
+    "placeholders": {
+      "postCount": {
+        "type": "String"
+      }
+    }
+  },
+  "youHaveNoVideos": "Você ainda não carregou nenhum vídeo.",
+  "userHasNoVideos": "Este usuário não tem vídeos.",
+  "moodWithStatus": "Humor: {moodStatus}",
+  "@moodWithStatus": {
+    "placeholders": {
+      "moodStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "setMood": "Definir humor",
+  "howBadgesWork": "Como funcionam os emblemas",
+  "selectYourMood": "Selecione seu humor",
+  "moodUpdated": "Humor atualizado para {mood}!",
+  "@moodUpdated": {
+    "placeholders": {
+      "mood": {
+        "type": "String"
+      }
+    }
+  },
+  "dadaduBadgeSystem": "Sistema de emblemas Dadadu",
+  "earnBadgesDescription": "Ganhe emblemas alcançando vários marcos!",
+  "badgeLeafTitle": "FOLHA (0 - 9.999 diamantes)",
+  "badgeLeafDescription": "Nível inicial para novos usuários.",
+  "badgeThreeleafTitle": "TREVO (10K - 999K diamantes)",
+  "badgeThreeleafDescription": "Membro ativo da comunidade.",
+  "badgeFiveleafTitle": "CINCO FOLHAS (1M - 9.9M diamantes)",
+  "badgeFiveleafDescription": "Status de criador popular.",
+  "badgeDadalordTitle": "DADALORD (10M+ diamantes)",
+  "badgeDadalordDescription": "Status de elite no valor de mais de US$ 10.000 +2% por milhão de diamantes.",
+  "badgesPrestigeInfo": "📈 Emblemas mais altos = mais prestígio + valor de mercado",
+  "gotIt": "Entendi!",
+  "back": "Voltar",
+  "userHasNoPosts": "Este usuário não tem publicações.",
+  "permissionsRequired": "São necessárias permissões de câmera e microfone.",
+  "zoomLevel": "{zoomValue}x",
+  "@zoomLevel": {
+    "placeholders": {
+      "zoomValue": {
+        "type": "String"
+      }
+    }
+  },
+  "recordingTimer": "0:{seconds}",
+  "@recordingTimer": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "timeSelectorSeconds": "{seconds}s",
+  "@timeSelectorSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  }
+}

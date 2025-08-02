@@ -372,5 +372,30 @@
   "badgesPrestigeInfo": "📈 Höhere Abzeichen = mehr Prestige + Marktwert",
   "gotIt": "Verstanden!",
   "back": "Zurück",
-  "userHasNoPosts": "Dieser Benutzer hat keine Beiträge."
+  "userHasNoPosts": "Dieser Benutzer hat keine Beiträge.",
+  "permissionsRequired": "Kamera- und Mikrofonberechtigungen sind erforderlich.",
+  "zoomLevel": "{zoomValue}x",
+  "@zoomLevel": {
+    "placeholders": {
+      "zoomValue": {
+        "type": "String"
+      }
+    }
+  },
+  "recordingTimer": "0:{seconds}",
+  "@recordingTimer": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "timeSelectorSeconds": "{seconds}s",
+  "@timeSelectorSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  }
 }
