@@ -190,68 +190,6 @@
     }
   },
   "aspectRatio_1_1": "1:1",
-  "somethingWentWrong": "Something went wrong",
-  "editProfile": "Edit Profile",
-  "unfollow": "Unfollow",
-  "myProfile": "My Profile",
-  "profile": "Profile",
-  "followers": "Followers",
-  "videos": "Videos",
-  "inviteFriendsAndEarn": "Invite Friends & Earn Diamonds!",
-  "inviteFriendsDescription": "Share your unique referral link and earn 100 💎 for every friend who signs up!",
-  "copy": "Copy",
-  "referralLinkCopied": "Referral link copied!",
-  "joinMeOnDadadu": "Join me on Dadadu! Use my link to sign up: {referralLink}",
-  "@joinMeOnDadadu": {
-    "placeholders": {
-      "referralLink": {
-        "type": "String"
-      }
-    }
-  },
-  "matchHistory": "Match History",
-  "noMatchHistory": "No match history yet.",
-  "uploadedVideos": "Uploaded Videos ({postCount})",
-  "@uploadedVideos": {
-    "placeholders": {
-      "postCount": {
-        "type": "String"
-      }
-    }
-  },
-  "youHaveNoVideos": "You haven't uploaded any videos yet.",
-  "userHasNoVideos": "This user has no videos.",
-  "moodWithStatus": "Mood: {moodStatus}",
-  "@moodWithStatus": {
-    "placeholders": {
-      "moodStatus": {
-        "type": "String"
-      }
-    }
-  },
-  "setMood": "Set Mood",
-  "howBadgesWork": "How Badges Work",
-  "selectYourMood": "Select Your Mood",
-  "moodUpdated": "Mood updated to {mood}!",
-  "@moodUpdated": {
-    "placeholders": {
-      "mood": {
-        "type": "String"
-      }
-    }
-  },
-  "dadaduBadgeSystem": "Dadadu Badge System",
-  "earnBadgesDescription": "Earn badges by achieving various milestones!",
-  "badgeLeafTitle": "LEAF (0 - 9,999 diamonds)",
-  "badgeLeafDescription": "Starting level for new users.",
-  "badgeThreeleafTitle": "THREELEAF (10K - 999K diamonds)",
-  "badgeThreeleafDescription": "Active community member.",
-  "badgeFiveleafTitle": "FIVELEAF (1M - 9.9M diamonds)",
-  "badgeFiveleafDescription": "Popular creator status.",
-  "badgeDadalordTitle": "DADALORD (10M+ diamonds)",
-  "badgeDadalordDescription": "Elite status worth $10,000+ with +2% per million diamonds.",
-  "badgesPrestigeInfo": "📈 Higher badges = more prestige + marketplace value",
-  "gotIt": "Got It!",
   "userNotAuthenticated": "User not authenticated.",
   "profileSavedSuccess": "Profile saved successfully!",
   "failedToUpdateProfile": "Failed to update: {message}",
@@ -370,5 +308,67 @@
   "viewProfile": "View Profile",
   "likedYourVideo": "liked your video.",
   "startedFollowingYou": "started following you.",
-  "commentedAwesome": "commented: \"Awesome!\""
+  "commentedAwesome": "commented: \"Awesome!\"",
+  "somethingWentWrong": "Something went wrong",
+  "editProfile": "Edit Profile",
+  "unfollow": "Unfollow",
+  "myProfile": "My Profile",
+  "profile": "Profile",
+  "followers": "Followers",
+  "videos": "Videos",
+  "inviteFriendsAndEarn": "Invite Friends & Earn Diamonds!",
+  "inviteFriendsDescription": "Share your unique referral link and earn 100 💎 for every friend who signs up!",
+  "copy": "Copy",
+  "referralLinkCopied": "Referral link copied!",
+  "joinMeOnDadadu": "Join me on Dadadu! Use my link to sign up: {referralLink}",
+  "@joinMeOnDadadu": {
+    "placeholders": {
+      "referralLink": {
+        "type": "String"
+      }
+    }
+  },
+  "matchHistory": "Match History",
+  "noMatchHistory": "No match history yet.",
+  "uploadedVideos": "Uploaded Videos ({postCount})",
+  "@uploadedVideos": {
+    "placeholders": {
+      "postCount": {
+        "type": "String"
+      }
+    }
+  },
+  "youHaveNoVideos": "You haven't uploaded any videos yet.",
+  "userHasNoVideos": "This user has no videos.",
+  "moodWithStatus": "Mood: {moodStatus}",
+  "@moodWithStatus": {
+    "placeholders": {
+      "moodStatus": {
+        "type": "String"
+      }
+    }
+  },
+  "setMood": "Set Mood",
+  "howBadgesWork": "How Badges Work",
+  "selectYourMood": "Select Your Mood",
+  "moodUpdated": "Mood updated to {mood}!",
+  "@moodUpdated": {
+    "placeholders": {
+      "mood": {
+        "type": "String"
+      }
+    }
+  },
+  "dadaduBadgeSystem": "Dadadu Badge System",
+  "earnBadgesDescription": "Earn badges by achieving various milestones!",
+  "badgeLeafTitle": "LEAF (0 - 9,999 diamonds)",
+  "badgeLeafDescription": "Starting level for new users.",
+  "badgeThreeleafTitle": "THREELEAF (10K - 999K diamonds)",
+  "badgeThreeleafDescription": "Active community member.",
+  "badgeFiveleafTitle": "FIVELEAF (1M - 9.9M diamonds)",
+  "badgeFiveleafDescription": "Popular creator status.",
+  "badgeDadalordTitle": "DADALORD (10M+ diamonds)",
+  "badgeDadalordDescription": "Elite status worth $10,000+ with +2% per million diamonds.",
+  "badgesPrestigeInfo": "📈 Higher badges = more prestige + marketplace value",
+  "gotIt": "Got It!"
 }

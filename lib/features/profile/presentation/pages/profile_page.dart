@@ -78,8 +78,9 @@ class _ProfileView extends StatelessWidget {
               isMyProfile: isMyProfile,
               referralLink: referralLink);
         }
-        return const Scaffold(
-            body: Center(child: Text('Something went wrong')));
+        return Scaffold(
+            body: Center(
+                child: Text(AppLocalizations.of(context)!.somethingWentWrong)));
       },
     );
   }
@@ -504,8 +505,9 @@ class _ProfileContentState extends State<_ProfileContent> {
         ElevatedButton.icon(
           icon: const Icon(Icons.sentiment_satisfied_alt_rounded),
           label: Text(widget.user.moodStatus != null
-              ? 'Mood: ${widget.user.moodStatus}'
-              : 'Set Mood'),
+              ? AppLocalizations.of(context)!
+                  .moodWithStatus(widget.user.moodStatus.toString())
+              : AppLocalizations.of(context)!.setMood),
           onPressed: () => _showMoodSelectionBottomSheet(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
@@ -519,7 +521,7 @@ class _ProfileContentState extends State<_ProfileContent> {
         Expanded(
           child: OutlinedButton.icon(
             icon: const Icon(Icons.military_tech_outlined),
-            label: const Text('How Badges Work'),
+            label: Text(AppLocalizations.of(context)!.howBadgesWork),
             onPressed: () => _showBadgesInfoDialog(context),
             style: OutlinedButton.styleFrom(
               side: BorderSide(color: Theme.of(context).colorScheme.outline),
@@ -538,11 +540,14 @@ class _ProfileContentState extends State<_ProfileContent> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildStatColumn(context, Icons.people_alt_rounded,
-            '${widget.user.followerIds.length}', 'Followers'),
+            '${widget.user.followerIds.length}',
+            AppLocalizations.of(context)!.followers),
         _buildStatColumn(context, Icons.person_add_alt_1_rounded,
-            '${widget.user.followingIds.length}', 'Following'),
+            '${widget.user.followingIds.length}',
+            AppLocalizations.of(context)!.following),
         _buildStatColumn(context, Icons.ondemand_video_rounded,
-            '${widget.user.postIds.length}', 'Videos'),
+            '${widget.user.postIds.length}',
+            AppLocalizations.of(context)!.videos),
       ],
     );
   }
@@ -559,14 +564,14 @@ class _ProfileContentState extends State<_ProfileContent> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Invite Friends & Earn Diamonds!',
+              AppLocalizations.of(context)!.inviteFriendsAndEarn,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
             ),
             const SizedBox(height: 12),
             Text(
-              'Share your unique referral link and earn 100 💎 for every friend who signs up!',
+              AppLocalizations.of(context)!.inviteFriendsDescription,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -593,14 +598,15 @@ class _ProfileContentState extends State<_ProfileContent> {
                 Expanded(
                   child: OutlinedButton.icon(
                     icon: const Icon(Icons.copy_rounded),
-                    label: const Text('Copy'),
+                    label: Text(AppLocalizations.of(context)!.copy),
                     onPressed: () async {
                       await Clipboard.setData(
                           ClipboardData(text: referralLink));
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Referral link copied!')),
+                          SnackBar(
+                              content: Text(AppLocalizations.of(context)!
+                                  .referralLinkCopied)),
                         );
                       }
                     },
@@ -610,10 +616,10 @@ class _ProfileContentState extends State<_ProfileContent> {
                 Expanded(
                   child: FilledButton.icon(
                     icon: const Icon(Icons.share_rounded),
-                    label: const Text('Share'),
+                    label: Text(AppLocalizations.of(context)!.share),
                     onPressed: () async {
-                      await Share.share(
-                          'Join me on Dadadu! Use my link to sign up: $referralLink');
+                      await Share.share(AppLocalizations.of(context)!
+                          .joinMeOnDadadu(referralLink));
                     },
                   ),
                 ),
@@ -630,7 +636,7 @@ class _ProfileContentState extends State<_ProfileContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Match History',
+          AppLocalizations.of(context)!.matchHistory,
           style: Theme.of(context)
               .textTheme
               .titleLarge
@@ -656,7 +662,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'No match history yet.',
+                  AppLocalizations.of(context)!.noMatchHistory,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],
@@ -673,7 +679,8 @@ class _ProfileContentState extends State<_ProfileContent> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Uploaded Videos (${widget.user.postIds.length})',
+          AppLocalizations.of(context)!
+              .uploadedVideos(widget.user.postIds.length.toString()),
           style: Theme.of(context)
               .textTheme
               .titleLarge
@@ -686,8 +693,8 @@ class _ProfileContentState extends State<_ProfileContent> {
             child: Center(
               child: Text(
                 isMyProfile
-                    ? 'You haven\'t uploaded any videos yet.'
-                    : 'This user has no videos.',
+                    ? AppLocalizations.of(context)!.youHaveNoVideos
+                    : AppLocalizations.of(context)!.userHasNoVideos,
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
@@ -821,7 +828,7 @@ class _ProfileContentState extends State<_ProfileContent> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.all(16.0),
-            child: Text('Select Your Mood',
+            child: Text(AppLocalizations.of(context)!.selectYourMood,
                 style: Theme.of(context).textTheme.titleLarge),
           ),
           ...moods.entries.map((entry) {
@@ -836,7 +843,9 @@ class _ProfileContentState extends State<_ProfileContent> {
 
                 // Show immediate feedback
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Mood updated to ${entry.key}!')),
+                  SnackBar(
+                      content: Text(AppLocalizations.of(context)!
+                          .moodUpdated(entry.key))),
                 );
                 Navigator.pop(bc);
               },
@@ -852,12 +861,12 @@ class _ProfileContentState extends State<_ProfileContent> {
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Row(
+        title: Row(
           children: [
             Icon(Icons.military_tech_rounded),
             SizedBox(width: 10),
             Text(
-              'Dadadu Badge System',
+              AppLocalizations.of(context)!.dadaduBadgeSystem,
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             )
           ],
@@ -865,24 +874,33 @@ class _ProfileContentState extends State<_ProfileContent> {
         content: SingleChildScrollView(
           child: ListBody(
             children: <Widget>[
-              Text('Earn badges by achieving various milestones!'),
+              Text(AppLocalizations.of(context)!.earnBadgesDescription),
               const SizedBox(
                 height: 10,
               ),
-              _buildBadgeInfoRow(context, '🍃', 'LEAF (0 - 9,999 diamonds)',
-                  'Starting level for new users.'),
+              _buildBadgeInfoRow(
+                  context,
+                  '🍃',
+                  AppLocalizations.of(context)!.badgeLeafTitle,
+                  AppLocalizations.of(context)!.badgeLeafDescription),
               _buildBadgeInfoRow(
                   context,
                   '☘️',
-                  'THREELEAF (10K - 999K diamonds)',
-                  'Active community member.'),
-              _buildBadgeInfoRow(context, '🎀', 'FIVELEAF (1M - 9.9M diamonds)',
-                  'Popular creator status.'),
-              _buildBadgeInfoRow(context, '👑', 'DADALORD (10M+ diamonds)',
-                  'Elite status worth \$10,000+ with +2% per million diamonds.'),
+                  AppLocalizations.of(context)!.badgeThreeleafTitle,
+                  AppLocalizations.of(context)!.badgeThreeleafDescription),
+              _buildBadgeInfoRow(
+                  context,
+                  '🎀',
+                  AppLocalizations.of(context)!.badgeFiveleafTitle,
+                  AppLocalizations.of(context)!.badgeFiveleafDescription),
+              _buildBadgeInfoRow(
+                  context,
+                  '👑',
+                  AppLocalizations.of(context)!.badgeDadalordTitle,
+                  AppLocalizations.of(context)!.badgeDadalordDescription),
               const SizedBox(height: 16),
               Text(
-                '📈 Higher badges = more prestige + marketplace value',
+                AppLocalizations.of(context)!.badgesPrestigeInfo,
                 style: Theme.of(context).textTheme.bodyMedium,
                 textAlign: TextAlign.center,
               ),
@@ -892,7 +910,7 @@ class _ProfileContentState extends State<_ProfileContent> {
         actions: [
           Center(
             child: FilledButton.tonal(
-              child: const Text('Got It!'),
+              child: Text(AppLocalizations.of(context)!.gotIt),
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
