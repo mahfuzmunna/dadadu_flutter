@@ -63,6 +63,8 @@ class AuthSignInWithOAuthRequested extends AuthEvent {
   const AuthSignInWithOAuthRequested({required this.provider});
 
 }
+// TO_BE_IMPLEMENTED
+class AuthSignInWithGoogleRequested extends AuthEvent {}
 
 class AuthPasswordResetRequested extends AuthEvent {
   // Renamed from AuthResetPasswordRequested for clarity

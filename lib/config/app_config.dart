@@ -20,6 +20,9 @@ class AppConfig {
   static const String supabaseUserTable =
       String.fromEnvironment('SUPABASE_USER_TABLE', defaultValue: 'users_data');
 
+  static const String supabaseFeedTable =
+      String.fromEnvironment('SUPABASE_FEED_TABLE', defaultValue: 'feed_data');
+
   static const String supabasePostTable =
       String.fromEnvironment('SUPABASE_POST_TABLE', defaultValue: 'posts_data');
 

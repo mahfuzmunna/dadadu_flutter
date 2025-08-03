@@ -14,7 +14,7 @@ import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo
 import 'package:dadadu_app/features/chat/presentation/pages/chats_page.dart';
 // import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
-import 'package:dadadu_app/features/now/presentation/pages/now_page.dart';
+import 'package:dadadu_app/features/now/presentation/pages/now_page_s.dart';
 import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';

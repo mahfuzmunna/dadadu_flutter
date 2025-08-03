@@ -15,6 +15,7 @@ import '../../domain/entities/user_entity.dart';
 import '../../domain/usecases/get_current_user_usecase.dart';
 import '../../domain/usecases/reset_password_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
+import '../../domain/usecases/sign_in_with_google_usecase.dart';
 import '../../domain/usecases/sign_in_with_oauth_usecase.dart';
 import '../../domain/usecases/sign_out_usecase.dart';
 import '../../domain/usecases/sign_up_usecase.dart';
@@ -48,6 +49,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final StreamController<Set<String>> _onlineUsersController =
       StreamController<Set<String>>.broadcast();
 
+  final SignInWithGoogleUseCase _signInWithGoogleUseCase;
+
   AuthBloc({
     required SignInUseCase signInUseCase,
     required SignUpUseCase signUpUseCase,
@@ -56,11 +59,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required GetUserProfileDataUseCase getUserProfileDataUseCase,
     required this.signInWithOAuthUseCase,
     required this.resetPasswordUseCase,
+    required SignInWithGoogleUseCase signInWithGoogleUseCase,
   })  : _signInUseCase = signInUseCase,
         _signUpUseCase = signUpUseCase,
         _signOutUseCase = signOutUseCase,
         _getCurrentUserUseCase = getCurrentUserUseCase,
         _getUserProfileDataUseCase = getUserProfileDataUseCase,
+        _signInWithGoogleUseCase = signInWithGoogleUseCase,
         super(AuthInitial()) {
     _setupAuthListener();
 
@@ -70,11 +75,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthOnboardingComplete>(_onOnboardingComplete);
     on<AuthSignOutRequested>(_onSignOut);
     on<_AuthUserChanged>(_onUserChanged);
-
-    // on<AuthSignInWithOAuthRequested>(_onAuthSignInWithOAuthRequested);
+    on<AuthSignInWithOAuthRequested>(_onAuthSignInWithOAuthRequested);
     // on<AuthPasswordResetRequested>(_onAuthPasswordResetRequested);
     // on<AuthUserChanged>(_onAuthUserChanged);
     on<AuthRefreshCurrentUser>(_onAuthRefreshCurrentUser);
+    on<AuthSignInWithGoogleRequested>(_onSignInWithGoogleRequested);
   }
 
   /// Public stream for GoRouter to listen to for redirection.
@@ -268,5 +273,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _authStatusController.close();
     _onlineUsersController.close();
     return super.close();
+  }
+
+  Future<void> _onSignInWithGoogleRequested(
+    AuthSignInWithGoogleRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(AuthLoading());
+    final result = await _signInWithGoogleUseCase();
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) => emit(AuthAuthenticated(user: user)),
+    );
   }
 }

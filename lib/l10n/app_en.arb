@@ -402,5 +402,10 @@
   "moodSad": "Sad",
   "moodExcited": "Excited",
   "moodCalm": "Calm",
-  "moodAngry": "Angry"
+  "moodAngry": "Angry",
+  "quickSignUp": "Quick Sign Up",
+  "selectTheme": "Select Theme",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystem": "System"
 }
