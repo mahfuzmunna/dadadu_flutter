@@ -15,7 +15,7 @@ abstract class PostRepository {
     required File videoFile,
     required Uint8List thumbnailBytes,
     required String caption,
-    required String intent,
+    required int intent,
     required String userId,
     Function(double progress)? onUploadProgress,
   });
@@ -74,7 +74,7 @@ class PostRepositoryImpl implements PostRepository {
     required File videoFile,
     required Uint8List thumbnailBytes,
     required String caption,
-    required String intent,
+    required int intent,
     required String userId,
     Function(double progress)? onUploadProgress,
   }) async {

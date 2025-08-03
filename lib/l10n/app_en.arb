@@ -407,5 +407,17 @@
   "selectTheme": "Select Theme",
   "themeLight": "Light",
   "themeDark": "Dark",
-  "themeSystem": "System"
+  "themeSystem": "System",
+  "langEnglish": "English",
+  "langFrench": "Français",
+  "langGerman": "Deutsch",
+  "langSpanish": "Español",
+  "langPortuguese": "Portuguese",
+  "phone": "Phone",
+  "phoneNumber": "Phone Number",
+  "sendOTP": "Send OTP",
+  "pleaseEnterPhoneNumber": "Please enter a phone number",
+  "intentLove": "Love",
+  "intentBusiness": "Business",
+  "intentEntertainment": "Entertainment"
 }

@@ -84,17 +84,17 @@ class _NowPageViewState extends State<_NowPageView> {
         builder: (context, state) {
           if (state is FeedLoading || state is FeedInitial) {
             return const Center(child: CircularProgressIndicator());
-          } else if (state is FeedError) {
-            return Center(child: Text('Error: ${state.message}'));
-          } else if (state is FeedLoaded) {
-            final posts = state.data.posts;
-            final authors = state.data.authors;
+          }
+          if (state is FeedError) {
+            return Center(child: Text(l10n.errorWithMessage(state.message)));
+          }
+          if (state is FeedLoaded) {
             return ScrollableVideoPlayer(
-              posts: posts,
-              authors: authors,
+              posts: state.data.posts,
+              authors: state.data.authors,
             );
           }
-          return const SizedBox.shrink();
+          return Center(child: Text(l10n.noPostsFound));
         },
       ),
     );

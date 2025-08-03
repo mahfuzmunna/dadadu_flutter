@@ -2,17 +2,16 @@
 
 import 'dart:async'; // For StreamSubscription
 
-// import 'package:dadadu_app/core/common/widgets/scaffold_with_nav_bar.dart'; // Ensure this path is correct
 import 'package:dadadu_app/core/common/widgets/scaffold_with_navbar.dart'; // Ensure this path is correct
 // Core imports
 import 'package:dadadu_app/core/pages/splash_page.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart'; // Auth Bloc for redirection logic
 // If you have a ForgotPasswordPage, make sure to import it too
 import 'package:dadadu_app/features/auth/presentation/pages/forgot_password_page.dart';
+import 'package:dadadu_app/features/auth/presentation/pages/quick_sign_up_page.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/sign_in_page_s.dart';
 import 'package:dadadu_app/features/auth/presentation/pages/upload_profile_photo_page.dart';
 import 'package:dadadu_app/features/chat/presentation/pages/chats_page.dart';
-// import 'package:dadadu_app/features/auth/presentation/pages/sign_up_page_t.dart'; // No longer explicitly needed if LoginPage handles signup
 import 'package:dadadu_app/features/discover/presentation/pages/discover_page.dart';
 import 'package:dadadu_app/features/now/presentation/pages/now_page_s.dart';
 import 'package:dadadu_app/features/posts/domain/entities/post_draft.dart';
@@ -22,7 +21,6 @@ import 'package:dadadu_app/features/profile/presentation/pages/edit_profile_page
 import 'package:dadadu_app/features/profile/presentation/pages/profile_page.dart';
 import 'package:dadadu_app/features/profile/presentation/pages/user_video_page_s.dart';
 import 'package:dadadu_app/features/settings/presentation/pages/settings_page.dart';
-// import 'package:dadadu_app/features/upload/presentation/pages/create_post_camera_page.dart'; // If you're using this
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -36,6 +34,17 @@ import '../../features/profile/presentation/bloc/profile_bloc.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey =
     GlobalKey<NavigatorState>(debugLabel: 'root');
+// ✅ NEW: Add a GlobalKey for each branch of the shell route
+final GlobalKey<NavigatorState> _shellNavigatorKeyHome =
+    GlobalKey<NavigatorState>(debugLabel: 'shellHome');
+final GlobalKey<NavigatorState> _shellNavigatorKeyDiscover =
+    GlobalKey<NavigatorState>(debugLabel: 'shellDiscover');
+final GlobalKey<NavigatorState> _shellNavigatorKeyUpload =
+    GlobalKey<NavigatorState>(debugLabel: 'shellUpload');
+final GlobalKey<NavigatorState> _shellNavigatorKeyChats =
+    GlobalKey<NavigatorState>(debugLabel: 'shellChats');
+final GlobalKey<NavigatorState> _shellNavigatorKeyProfile =
+    GlobalKey<NavigatorState>(debugLabel: 'shellProfile');
 
 class AppRouter {
   static GoRouter router({required AuthBloc authBloc}) {
@@ -58,6 +67,11 @@ class AppRouter {
           path: '/login',
           parentNavigatorKey: _rootNavigatorKey,
           builder: (context, state) => const SignInPage(),
+        ),
+        GoRoute(
+          path: '/quick-signup',
+          parentNavigatorKey: _rootNavigatorKey,
+          builder: (context, state) => const QuickSignUpPage(),
         ),
         GoRoute(
           path: '/signUp',
@@ -154,6 +168,7 @@ class AppRouter {
           branches: <StatefulShellBranch>[
             // Home
             StatefulShellBranch(
+              navigatorKey: _shellNavigatorKeyHome,
               routes: [
                 GoRoute(
                   path: '/home',
@@ -176,6 +191,7 @@ class AppRouter {
             ),
             // Discover
             StatefulShellBranch(
+              navigatorKey: _shellNavigatorKeyDiscover,
               routes: [
                 GoRoute(
                   path: '/discover',
@@ -194,6 +210,7 @@ class AppRouter {
             ),
             // Upload (Redirects to Camera)
             StatefulShellBranch(
+              navigatorKey: _shellNavigatorKeyUpload,
               routes: [
                 GoRoute(
                     path: '/createPostCamera',
@@ -204,6 +221,7 @@ class AppRouter {
             ),
             // Friends
             StatefulShellBranch(
+              navigatorKey: _shellNavigatorKeyChats,
               routes: [
                 GoRoute(
                   path: '/chats',
@@ -213,6 +231,7 @@ class AppRouter {
             ),
             // Profile
             StatefulShellBranch(
+              navigatorKey: _shellNavigatorKeyProfile,
               routes: [
                 GoRoute(
                   path: '/profile',
@@ -266,7 +285,12 @@ class AppRouter {
         const loginLocation = '/login';
         const homeLocation = '/home';
         const onboardingLocation = '/upload-profile-photo';
-        const authRoutes = ['/login', '/signUp', '/forgot-password'];
+        const authRoutes = [
+          '/login',
+          '/signUp',
+          '/quick-signup',
+          '/forgot-password'
+        ];
 
         final isAtAuthRoute = authRoutes.contains(location);
         final isAtOnboarding = location == onboardingLocation;
@@ -280,6 +304,9 @@ class AppRouter {
         // 2. If the user just signed up, they MUST go to onboarding.
         if (authState is AuthSignUpSuccess) {
           return location == onboardingLocation ? null : onboardingLocation;
+        }
+        if (authState is AuthQuickSignUpSuccess) {
+          return location == homeLocation ? null : homeLocation;
         }
 
         // 3. If the user is authenticated:
@@ -313,26 +340,6 @@ class AppRouter {
     );
   }
 }
-
-/// A `Listenable` that notifies `GoRouter` when a `Stream` emits a new value.
-/// Used to trigger re-evaluation of the router's `redirect` logic.
-// class GoRouterRefreshStream extends ChangeNotifier {
-//   late final StreamSubscription<dynamic> _subscription;
-//
-//   GoRouterRefreshStream(Stream<dynamic> stream) {
-//     notifyListeners(); // Notify listeners immediately on creation
-//     _subscription = stream.asBroadcastStream().listen(
-//           (dynamic _) =>
-//               notifyListeners(), // Notify listeners whenever the stream emits
-//         );
-//   }
-//
-//   @override
-//   void dispose() {
-//     _subscription.cancel(); // Cancel the subscription to prevent memory leaks
-//     super.dispose();
-//   }
-// }
 
 class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<AuthenticationStatus> _subscription;

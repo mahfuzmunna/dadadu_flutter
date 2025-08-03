@@ -118,7 +118,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
       final tempFilePath = '${tempDir.path}/${widget.post.id}.mp4';
 
       await dio.download(
-        widget.post.videoUrl,
+        widget.post.videoUrl ?? '',
         tempFilePath,
         onReceiveProgress: (received, total) {
           if (total != -1 && mounted) {
@@ -329,7 +329,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
       decoration: BoxDecoration(
         color: Colors.black,
         image: DecorationImage(
-          image: CachedNetworkImageProvider(widget.post.thumbnailUrl),
+          image: CachedNetworkImageProvider(widget.post.thumbnailUrl ?? ''),
           fit: BoxFit.cover,
         ),
       ),
@@ -441,7 +441,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
 
                 // --- Caption ---
                 Text(
-                  post.caption,
+                  post.caption ?? '',
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.bodyMedium?.copyWith(
@@ -549,7 +549,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
             icon: Icons.comment_bank_outlined,
             label: "${widget.post.commentCount ?? 0}",
             onPressed: () {
-              _showCommentsBottomSheet(context, widget.post.id);
+              _showCommentsBottomSheet(context, widget.post.id ?? '');
             }),
         const SizedBox(height: 20),
         _buildActionButton(
@@ -577,7 +577,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
             label: 'Share',
             onPressed: () {
               Share.share(
-                  'Check out this video! https://dadadu.app/${widget.post.id.substring(0, 8)}');
+                  'Check out this video! https://dadadu.app/${widget.post.id?.substring(0, 8)}');
             }),
       ],
     );
@@ -631,12 +631,12 @@ class _VideoPostItemState extends State<VideoPostItem> {
             final event = hasGivenDiamond
                 ? UnsendDiamond(
                     userId: currentUser.id,
-                    postId: post.id,
-                    authorId: post.userId)
+                    postId: post.id ?? '',
+                    authorId: post.userId ?? '')
                 : SendDiamond(
                     userId: currentUser.id,
-                    postId: post.id,
-                    authorId: post.userId);
+                    postId: post.id ?? '',
+                    authorId: post.userId ?? '');
 
             context.read<DiamondBloc>().add(event);
           },

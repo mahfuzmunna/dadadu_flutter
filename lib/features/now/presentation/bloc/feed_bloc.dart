@@ -1,8 +1,6 @@
-// feed_bloc.dart
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/datasources/feed_remote_data_source.dart';
 import '../../domain/repositories/feed_repository.dart';
@@ -12,7 +10,7 @@ part 'feed_state.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final FeedRepository _repository;
-  StreamSubscription<FeedResult>? _subscription;
+  StreamSubscription<FeedResult>? _externalSub;
 
   FeedBloc({required FeedRepository repository})
       : _repository = repository,
@@ -21,37 +19,44 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<RefreshFeed>(_onRefresh);
   }
 
-  void _onSubscribe(SubscribeToFeed event, Emitter<FeedState> emit) {
+  Future<void> _onSubscribe(
+      SubscribeToFeed event, Emitter<FeedState> emit) async {
     emit(FeedLoading());
-    _subscription?.cancel();
-    _subscription = _repository.streamFeed().listen(
-      (result) {
-        if (result.data.posts.isEmpty) {
-          emit(const FeedLoaded(data: FeedData([], {})));
-          return;
-        }
 
-        if (result.isPartial) {
-          emit(FeedLoaded(
-              data: result.data, degraded: true, message: result.errorMessage));
-        } else {
-          emit(FeedLoaded(data: result.data));
+    // Cancel any previous external subscription if you still keep it
+    await _externalSub?.cancel();
+    _externalSub = null;
+
+    // Use emit.forEach to properly integrate the stream into the handler
+    await emit.forEach<FeedResult>(
+      _repository.streamFeed(),
+      onData: (result) {
+        if (result.data.posts.isEmpty) {
+          return const FeedLoaded(data: FeedData([], {}));
         }
+        if (result.isPartial) {
+          return FeedLoaded(
+            data: result.data,
+            degraded: true,
+            message: result.errorMessage,
+          );
+        }
+        return FeedLoaded(data: result.data);
       },
-      onError: (e) {
-        emit(FeedError(message: e.toString()));
+      onError: (error, _) {
+        return FeedError(error.toString());
       },
     );
   }
 
-  void _onRefresh(RefreshFeed event, Emitter<FeedState> emit) {
-    // Re-subscribe to force fresh data if needed
-    add(SubscribeToFeed());
+  Future<void> _onRefresh(RefreshFeed event, Emitter<FeedState> emit) async {
+    // Simply re-subscribe by calling the same logic
+    await _onSubscribe(SubscribeToFeed(), emit);
   }
 
   @override
-  Future<void> close() {
-    _subscription?.cancel();
+  Future<void> close() async {
+    await _externalSub?.cancel();
     return super.close();
   }
 }

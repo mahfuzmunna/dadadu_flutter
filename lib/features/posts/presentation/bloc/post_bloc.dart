@@ -44,7 +44,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       (failure) async => emit(PostError(failure.message)),
       (post) async {
         final authorResult =
-            await _profileRepository.getUserProfile(post.userId);
+            await _profileRepository.getUserProfile(post.userId ?? '');
         authorResult.fold(
           (failure) => emit(PostError(failure.message)),
           (author) {

@@ -33,6 +33,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   // This controller is used to get video duration for thumbnail generation
   late VideoPlayerController _videoController;
   late TextEditingController _captionController;
+  int _selectedIntentValue = 3; // Default to Entertainment (value: 3)
 
   bool _isProcessing = false;
 
@@ -46,8 +47,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
     super.initState();
     _captionController =
         TextEditingController(text: widget.initialDraft.caption);
-    _selectedIntent = widget.initialDraft.intent;
     _selectedThumbnail = widget.initialDraft.selectedThumbnail;
+    _selectedIntentValue = widget.initialDraft.intent ?? 3;
     _initialize();
   }
 
@@ -113,7 +114,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
       // ✅ Create an updated draft with the current UI state
       final updatedDraft = PostDraft(
         caption: _captionController.text,
-        intent: _selectedIntent,
+        intent: _selectedIntentValue,
         selectedThumbnail: _selectedThumbnail,
       );
       // ✅ Pass the updated draft back when popping
@@ -159,8 +160,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 videoFile: File(processedVideoPath),
                 thumbnailBytes: _selectedThumbnail!,
             caption: _captionController.text.trim(),
-            intent: _selectedIntent,
-            userId: authState.user.id,
+                intent: _selectedIntentValue,
+                userId: authState.user.id,
           ));
         }
       } else {
@@ -195,6 +196,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return BlocConsumer<PostBloc, PostState>(listener: (context, state) {
       // ✅ This listener handles the navigation after the upload is complete.
@@ -252,7 +254,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 Text(AppLocalizations.of(context)!.selectAnIntent,
                     style: theme.textTheme.titleMedium),
                 const SizedBox(height: 12),
-                _buildIntentSelector(),
+                _buildIntentSelector(l10n),
                 const SizedBox(height: 48), // Extra space before button
 
                 // --- Publish Button ---
@@ -410,28 +412,28 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
-  Widget _buildIntentSelector() {
+  Widget _buildIntentSelector(AppLocalizations l10n) {
+    // Data structure to hold intent information
+    final Map<int, ({String label, IconData icon})> intentOptions = {
+      1: (label: l10n.intentLove, icon: Icons.favorite_border),
+      2: (label: l10n.intentBusiness, icon: Icons.business_center_outlined),
+      3: (label: l10n.intentEntertainment, icon: Icons.movie_outlined),
+    };
+
     return SizedBox(
       width: double.infinity,
-      child: SegmentedButton<String>(
-        segments: [
-          ButtonSegment(
-              value: 'Love',
-              label: Text(AppLocalizations.of(context)!.love),
-              icon: Icon(Icons.favorite_border)),
-          ButtonSegment(
-              value: 'Business',
-              label: Text(AppLocalizations.of(context)!.business),
-              icon: Icon(Icons.business_center_outlined)),
-          ButtonSegment(
-              value: 'Entertainment',
-              label: Text(AppLocalizations.of(context)!.entertainment),
-              icon: Icon(Icons.movie_outlined)),
-        ],
-        selected: {_selectedIntent},
+      child: SegmentedButton<int>(
+        segments: intentOptions.entries.map((entry) {
+          return ButtonSegment<int>(
+            value: entry.key, // The integer value
+            label: Text(entry.value.label), // The translated string
+            icon: Icon(entry.value.icon),
+          );
+        }).toList(),
+        selected: {_selectedIntentValue},
         onSelectionChanged: (newSelection) {
           setState(() {
-            _selectedIntent = newSelection.first;
+            _selectedIntentValue = newSelection.first;
           });
         },
       ),

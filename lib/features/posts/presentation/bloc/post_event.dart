@@ -12,7 +12,7 @@ class UploadPost extends PostEvent {
   final File videoFile;
   final Uint8List thumbnailBytes;
   final String caption;
-  final String intent;
+  final int intent;
   final String userId;
 
   const UploadPost({

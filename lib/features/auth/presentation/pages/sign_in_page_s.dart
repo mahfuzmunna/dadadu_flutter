@@ -36,26 +36,40 @@ class _SignInPageState extends State<SignInPage> {
 
   // Helper for the language selection menu
   Widget _buildLanguageSelector(BuildContext context) {
-    final localeCubit = context.read<LocaleCubit>();
-    const supportedLocales = {
-      'English': Locale('en'),
-      'Français': Locale('fr'),
-      'Deutsch': Locale('de'),
-      'Español': Locale('es'),
-      'Portuguese': Locale('pt'),
+    final localeCubit = context.watch<LocaleCubit>();
+    final l10n = AppLocalizations.of(context)!;
+
+    // Maps language codes to their display names using the l10n file
+    final Map<String, String> supportedLanguages = {
+      'en': l10n.langEnglish,
+      'fr': l10n.langFrench,
+      'de': l10n.langGerman,
+      'es': l10n.langSpanish,
+      'pt': l10n.langPortuguese,
     };
 
     return PopupMenuButton<Locale>(
-      icon: const Icon(Icons.language_rounded),
-      tooltip: 'Select Language',
+      // Use a TextButton as the child for a clean look
+      child: TextButton.icon(
+        onPressed: null, // PopupMenuButton handles the tap
+        icon: const Icon(Icons.language_rounded),
+        label: Text(
+          localeCubit.state.languageCode.toUpperCase(),
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        style: TextButton.styleFrom(
+          foregroundColor: Theme.of(context).colorScheme.onSurface,
+        ),
+      ),
+      tooltip: l10n.selectLanguage,
       onSelected: (Locale locale) {
         localeCubit.updateLocale(locale);
       },
       itemBuilder: (BuildContext context) {
-        return supportedLocales.entries.map((entry) {
+        return supportedLanguages.entries.map((entry) {
           return PopupMenuItem<Locale>(
-            value: entry.value,
-            child: Text(entry.key),
+            value: Locale(entry.key),
+            child: Text(entry.value),
           );
         }).toList();
       },
@@ -208,7 +222,7 @@ class _SignInPageState extends State<SignInPage> {
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             onPressed: () {
-                              context.push('/signUp');
+                              context.push('/quick-signup');
                             },
                             icon: Icon(
                               Icons.person_add_alt_1_rounded,

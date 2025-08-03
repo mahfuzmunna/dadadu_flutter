@@ -31,7 +31,7 @@ class UploadPostParams extends Equatable {
   final File videoFile;
   final Uint8List thumbnailBytes; // ✅ Changed from File to Uint8List
   final String caption;
-  final String intent;
+  final int intent;
   final String userId;
   final Function(double progress)? onUploadProgress;
 

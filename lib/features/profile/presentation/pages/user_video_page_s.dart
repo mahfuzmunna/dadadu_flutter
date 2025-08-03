@@ -193,13 +193,13 @@ class _UsersVideoViewState extends State<_UsersVideoView>
     if (_controllerCache.containsKey(post.id) ||
         _initializingControllers.contains(post.id)) return;
 
-    _initializingControllers.add(post.id);
+    _initializingControllers.add(post.id ?? '');
     final controller =
-        CachedVideoPlayerPlus.networkUrl(Uri.parse(post.videoUrl));
+        CachedVideoPlayerPlus.networkUrl(Uri.parse(post.videoUrl ?? ''));
     try {
       await controller.initialize();
       if (mounted) {
-        _controllerCache[post.id] = controller.controller;
+        _controllerCache[post.id ?? ''] = controller.controller;
         setState(() {});
       } else {
         await controller.dispose();
@@ -381,7 +381,7 @@ class _UsersVideoViewState extends State<_UsersVideoView>
                           onPlayPressed: () {
                             if (!_userHasInitiatedPlay.contains(post.id)) {
                               setState(() {
-                                _userHasInitiatedPlay.add(post.id);
+                                _userHasInitiatedPlay.add(post.id ?? '');
                               });
                             }
                             _controllerCache[post.id]?.play();

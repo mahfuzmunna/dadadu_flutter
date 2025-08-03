@@ -2,11 +2,11 @@ import '../../domain/entities/post_entity.dart';
 
 class PostModel extends PostEntity {
   const PostModel({
-    required super.id,
-    required super.userId,
-    required super.videoUrl,
-    required super.thumbnailUrl,
-    required super.caption,
+    super.id,
+    super.userId,
+    super.videoUrl,
+    super.thumbnailUrl,
+    super.caption,
     super.tag,
     super.diamondGivers,
     super.diamondCount,

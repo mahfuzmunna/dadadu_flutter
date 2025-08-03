@@ -1,11 +1,11 @@
 import 'package:equatable/equatable.dart';
 
 class PostEntity extends Equatable {
-  final String id;
-  final String userId;
-  final String videoUrl;
-  final String thumbnailUrl;
-  final String caption;
+  final String? id;
+  final String? userId;
+  final String? videoUrl;
+  final String? thumbnailUrl;
+  final String? caption;
   final List<String>? tag;
   final List<String>? diamondGivers;
   final int? diamondCount;

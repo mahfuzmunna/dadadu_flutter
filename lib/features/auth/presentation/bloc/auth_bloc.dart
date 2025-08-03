@@ -72,6 +72,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthInitialCheckRequested>(_onInitialCheck);
     on<AuthSignInRequested>(_onSignIn);
     on<AuthSignUpRequested>(_onSignUp);
+    on<AuthQuickSignUpRequested>(_onQuickSignUp);
     on<AuthOnboardingComplete>(_onOnboardingComplete);
     on<AuthSignOutRequested>(_onSignOut);
     on<_AuthUserChanged>(_onUserChanged);
@@ -146,6 +147,26 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(AuthSignUpSuccess(user: user));
 
       _authStatusController.add(AuthenticationStatus.onboarding);
+    });
+  }
+
+  Future<void> _onQuickSignUp(
+      AuthQuickSignUpRequested event, Emitter<AuthState> emit) async {
+    emit(AuthLoading());
+    _authStateSubscription?.pause();
+    final result = await _signUpUseCase(SignUpParams(
+      email: event.email,
+      password: event.password,
+      fullName: event.fullName,
+      username: event.username,
+      referralId: event.referralId,
+    ));
+    result.fold((failure) {
+      _authStateSubscription?.resume();
+      emit(AuthUnauthenticated(message: failure.message));
+    }, (user) {
+      emit(AuthAuthenticated(user: user));
+      _authStatusController.add(AuthenticationStatus.authenticated);
     });
   }
 

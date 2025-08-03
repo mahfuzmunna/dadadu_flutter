@@ -690,7 +690,7 @@ class _ProfileContentState extends State<_ProfileContent> {
                           if (state is PostLoaded) {
                             return CachedNetworkImage(
                               // imageUrl: usersPosts[index].thumbnailUrl,
-                              imageUrl: state.post.thumbnailUrl,
+                              imageUrl: state.post.thumbnailUrl ?? '',
                               fit: BoxFit.cover,
                               // Ensures the image covers the card area
                               // Placeholder while the image is loading

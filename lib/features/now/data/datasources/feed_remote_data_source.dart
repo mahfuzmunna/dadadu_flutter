@@ -1,4 +1,5 @@
-// feed_remote_data_source.dart
+// lib/features/now/data/datasources/feed_remote_data_source.dart
+
 import 'dart:async';
 
 import 'package:dadadu_app/config/app_config.dart';
@@ -16,10 +17,9 @@ class FeedData {
   const FeedData(this.posts, this.authors);
 }
 
-/// A richer result so caller can know if authors partially failed.
 class FeedResult {
   final FeedData data;
-  final String? errorMessage; // null if clean
+  final String? errorMessage; // non-null means partial failure
 
   const FeedResult({required this.data, this.errorMessage});
 
@@ -27,71 +27,62 @@ class FeedResult {
 }
 
 abstract class FeedRemoteDataSource {
-  /// Streams the feed: posts + authors. Emits incremental updates.
   Stream<FeedResult> streamFeed();
+
+  void dispose();
 }
 
 class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
   final SupabaseClient _supabaseClient;
 
-  // Simple in-memory author cache
+  // Simple in-memory author cache to avoid refetching same user repeatedly.
   final Map<String, UserModel> _authorCache = {};
-
-  // Tracks listeners for author changes to invalidate
   StreamSubscription<dynamic>? _authorChangeSub;
 
-  FeedRemoteDataSourceImpl(this._supabaseClient);
+  FeedRemoteDataSourceImpl(this._supabaseClient) {
+    _subscribeToAuthorUpdates();
+  }
 
   @override
   Stream<FeedResult> streamFeed() {
-    // Start listening to user changes for cached authors to invalidate stale entries
-    _setupAuthorInvalidation();
-
-    return _supabaseClient
+    final postStream = _supabaseClient
         .from(AppConfig.supabasePostTable)
-        .stream(primaryKey: ['id'])
-        .order('created_at', ascending: false)
-        .asyncMap((listOfPostMaps) async {
-          if (listOfPostMaps.isEmpty) {
-            return FeedResult(
-              data: FeedData(const [], Map.unmodifiable(_authorCache)),
-            );
-          }
+        .stream(primaryKey: ['id']).order('created_at', ascending: false);
 
-          final posts = listOfPostMaps
-          .map((map) =>
-          PostModel.fromMap(Map<String, dynamic>.from(map as Map)))
+    return postStream.asyncMap((listOfPostMaps) async {
+      if (listOfPostMaps.isEmpty) {
+        return FeedResult(
+            data: FeedData(const [], Map.unmodifiable(_authorCache)));
+      }
+
+      final posts = listOfPostMaps
+          .map(
+              (raw) => PostModel.fromMap(Map<String, dynamic>.from(raw as Map)))
           .toList();
 
-          final userIds = posts.map((p) => p.userId).toSet();
+      final userIds = posts.map((p) => p.userId).toSet();
+      final missingAuthorIds = userIds.difference(_authorCache.keys.toSet());
 
-          // Determine which authors are missing
-      final missingAuthorIds =
-      userIds.difference(_authorCache.keys.toSet()).toList();
+      String? partialError;
 
-          String? partialError;
-
-          if (missingAuthorIds.isNotEmpty) {
+      if (missingAuthorIds.isNotEmpty) {
         try {
           final authorMaps = await _supabaseClient
               .from(AppConfig.supabaseUserTable)
               .select()
-              .filter('id', 'in', '(${missingAuthorIds.join(',')})');
-          // .in_('id', missingAuthorIds);
-          for (var map in authorMaps) {
-            final safe = Map<String, dynamic>.from(map as Map);
-            final id = safe['id'] as String;
-            _authorCache[id] = UserModel.fromMap(safe);
+              .inFilter('id', missingAuthorIds.toList());
+
+          for (var raw in authorMaps) {
+            final map = Map<String, dynamic>.from(raw as Map);
+            final id = map['id'] as String;
+            _authorCache[id] = UserModel.fromMap(map);
           }
         } catch (e) {
-          // fetch failed, but we can still proceed with whatever is cached
-          partialError =
-          'Failed to fetch some author profiles: ${e.toString()}';
+          partialError = 'Failed to load some author profiles: ${e.toString()}';
           debugPrint(partialError);
         }
       }
 
-      // Build snapshot copy (immutable externally)
       final authorsSnapshot = Map<String, UserModel>.unmodifiable(
         Map.of(_authorCache),
       );
@@ -101,42 +92,37 @@ class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
         errorMessage: partialError,
       );
     }).handleError((e) {
-      // Surface full-stream failures by wrapping in FeedResult with exception propagated via throw
-      throw ServerException('Feed stream error: ${e.toString()}');
+      throw ServerException('Failed to stream feed: ${e.toString()}');
     });
   }
 
-  void _setupAuthorInvalidation() {
-    // If already subscribed, skip
+  void _subscribeToAuthorUpdates() {
     if (_authorChangeSub != null) return;
 
-    // Listen to changes on users table for any author in cache
+    // Listen to changes on users to refresh cached author entries.
     _authorChangeSub = _supabaseClient
         .from(AppConfig.supabaseUserTable)
         .stream(primaryKey: ['id'])
         .order('updated_at', ascending: false)
         .listen((userMaps) {
       if (userMaps.isEmpty) return;
-
-      bool shouldNotify = false;
-
-      for (var raw in userMaps) {
+          var replaced = false;
+          for (var raw in userMaps) {
         final map = Map<String, dynamic>.from(raw as Map);
         final id = map['id'] as String;
         if (_authorCache.containsKey(id)) {
-          // Replace with fresh copy
           _authorCache[id] = UserModel.fromMap(map);
-          shouldNotify = true;
-        }
+              replaced = true;
+            }
       }
-
-      if (shouldNotify) {
-        // No-op: the feed stream will eventually emit again because posts may not change.
-        // If you want immediate re-emission you could expose a controller and re-add last posts.
-      }
+          if (replaced) {
+            // no direct emitter here; feedStream will re-run when posts change.
+            // For immediate refresh you could add logic to push a synthetic event.
+          }
     });
   }
 
+  @override
   void dispose() {
     _authorChangeSub?.cancel();
     _authorChangeSub = null;

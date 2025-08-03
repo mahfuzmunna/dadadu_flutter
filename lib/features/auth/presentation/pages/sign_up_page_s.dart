@@ -1,4 +1,4 @@
-// lib/features/auth/presentation/pages/sign_up_page.dart
+// lib/features/auth/presentation/pages/quick_sign_up_page.dart
 
 import 'package:dadadu_app/core/util/check_for_deferred.dart';
 import 'package:flutter/material.dart';

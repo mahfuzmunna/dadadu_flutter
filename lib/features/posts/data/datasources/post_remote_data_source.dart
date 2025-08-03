@@ -20,7 +20,7 @@ abstract class PostRemoteDataSource {
     required File videoFile,
     required Uint8List thumbnailBytes,
     required String caption,
-    required String intent,
+    required int intent,
     required String userId,
     Function(double progress)? onUploadProgress,
   });
@@ -81,7 +81,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     required File videoFile,
     required Uint8List thumbnailBytes,
     required String caption,
-    required String intent,
+    required int intent,
     required String userId,
     Function(double progress)? onUploadProgress,
   }) async {
@@ -110,6 +110,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       onUploadProgress?.call(0.8); // 80% progress
 
       // 3. Insert into Supabase 'posts' table
+
       await _supabaseClient.from(AppConfig.supabasePostTable).insert({
         'id': postId,
         'user_id': userId,
@@ -118,6 +119,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         'caption': caption,
         'intent': intent,
         'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
       });
 
       await _supabaseClient.rpc(

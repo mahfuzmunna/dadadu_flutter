@@ -28,9 +28,24 @@ class AuthSignUpRequested extends AuthEvent {
   final String password;
   final String fullName;
   final String username;
-  final String referralId;
+  final String? referralId;
 
   const AuthSignUpRequested(
+      {required this.email,
+      required this.password,
+      required this.fullName,
+      required this.username,
+      required this.referralId});
+}
+
+class AuthQuickSignUpRequested extends AuthEvent {
+  final String email;
+  final String password;
+  final String fullName;
+  final String username;
+  final String? referralId;
+
+  const AuthQuickSignUpRequested(
       {required this.email,
       required this.password,
       required this.fullName,

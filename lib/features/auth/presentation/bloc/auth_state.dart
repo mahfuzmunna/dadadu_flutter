@@ -59,6 +59,15 @@ class AuthSignUpSuccess extends AuthState {
   List<Object> get props => [user];
 }
 
+class AuthQuickSignUpSuccess extends AuthState {
+  final UserEntity user;
+
+  const AuthQuickSignUpSuccess({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}
+
 class AuthError extends AuthState {
   final String message;
 

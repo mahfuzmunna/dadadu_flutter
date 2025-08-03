@@ -11,6 +11,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:video_player/video_player.dart';
 
+import '../bloc/feed_bloc.dart';
+
 class ScrollableVideoPlayer extends StatefulWidget {
   final List<PostEntity> posts;
   final Map<String, UserEntity> authors;
@@ -140,13 +142,13 @@ class _ScrollableVideoPlayerState extends State<ScrollableVideoPlayer>
     if (_controllerCache.containsKey(post.id) ||
         _initializingControllers.contains(post.id)) return;
 
-    _initializingControllers.add(post.id);
+    _initializingControllers.add(post.id ?? '');
     final controller =
         CachedVideoPlayerPlus.networkUrl(Uri.parse(post.videoUrl!));
     try {
       await controller.initialize();
       if (mounted) {
-        _controllerCache[post.id] = controller.controller;
+        _controllerCache[post.id ?? ''] = controller.controller;
         setState(() {});
       } else {
         await controller.dispose();
@@ -189,44 +191,94 @@ class _ScrollableVideoPlayerState extends State<ScrollableVideoPlayer>
       return const Center(child: Text("No posts found."));
     }
 
-    return PageView.builder(
-      controller: _pageController,
-      scrollDirection: Axis.vertical,
-      itemCount: widget.posts.length,
-      physics: const BouncingScrollPhysics(),
-      itemBuilder: (context, index) {
-        final post = widget.posts[index];
-        final author = widget.authors[post.userId];
-        final controller = _controllerCache[post.id];
-
-        if (controller == null || author == null) {
-          return Container(
-            color: Colors.black,
-            child: const Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        return BlocProvider<ProfileBloc>(
-          create: (context) =>
-              di.sl<ProfileBloc>()..add(SubscribeToUserProfile(author.id)),
-          child: VideoPostItem(
-            key: ValueKey(post.id),
-            post: post,
-            author: author,
-            controller: controller,
-            isCurrentPage: index == _currentPageIndex,
-            onUserTapped: (userId) => context.push('/profile/$userId'),
-            onPlayPressed: () {
-              if (!_userHasInitiatedPlay.contains(post.id)) {
-                setState(() {
-                  _userHasInitiatedPlay.add(post.id);
-                });
-              }
-              _controllerCache[post.id]?.play();
-            },
-          ),
+    return BlocConsumer<FeedBloc, FeedState>(listener: (context, state) {
+      if (state is FeedLoaded && state.degraded) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Partial data: ${state.message}')),
         );
-      },
+      }
+    }, builder: (context, state) {
+      return PageView.builder(
+        controller: _pageController,
+        scrollDirection: Axis.vertical,
+        itemCount: widget.posts.length,
+        physics: const BouncingScrollPhysics(),
+        itemBuilder: (context, index) {
+          final post = widget.posts[index];
+
+          // ✅ --- THIS IS THE KEY UI CHANGE ---
+          // Check if the current item is the special "add post" card.
+          if (post.id == 'add_new_post_card') {
+            return const _AddNewPostCard(); // Render the special card
+          }
+          // --- END OF KEY UI CHANGE ---
+
+          final author = widget.authors[post.userId];
+          final controller = _controllerCache[post.id];
+
+          if (controller == null || author == null) {
+                return Container(
+                  color: Colors.black,
+                  child: const Center(child: CircularProgressIndicator()),
+                );
+              }
+
+          return BlocProvider<ProfileBloc>(
+            create: (context) =>
+                di.sl<ProfileBloc>()..add(SubscribeToUserProfile(author.id)),
+            child: VideoPostItem(
+              key: ValueKey(post.id),
+              post: post,
+              author: author,
+              controller: controller,
+              isCurrentPage: index == _currentPageIndex,
+              onUserTapped: (userId) => context.push('/profile/$userId'),
+              onPlayPressed: () {
+                if (!_userHasInitiatedPlay.contains(post.id)) {
+                  setState(() {
+                    _userHasInitiatedPlay.add(post.id ?? '');
+                  });
+                }
+                _controllerCache[post.id]?.play();
+              },
+            ),
+          );
+        },
+      );
+    });
+  }
+}
+
+class _AddNewPostCard extends StatelessWidget {
+  const _AddNewPostCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+      margin: const EdgeInsets.all(8.0),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      child: InkWell(
+        onTap: () => context.go('/createPostCamera'),
+        borderRadius: BorderRadius.circular(24),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.add_circle_outline_rounded,
+                size: 80,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Create a New Post', // TODO: Localize this string
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
