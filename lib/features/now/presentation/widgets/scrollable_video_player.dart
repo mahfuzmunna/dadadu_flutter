@@ -206,13 +206,6 @@ class _ScrollableVideoPlayerState extends State<ScrollableVideoPlayer>
         itemBuilder: (context, index) {
           final post = widget.posts[index];
 
-          // ✅ --- THIS IS THE KEY UI CHANGE ---
-          // Check if the current item is the special "add post" card.
-          if (post.id == 'add_new_post_card') {
-            return const _AddNewPostCard(); // Render the special card
-          }
-          // --- END OF KEY UI CHANGE ---
-
           final author = widget.authors[post.userId];
           final controller = _controllerCache[post.id];
 
@@ -222,7 +215,6 @@ class _ScrollableVideoPlayerState extends State<ScrollableVideoPlayer>
                   child: const Center(child: CircularProgressIndicator()),
                 );
               }
-
           return BlocProvider<ProfileBloc>(
             create: (context) =>
                 di.sl<ProfileBloc>()..add(SubscribeToUserProfile(author.id)),
@@ -246,39 +238,5 @@ class _ScrollableVideoPlayerState extends State<ScrollableVideoPlayer>
         },
       );
     });
-  }
-}
-
-class _AddNewPostCard extends StatelessWidget {
-  const _AddNewPostCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      margin: const EdgeInsets.all(8.0),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: InkWell(
-        onTap: () => context.go('/createPostCamera'),
-        borderRadius: BorderRadius.circular(24),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add_circle_outline_rounded,
-                size: 80,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Create a New Post', // TODO: Localize this string
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

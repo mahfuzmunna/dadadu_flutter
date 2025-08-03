@@ -1,8 +1,12 @@
 // lib/features/now/now_injection.dart
 
+import 'package:dadadu_app/features/now/data/datasources/comments_remote_data_source.dart';
 import 'package:dadadu_app/features/now/data/datasources/feed_remote_data_source.dart';
+import 'package:dadadu_app/features/now/domain/repositories/comments_repository.dart';
 import 'package:dadadu_app/features/now/domain/repositories/feed_repository.dart';
+import 'package:dadadu_app/features/now/presentation/bloc/comments_bloc.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
+import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usecase.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/stream_feed_usecase.dart';
 import 'package:get_it/get_it.dart';
 
@@ -17,14 +21,27 @@ Future<void> nowInjection() async {
   sl.registerFactory(
     () => FeedBloc(repository: sl()),
   );
+  sl.registerFactory(
+    () => CommentsBloc(
+        repository: sl(),
+        getPostCommentsUseCase: sl(),
+        addCommentUseCase: sl()),
+  );
 
   // Use cases
   sl.registerLazySingleton(() => StreamFeedUseCase(sl()));
+  sl.registerLazySingleton(() => GetPostCommentsUseCase(sl()));
+  sl.registerLazySingleton(() => AddCommentUseCase(sl()));
+
+  // sl.registerLazySingleton(() => StreamFeedUseCase(sl()));
   // sl.registerLazySingleton(() => StreamAllPostsUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<FeedRepository>(
     () => FeedRepositoryImpl(sl()),
+  );
+  sl.registerLazySingleton<CommentsRepository>(
+    () => CommentsRepositoryImpl(sl()),
   );
 
   // sl.registerLazySingleton<PostRepository>(
@@ -42,5 +59,8 @@ Future<void> nowInjection() async {
   // );
   sl.registerLazySingleton<FeedRemoteDataSource>(
     () => FeedRemoteDataSourceImpl(sl()),
+  );
+  sl.registerLazySingleton<CommentsRemoteDataSource>(
+    () => CommentsRemoteDataSourceImpl(sl()),
   );
 }

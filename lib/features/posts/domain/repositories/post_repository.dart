@@ -139,7 +139,8 @@ class PostRepositoryImpl implements PostRepository {
       if (comments.isNotEmpty) {
         final userIds = comments.map((c) => c.userId).toSet().toList();
         // Assume you have a method in ProfileRepository to get multiple users
-        final authorsResult = await remoteDataSource.getUsersByIds(userIds);
+        final authorsResult =
+            await remoteDataSource.getUsersByIds(userIds as List<String>);
 
         authorsResult.fold(
           (failure) => null,

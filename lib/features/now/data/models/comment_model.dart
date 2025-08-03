@@ -14,11 +14,12 @@ class CommentModel extends CommentEntity {
 
   factory CommentModel.fromMap(Map<String, dynamic> map) {
     return CommentModel(
-        id: map['id'] as String,
-        userId: map['user_id'] as String,
-      postId: map['post_id'] as String,
-      comment: map['comment_text'] as String,
-      createdAt: DateTime.parse(map['created_at'] as String),
+      id: map['id'] as String?,
+      userId: map['user_id'] as String?,
+      postId: map['post_id'] as String?,
+      comment: map['comment_body'] as String?,
+      createdAt:
+          map['created_at'] != null ? DateTime.parse(map['created_at']) : null,
       likes: map['likes'] ?? 0,
       likedBy:
           map['liked_by'] == null ? [] : List<String>.from(map['liked_by']),

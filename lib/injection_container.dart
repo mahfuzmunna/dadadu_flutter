@@ -1,5 +1,4 @@
 import 'package:dadadu_app/features/chat/chat_injection.dart';
-import 'package:dadadu_app/features/comments/comments_injection.dart';
 import 'package:dadadu_app/features/discover/discover_injection.dart';
 import 'package:get_it/get_it.dart';
 import 'package:minio/minio.dart';
@@ -31,7 +30,7 @@ Future<void> init() async {
   await authInjection();
   await nowInjection();
   await postInjection();
-  await commentsInjection();
+  // await commentsInjection();
   await discoverInjection();
   await chatInjection();
   await profileInjection();

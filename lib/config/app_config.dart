@@ -38,6 +38,10 @@ class AppConfig {
       'SUPABASE_MESSAGES_TABLE',
       defaultValue: 'messages_data');
 
+  static const String supabaseNotificationsTable = String.fromEnvironment(
+      'SUPABASE_MESSAGES_TABLE',
+      defaultValue: 'notifications_data');
+
 // If using flutter_dotenv:
 // static final String wasabiAccessKey = dotenv.env['WASABI_ACCESS_KEY']!;
 // static final String wasabiSecretKey = dotenv.env['WASABI_SECRET_KEY']!;

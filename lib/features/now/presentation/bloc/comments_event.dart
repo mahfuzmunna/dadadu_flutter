@@ -22,10 +22,26 @@ class LoadComments extends CommentsEvent {
 /// Event to add a new comment to a post.
 class AddComment extends CommentsEvent {
   final CommentParams params;
-
   const AddComment(this.params);
 
   @override
   List<Object> get props => [params];
 }
 
+class SubscribeToComments extends CommentsEvent {
+  final String postId;
+
+  const SubscribeToComments({required this.postId});
+
+  @override
+  List<Object> get props => [postId];
+}
+
+class RefreshComments extends CommentsEvent {
+  final String postId;
+
+  const RefreshComments({required this.postId});
+
+  @override
+  List<Object> get props => [postId];
+}

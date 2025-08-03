@@ -19,18 +19,17 @@ class CommentsInitial extends CommentsState {}
 
 class CommentsLoading extends CommentsState {}
 
-/// State when comments are successfully loaded.
-/// It holds separate lists for recent and popular comments.
 class CommentsLoaded extends CommentsState {
-  final List<CommentEntity> recent;
-  final List<CommentEntity> popular;
+  final CommentsData data;
+  final bool degraded;
+  final String? message;
 
-  const CommentsLoaded({this.recent = const [], this.popular = const []});
-
-  @override
-  List<Object> get props => [recent, popular];
+  const CommentsLoaded({
+    required this.data,
+    this.degraded = false,
+    this.message,
+  });
 }
-
 /// State when adding a comment is in progress.
 class CommentAdding extends CommentsState {}
 

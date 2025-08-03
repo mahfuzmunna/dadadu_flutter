@@ -615,7 +615,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
                       ? Theme.of(context).colorScheme.primary
                       : Colors.white,
                 ),
-          label: '${post.diamondGivers?.length ?? 0}',
+          label: '${post.diamondCount ?? 0}',
           onPressed: () {
             if (currentUser.id == author.id) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
@@ -656,8 +656,8 @@ class _VideoPostItemState extends State<VideoPostItem> {
         builder: (context, scrollController) => MultiBlocProvider(
           providers: [
             BlocProvider(
-                create: (context) =>
-                    sl<CommentsBloc>()..add(LoadComments(postId))),
+                create: (context) => sl<CommentsBloc>()
+                  ..add(SubscribeToComments(postId: postId))),
             BlocProvider(
               create: (context) => sl<LikeUnlikeCommentBloc>(),
             ),

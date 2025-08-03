@@ -75,12 +75,14 @@ class CommentsView extends StatelessWidget {
                             child: TabBarView(
                               children: [
                                 _CommentList(
-                                    comments: state.recent,
+                                    comments: state.data.comments,
+                                    authors: state.data.authors,
                                     postId: postId,
                                     controller: scrollController),
                                 _CommentList(
-                                    comments: state.popular,
+                                    comments: state.data.comments,
                                     postId: postId,
+                                    authors: state.data.authors,
                                     controller: scrollController),
                               ],
                             ),
@@ -196,11 +198,13 @@ class _CommentInputFieldState extends State<_CommentInputField> {
 
 class _CommentList extends StatelessWidget {
   final List<CommentEntity> comments;
+  final Map<String, UserEntity> authors;
   final ScrollController controller;
   final String postId;
 
   const _CommentList({
     required this.comments,
+    required this.authors,
     required this.controller,
     required this.postId,
   });
@@ -220,10 +224,12 @@ class _CommentList extends StatelessWidget {
       padding: const EdgeInsets.only(top: 8),
       itemBuilder: (context, index) {
         final comment = comments[index];
+        final author = authors[comment.userId];
         // ✅ Use the new, self-contained widget for each item.
         return _CommentListItem(
           key: ValueKey(comment.id), // Use a unique key
           comment: comment,
+          author: author,
           postId: postId,
         );
       },
@@ -234,10 +240,12 @@ class _CommentList extends StatelessWidget {
 // ✅ NEW: A dedicated StatefulWidget for each comment item.
 class _CommentListItem extends StatefulWidget {
   final CommentEntity comment;
+  final UserEntity? author;
   final String postId;
 
   const _CommentListItem({
     super.key,
+    required this.author,
     required this.comment,
     required this.postId,
   });
@@ -262,7 +270,7 @@ class _CommentListItemState extends State<_CommentListItem> {
       _currentUser = authState.user;
     }
     // Set the initial liked state for this specific comment.
-    _isLiked = widget.comment.likedBy.contains(_currentUser?.id);
+    _isLiked = widget.comment.likedBy!.contains(_currentUser?.id);
   }
 
   // This ensures the UI updates if the comment data from the BLoC changes.
@@ -271,7 +279,7 @@ class _CommentListItemState extends State<_CommentListItem> {
     super.didUpdateWidget(oldWidget);
     if (widget.comment != oldWidget.comment) {
       setState(() {
-        _isLiked = widget.comment.likedBy.contains(_currentUser?.id);
+        _isLiked = widget.comment.likedBy!.contains(_currentUser?.id);
       });
     }
   }
@@ -290,12 +298,12 @@ class _CommentListItemState extends State<_CommentListItem> {
         ? UnlikeComment(
             userId: _currentUser!.id,
             postId: widget.postId,
-            commentId: widget.comment.id,
+            commentId: widget.comment.id ?? '',
           )
         : LikeComment(
             userId: _currentUser!.id,
             postId: widget.postId,
-            commentId: widget.comment.id,
+            commentId: widget.comment.id ?? '',
           );
 
     context.read<LikeUnlikeCommentBloc>().add(event);
@@ -312,24 +320,22 @@ class _CommentListItemState extends State<_CommentListItem> {
             context.push('/profile/${widget.comment.author?.id}');
           },
           child: CircleAvatar(
-            backgroundImage: widget.comment.author?.profilePhotoUrl != null
-                ? CachedNetworkImageProvider(
-                    widget.comment.author!.profilePhotoUrl!)
+            backgroundImage: widget.author != null
+                ? CachedNetworkImageProvider(widget.author!.profilePhotoUrl!)
                 : null,
-            child: widget.comment.author?.profilePhotoUrl == null
+            child: widget.author?.profilePhotoUrl == null
                 ? const Icon(Icons.person)
                 : null,
           ),
         ),
         title: Text(
-            widget.comment.author?.username ??
-                AppLocalizations.of(context)!.anonymous,
+            widget.author?.username ?? AppLocalizations.of(context)!.anonymous,
             style: const TextStyle(fontWeight: FontWeight.bold)),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(widget.comment.comment),
-          const SizedBox(height: 4),
+            Text(widget.comment.comment ?? ''),
+            const SizedBox(height: 4),
           TextButton.icon(
             icon: _isTranslating
                 ? const SizedBox(
