@@ -40,8 +40,9 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
       (failure) => emit(CommentsError(failure.message)),
       (_) {
         emit(CommentAdded());
+        add(RefreshComments(postId: event.params.postId));
         // After successfully adding, refresh the comments list.
-        add(LoadComments(event.params.postId));
+        // add(LoadComments(event.params.postId));
       },
     );
   }

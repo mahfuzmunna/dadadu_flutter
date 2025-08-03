@@ -7,7 +7,7 @@ class CommentEntity extends Equatable {
   final String? postId;
   final String? comment;
   final DateTime? createdAt;
-  final int? likes;
+  final int likes;
   final List<String>? likedBy;
   final UserEntity? author; // Author details will be populated later
 

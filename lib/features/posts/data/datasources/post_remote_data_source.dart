@@ -329,11 +329,6 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       required String comment}) async {
     try {
       final commentId = uuid.v4();
-      // supabaseClient.from(AppConfig.supabasePostTable).insert({
-      //   'id': postId,
-      //   'user_id': userId,
-      //   'comment': comment,
-      //   'created_at': DateTime.now().toIso8601String()});
 
       await _supabaseClient.from(AppConfig.supabaseCommentsTable).insert({
         'id': commentId,
@@ -344,11 +339,9 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       });
 
       await _supabaseClient.rpc(
-        'add_post_comment',
+        'increment_comment_count',
         params: {
-          'd_user_id': userId,
           'd_post_id': postId,
-          'd_comment': comment,
         },
       );
       return const Right(null);

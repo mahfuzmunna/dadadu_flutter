@@ -10,14 +10,7 @@ abstract class CommentsEvent extends Equatable {
 }
 
 /// Event to fetch all comments for a specific post.
-class LoadComments extends CommentsEvent {
-  final String postId;
 
-  const LoadComments(this.postId);
-
-  @override
-  List<Object> get props => [postId];
-}
 
 /// Event to add a new comment to a post.
 class AddComment extends CommentsEvent {

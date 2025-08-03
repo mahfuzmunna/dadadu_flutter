@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/comments/presentation/bloc/like_unlike_comment_bloc.dart';
+import 'package:dadadu_app/features/now/data/models/comment_model.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usecase.dart';
 import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -61,6 +62,7 @@ class CommentsView extends StatelessWidget {
                     return Center(child: Text(state.message));
                   }
                   if (state is CommentsLoaded) {
+                    final popular = state.data.comments.sortedByLikes();
                     return DefaultTabController(
                       length: 2,
                       child: Column(
@@ -80,7 +82,7 @@ class CommentsView extends StatelessWidget {
                                     postId: postId,
                                     controller: scrollController),
                                 _CommentList(
-                                    comments: state.data.comments,
+                                    comments: popular,
                                     postId: postId,
                                     authors: state.data.authors,
                                     controller: scrollController),
@@ -102,6 +104,12 @@ class CommentsView extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+extension on List<CommentModel> {
+  sortedByLikes() {
+    return this.toList()..sort((a, b) => b.likes.compareTo(a.likes));
   }
 }
 
