@@ -291,10 +291,10 @@ class _ProfileContentState extends State<_ProfileContent> {
               ],
 
               // --- Match History ---
-              if (widget.isMyProfile) ...[
-                _buildMatchHistory(),
-                const SizedBox(height: 32),
-              ],
+              // if (widget.isMyProfile) ...[
+              //   _buildMatchHistory(),
+              //   const SizedBox(height: 32),
+              // ],
               // --- Uploaded Videos ---
               _buildVideosGrid(
                   isMyProfile: widget.isMyProfile, usersPosts: _usersPosts),
@@ -451,14 +451,32 @@ class _ProfileContentState extends State<_ProfileContent> {
     );
   }
 
+  String getMoodName(int? moodStatus, AppLocalizations l10n) {
+    switch (moodStatus) {
+      case 1:
+        return l10n.moodHappy;
+      case 2:
+        return l10n.moodSad;
+      case 3:
+        return l10n.moodExcited;
+      case 4:
+        return l10n.moodCalm;
+      case 5:
+        return l10n.moodAngry;
+      default:
+        // This will be the text if no mood is set
+        return l10n.setMood;
+    }
+  }
+
   Widget _buildMoodAndBadgesSection() {
     return Row(
       children: [
         ElevatedButton.icon(
           icon: const Icon(Icons.sentiment_satisfied_alt_rounded),
           label: Text(widget.user.moodStatus != null
-              ? AppLocalizations.of(context)!
-                  .moodWithStatus(widget.user.moodStatus.toString())
+              ? AppLocalizations.of(context)!.moodWithStatus(getMoodName(
+                  widget.user.moodStatus, AppLocalizations.of(context)!))
               : AppLocalizations.of(context)!.setMood),
           onPressed: () => _showMoodSelectionBottomSheet(context),
           style: ElevatedButton.styleFrom(
