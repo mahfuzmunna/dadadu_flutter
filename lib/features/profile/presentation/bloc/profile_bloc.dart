@@ -176,7 +176,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     Emitter<ProfileState> emit,
   ) async {
     // Optionally emit a loading state to show a spinner in the UI
-    emit(ProfileLoading());
+    emit(const ProfileLoading());
 
     // Create the parameters object for the use case
     final params = UpdateUserLocationParams(

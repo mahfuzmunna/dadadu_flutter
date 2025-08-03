@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dadadu_app/config/app_config.dart';
+import 'package:dadadu_app/features/auth/data/models/location_model.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:minio/minio.dart';
@@ -259,10 +260,14 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
     try {
       // ✅ Create a map containing ONLY the fields you want to update.
       // This is the key to not overwriting other profile data.
+
+      final locationData = LocationModel(
+        latitude: params.latitude,
+        longitude: params.longitude,
+        locationName: params.locationName,
+      );
       final updateData = {
-        'latitude': params.latitude,
-        'longitude': params.longitude,
-        'location': params.locationName,
+        'location': locationData,
         'updated_at': DateTime.now().toIso8601String(),
       };
 

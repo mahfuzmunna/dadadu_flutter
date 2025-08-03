@@ -199,7 +199,6 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
   }
 
   void _openAppSettings() => Geolocator.openAppSettings();
-
   void _openLocationSettings() => Geolocator.openLocationSettings();
 
 
@@ -349,9 +348,9 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
           _isDistanceLocked
               ? _selectedDistance < 1
                   ? AppLocalizations.of(context)!.distanceMeters(
-                      (_selectedDistance * 1000).round() as String)
+                      (_selectedDistance * 1000).round().toString())
                   : AppLocalizations.of(context)!
-                      .distanceKilometers(_selectedDistance.round() as String)
+                      .distanceKilometers(_selectedDistance.round().toString())
               : AppLocalizations.of(context)!.globe,
           style: theme.textTheme.headlineSmall?.copyWith(
             fontWeight: FontWeight.bold,
@@ -387,9 +386,9 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                         // Creates 100m steps
                   label: _selectedDistance < 1
                             ? AppLocalizations.of(context)!.distanceMeters(
-                                (_selectedDistance * 1000).round() as String)
+                                (_selectedDistance * 1000).round().toString())
                             : AppLocalizations.of(context)!.distanceKilometers(
-                                _selectedDistance.round() as String),
+                                _selectedDistance.round().toString()),
                         activeColor: theme.colorScheme.primary,
                   inactiveColor: theme.colorScheme.surfaceContainerHighest,
                   onChanged: (double value) {
@@ -522,7 +521,7 @@ class _DiscoverPageContentState extends State<_DiscoverPageContent> {
                               TextSpan(
                                 text: AppLocalizations.of(context)!
                                     .referralProgress(
-                                        _referralsCount as String),
+                                        _referralsCount.toString()),
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: Theme.of(context).colorScheme.primary,

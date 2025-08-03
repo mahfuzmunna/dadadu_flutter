@@ -17,4 +17,12 @@ class LocationModel extends LocationEntity {
       locationName: map['locationName'] as String?,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'locationName': locationName,
+    };
+  }
 }
