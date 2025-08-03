@@ -11,7 +11,6 @@ import 'features/auth/auth_injection.dart'; // Import feature-specific injection
 import 'features/now/now_injection.dart';
 import 'features/posts/post_injection.dart';
 import 'features/profile/profile_injection.dart';
-import 'features/upload/upload_injection.dart';
 
 final sl = GetIt.instance;
 
@@ -34,7 +33,6 @@ Future<void> init() async {
   await postInjection();
   await commentsInjection();
   await discoverInjection();
-  await uploadInjection();
   await chatInjection();
   await profileInjection();
 }

@@ -1,10 +1,10 @@
 // lib/features/auth/presentation/pages/sign_in_page.dart
 
 import 'package:dadadu_app/core/locale/locale_cubit.dart';
+import 'package:dadadu_app/core/theme/theme_cubit.dart'; // Import ThemeCubit
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' hide AuthState;
 
 import '../../../../l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
@@ -34,10 +34,9 @@ class _SignInPageState extends State<SignInPage> {
     }
   }
 
-  // ✅ NEW: Helper widget for the language selection menu
+  // Helper for the language selection menu
   Widget _buildLanguageSelector(BuildContext context) {
     final localeCubit = context.read<LocaleCubit>();
-    // Map of display names to Locale objects
     const supportedLocales = {
       'English': Locale('en'),
       'Français': Locale('fr'),
@@ -50,7 +49,6 @@ class _SignInPageState extends State<SignInPage> {
       icon: const Icon(Icons.language_rounded),
       tooltip: 'Select Language',
       onSelected: (Locale locale) {
-        // Call the cubit's method to update the app's language
         localeCubit.updateLocale(locale);
       },
       itemBuilder: (BuildContext context) {
@@ -64,16 +62,64 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
+  // ✅ NEW: Helper widget for the theme selection menu
+  Widget _buildThemeSelector(BuildContext context) {
+    final themeCubit = context.watch<ThemeCubit>();
+    final l10n = AppLocalizations.of(context)!;
+
+    IconData _getIconForTheme(ThemeMode mode) {
+      switch (mode) {
+        case ThemeMode.light:
+          return Icons.light_mode_rounded;
+        case ThemeMode.dark:
+          return Icons.dark_mode_rounded;
+        case ThemeMode.system:
+          return Icons.settings_suggest_rounded;
+      }
+    }
+
+    return PopupMenuButton<ThemeMode>(
+      icon: Icon(_getIconForTheme(themeCubit.state)),
+      tooltip: l10n.selectTheme, // Assumes you added this key
+      onSelected: (ThemeMode themeMode) {
+        themeCubit.updateTheme(themeMode);
+      },
+      itemBuilder: (BuildContext context) => <PopupMenuEntry<ThemeMode>>[
+        PopupMenuItem<ThemeMode>(
+          value: ThemeMode.light,
+          child: ListTile(
+            leading: const Icon(Icons.light_mode_rounded),
+            title: Text(l10n.themeLight), // Assumes you added this key
+          ),
+        ),
+        PopupMenuItem<ThemeMode>(
+          value: ThemeMode.dark,
+          child: ListTile(
+            leading: const Icon(Icons.dark_mode_rounded),
+            title: Text(l10n.themeDark), // Assumes you added this key
+          ),
+        ),
+        PopupMenuItem<ThemeMode>(
+          value: ThemeMode.system,
+          child: ListTile(
+            leading: const Icon(Icons.settings_suggest_rounded),
+            title: Text(l10n.themeSystem), // Assumes you added this key
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: AppBar(
+        // ✅ Add the theme selector to the leading property
+        leading: _buildThemeSelector(context),
         title: Text(l10n.login),
         centerTitle: true,
-        // ✅ Add the language selector to the AppBar actions
         actions: [
           _buildLanguageSelector(context),
           const SizedBox(width: 8),
@@ -82,7 +128,6 @@ class _SignInPageState extends State<SignInPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthError) {
-            // Use the translated string with a placeholder
             _showSnackBar(l10n.loginFailed(state.message));
           } else if (state is AuthUnauthenticated && state.message != null) {
             _showSnackBar(state.message!);
@@ -163,15 +208,44 @@ class _SignInPageState extends State<SignInPage> {
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             onPressed: () {
+                              context.push('/signUp');
+                            },
+                            icon: Icon(
+                              Icons.person_add_alt_1_rounded,
+                              color: colorScheme.primary,
+                            ),
+                            label: Text(
+                                l10n.quickSignUp), // Assumes you added this key
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              foregroundColor: colorScheme.onSurface,
+                              side: BorderSide(color: colorScheme.outline),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            onPressed: () {
                               context
                                   .read<AuthBloc>()
-                                  .add(const AuthSignInWithOAuthRequested(
-                                    provider: OAuthProvider.google,
-                                  ));
+                                  .add(AuthSignInWithGoogleRequested());
                             },
                             icon: Image.asset('assets/google_logo.png',
                                 height: 24),
                             label: Text(l10n.signInWithGoogle),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              foregroundColor: colorScheme.onSurface,
+                              side: BorderSide(color: colorScheme.outline),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 32),

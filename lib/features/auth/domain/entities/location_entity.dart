@@ -13,4 +13,12 @@ class LocationEntity extends Equatable {
 
   @override
   List<Object?> get props => [latitude, longitude, locationName];
+
+  factory LocationEntity.fromMap(Map<String, dynamic> map) {
+    return LocationEntity(
+      latitude: map['latitude'] as double?,
+      longitude: map['longitude'] as double?,
+      locationName: map['location_name'] as String?,
+    );
+  }
 }

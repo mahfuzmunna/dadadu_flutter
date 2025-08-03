@@ -52,6 +52,8 @@ dependencies:
 
   dash_chat_3: ^1.0.1
 
+  google_sign_in: ^7.1.1
+
   # Deep Link
   url_launcher: ^6.3.2
   #  uni_links: ^0.1

@@ -1,6 +1,6 @@
 import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dadadu_app/core/usecases/usecase.dart';
-import 'package:dadadu_app/features/comments/domain/entities/comment_entity.dart';
+import 'package:dadadu_app/features/now/domain/entities/comment_entity.dart';
 import 'package:dadadu_app/features/posts/domain/repositories/post_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';

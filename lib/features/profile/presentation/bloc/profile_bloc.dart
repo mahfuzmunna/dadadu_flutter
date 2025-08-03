@@ -25,6 +25,8 @@ part 'profile_event.dart';
 part 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+  // Profile Stream Subscription
+
   final StreamUserProfileUseCase _streamUserProfileUseCase;
   final GetUserProfileDataUseCase getUserProfileUseCase;
   final UpdateUserProfileUseCase _updateUserProfileUseCase;

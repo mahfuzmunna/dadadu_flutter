@@ -1,7 +1,6 @@
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
-import 'package:dadadu_app/features/now/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/posts/domain/entities/post_entity.dart';
 import 'package:dadadu_app/injection_container.dart';
 import 'package:dadadu_app/l10n/app_localizations.dart';
@@ -29,7 +28,6 @@ class UsersVideoPage extends StatelessWidget {
       providers: [
         BlocProvider(
             create: (context) => sl<FeedBloc>()..add(SubscribeToFeed())),
-        BlocProvider(create: (context) => sl<PostBloc>()),
         BlocProvider(create: (context) => di.sl<FollowBloc>()),
         BlocProvider(create: (context) => di.sl<DiamondBloc>()),
       ],
@@ -269,12 +267,12 @@ class _UsersVideoViewState extends State<_UsersVideoView>
               setState(() {
                 // _posts = state.posts;
 
-                final PostEntity initialPost = state.posts
+                final PostEntity initialPost = state.data.posts
                     .firstWhere((post) => post.id == widget.initialPostId);
                 _author = _authors[initialPost.userId];
 
-                _authors = state.authors;
-                _posts = state.posts
+                _authors = state.data.authors;
+                _posts = state.data.posts
                     .where((post) => post.userId == initialPost.userId)
                     .toList()
                   ..sort((a, b) {

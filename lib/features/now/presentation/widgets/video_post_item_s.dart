@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
+import 'package:dadadu_app/l10n/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';
@@ -17,15 +18,13 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
-// import 'package:video_watermark_plus/video_watermark_plus.dart';
-
 import '../../../../injection_container.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../comments/presentation/bloc/comments_bloc.dart';
 import '../../../comments/presentation/bloc/like_unlike_comment_bloc.dart';
 import '../../../posts/domain/entities/post_entity.dart';
 import '../../../profile/presentation/bloc/follow_bloc.dart';
 import '../../../profile/presentation/bloc/profile_bloc.dart';
+import '../bloc/comments_bloc.dart';
 import 'comments_view_t.dart';
 
 class VideoPostItem extends StatefulWidget {
@@ -548,9 +547,7 @@ class _VideoPostItemState extends State<VideoPostItem> {
         const SizedBox(height: 20),
         _buildActionButton(
             icon: Icons.comment_bank_outlined,
-            label: widget.post.comments != null
-                ? widget.post.comments!.length.toString()
-                : '0',
+            label: "${widget.post.commentCount ?? 0}",
             onPressed: () {
               _showCommentsBottomSheet(context, widget.post.id);
             }),
@@ -569,7 +566,9 @@ class _VideoPostItemState extends State<VideoPostItem> {
                   Icons.save_alt,
                   color: Colors.white,
                 ),
-          label: _isDownloading ? 'Saving...' : 'Save',
+          label: _isDownloading
+              ? AppLocalizations.of(context)!.saving
+              : AppLocalizations.of(context)!.save,
           onPressed: _saveVideo,
         ),
         const SizedBox(height: 20),

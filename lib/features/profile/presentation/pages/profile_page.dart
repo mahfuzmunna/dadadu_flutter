@@ -259,13 +259,13 @@ class _ProfileContentState extends State<_ProfileContent> {
         child: BlocConsumer<FeedBloc, FeedState>(listener: (context, state) {
           if (state is FeedLoaded) {
             setState(() {
-              _posts = state.posts;
-              _authors = state.authors;
+              _posts = state.data.posts;
+              _authors = state.data.authors;
             });
           }
         }, builder: (context, state) {
           if (state is FeedLoaded) {
-            _usersPosts = state.posts
+            _usersPosts = state.data.posts
                 .where((post) => post.userId == widget.user.id)
                 .toList();
           }

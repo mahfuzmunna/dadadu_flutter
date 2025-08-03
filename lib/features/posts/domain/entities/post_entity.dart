@@ -1,22 +1,21 @@
-import 'package:dadadu_app/features/comments/domain/entities/comment_entity.dart';
 import 'package:equatable/equatable.dart';
 
 class PostEntity extends Equatable {
   final String id;
-
-  // userId is still useful for quick reference
   final String userId;
   final String videoUrl;
   final String thumbnailUrl;
   final String caption;
-  final String? tag;
+  final List<String>? tag;
   final List<String>? diamondGivers;
-  final List<CommentEntity>? comments;
-  final String? createdAt;
+  final int? diamondCount;
+  final String? commentsId;
+  final int? commentCount;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
   final bool? isDisabled;
-  final int visibilityLevel;
-  final int views;
-  final String? location;
+  final int? visibilityLevel;
+  final int? views;
   final String? soundTitle;
 
   const PostEntity({
@@ -27,12 +26,14 @@ class PostEntity extends Equatable {
     required this.caption,
     required this.tag,
     required this.diamondGivers,
-    required this.comments,
+    required this.diamondCount,
+    required this.commentsId,
+    required this.commentCount,
     required this.createdAt,
+    required this.updatedAt,
     required this.isDisabled,
     required this.visibilityLevel,
     required this.views,
-    required this.location,
     required this.soundTitle,
   });
 
@@ -45,12 +46,13 @@ class PostEntity extends Equatable {
         caption,
         tag,
         diamondGivers,
-        comments,
+        diamondCount,
+        commentsId,
+        commentCount,
         createdAt,
         isDisabled,
         visibilityLevel,
         views,
-        location,
         soundTitle,
       ];
 }

@@ -42,7 +42,9 @@ class UserModel extends UserEntity {
       gender: map['gender'] as String?,
       interestedIn: List<String>.from(map['interested_in'] ?? []),
       lookingFor: map['looking_for'] as String?,
-      createdAt: DateTime.parse(map['created_at'] as String),
+      createdAt: map['created_at'] == null
+          ? null
+          : DateTime.parse(map['updated_at'] as String),
       updatedAt: map['updated_at'] == null
           ? null
           : DateTime.parse(map['updated_at'] as String),

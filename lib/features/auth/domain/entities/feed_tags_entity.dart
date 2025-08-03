@@ -11,4 +11,10 @@ class FeedTagsEntity extends Equatable {
 
   @override
   List<Object?> get props => [tags];
+
+  factory FeedTagsEntity.fromMap(Map<String, dynamic> map) {
+    return FeedTagsEntity(
+      tags: List<Map<String, String>>.from(map['tags'] ?? []),
+    );
+  }
 }

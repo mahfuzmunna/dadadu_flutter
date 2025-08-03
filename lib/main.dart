@@ -61,6 +61,8 @@ class _MyAppState extends State<MyApp> {
     _authBloc = di.sl<AuthBloc>()..add(const AuthInitialCheckRequested());
     _router =
         AppRouter.router(authBloc: _authBloc); // 👈 Static router instance
+
+    // _handleAuthRedirect();
   }
 
   @override

@@ -27,10 +27,8 @@ abstract class PostRemoteDataSource {
 
   Stream<List<PostModel>> streamAllPosts();
 
-  Stream<Tuple2<List<PostModel>, Map<String, UserModel>>> streamFeed();
-
+  Stream<List<PostModel>> streamFeed();
   Future<List<Map<String, dynamic>>> getPostComments(String postId);
-
   Future<Either<Failure, void>> addComment(
       {required String userId,
       required String postId,
@@ -64,19 +62,19 @@ abstract class PostRemoteDataSource {
 }
 
 class PostRemoteDataSourceImpl implements PostRemoteDataSource {
-  final SupabaseClient supabaseClient;
+  final SupabaseClient _supabaseClient;
   final Minio minioClient;
   final Uuid uuid;
   final String wasabiBucketName;
   final String cdnHostname;
 
   PostRemoteDataSourceImpl({
-    required this.supabaseClient,
+    required SupabaseClient supabaseClient,
     required this.minioClient,
     required this.uuid,
     required this.wasabiBucketName,
     required this.cdnHostname,
-  });
+  }) : _supabaseClient = supabaseClient;
 
   @override
   Future<void> uploadPost({
@@ -112,7 +110,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       onUploadProgress?.call(0.8); // 80% progress
 
       // 3. Insert into Supabase 'posts' table
-      await supabaseClient.from(AppConfig.supabasePostTable).insert({
+      await _supabaseClient.from(AppConfig.supabasePostTable).insert({
         'id': postId,
         'user_id': userId,
         'video_url': videoUrl,
@@ -122,7 +120,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      await supabaseClient.rpc(
+      await _supabaseClient.rpc(
         'append_post_to_user',
         params: {
           'target_user_id': userId,
@@ -154,7 +152,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   Stream<List<PostModel>> streamAllPosts() {
     try {
       // Use .stream() to listen to the entire 'posts' table, ordered by creation time.
-      final stream = supabaseClient
+      final stream = _supabaseClient
           .from(AppConfig.supabasePostTable)
           .stream(primaryKey: ['id']).order('created_at', ascending: false);
 
@@ -167,50 +165,50 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     }
   }
 
-  @override
-  Stream<Tuple2<List<PostModel>, Map<String, UserModel>>> streamFeed() {
-    try {
-      final postStream = supabaseClient
-          .from(AppConfig.supabasePostTable)
-          .stream(primaryKey: ['id']).order('created_at', ascending: false);
-
-      // Use asyncMap to process the posts and fetch their authors
-      return postStream.asyncMap((listOfPostMaps) async {
-        if (listOfPostMaps.isEmpty) {
-          return const Tuple2([], {});
-        }
-
-        final posts =
-            listOfPostMaps.map((map) => PostModel.fromMap(map)).toList();
-
-        // 1. Collect all unique user IDs from the posts
-        final userIds = posts.map((post) => post.userId).toSet().toList();
-
-        // 2. Fetch all required author profiles in a single query
-        final authorMaps = await supabaseClient
-            .from(AppConfig.supabaseUserTable)
-            .select()
-            .filter('id', 'in', '(${userIds.join(',')})');
-        // .in_('id', userIds);
-
-        // 3. Create a map of authors for easy lookup
-        final authors = {
-          for (var map in authorMaps)
-            map['id'] as String: UserModel.fromMap(map)
-        };
-
-        // 4. Return both the posts and the authors
-        return Tuple2(posts, authors);
-      });
-    } catch (e) {
-      throw ServerException('Failed to stream feed: ${e.toString()}');
-    }
-  }
+  // @override
+  // Stream<List<PostModel>> streamFeed() {
+  //   try {
+  //     final stream = _supabaseClient
+  //         .from(AppConfig.supabasePostTable)
+  //         .stream(primaryKey: ['id']).order('created_at', ascending: false);
+  //
+  //     // Use asyncMap to process the posts and fetch their authors
+  //     return stream.asyncMap((listOfPostMaps) async {
+  //       if (listOfPostMaps.isEmpty) {
+  //         return const Tuple2([], {});
+  //       }
+  //
+  //       final posts =
+  //           listOfPostMaps.map((map) => PostModel.fromMap(map)).toList();
+  //
+  //       // 1. Collect all unique user IDs from the posts
+  //       final userIds = posts.map((post) => post.userId).toSet().toList();
+  //
+  //       // 2. Fetch all required author profiles in a single query
+  //       final authorMaps = await _supabaseClient
+  //           .from(AppConfig.supabaseUserTable)
+  //           .select()
+  //           .filter('id', 'in', '(${userIds.join(',')})');
+  //       // .in_('id', userIds);
+  //
+  //       // 3. Create a map of authors for easy lookup
+  //       final authors = {
+  //         for (var map in authorMaps)
+  //           map['id'] as String: UserModel.fromMap(map)
+  //       };
+  //
+  //       // 4. Return both the posts and the authors
+  //       return Tuple2(posts, authors);
+  //     });
+  //   } catch (e) {
+  //     throw ServerException('Failed to stream feed: ${e.toString()}');
+  //   }
+  // }
 
   @override
   Future<List<Map<String, dynamic>>> getPostComments(String postId) async {
     try {
-      final response = await supabaseClient
+      final response = await _supabaseClient
           .from(AppConfig.supabasePostTable)
           .select('comments')
           .eq('id', postId)
@@ -231,7 +229,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   Future<Either<Failure, List<UserEntity>>> getUsersByIds(
       List<String> userIds) async {
     try {
-      final authorMaps = await supabaseClient
+      final authorMaps = await _supabaseClient
           .from(AppConfig.supabaseUserTable)
           .select()
           .filter('id', 'in', '(${userIds.join(',')})');
@@ -249,7 +247,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   @override
   Future<PostModel> getPostById(String postId) async {
     try {
-      final data = await supabaseClient
+      final data = await _supabaseClient
           .from(AppConfig.supabasePostTable)
           .select()
           .eq('id', postId)
@@ -263,7 +261,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
   @override
   Stream<PostModel> subscribeToPostChanges(String postId) {
     try {
-      final stream = supabaseClient
+      final stream = _supabaseClient
           .from(AppConfig.supabasePostTable)
           .stream(primaryKey: ['id']).eq('id', postId);
 
@@ -285,7 +283,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       required String authorId}) async {
     try {
       // Assumes you have a Supabase RPC function named 'send_diamond'
-      await supabaseClient.rpc(
+      await _supabaseClient.rpc(
         'send_diamond',
         params: {
           'd_user_id': userId,
@@ -307,7 +305,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       required String authorId}) async {
     try {
       // Assumes you have a Supabase RPC function named 'unsend_diamond'
-      await supabaseClient.rpc(
+      await _supabaseClient.rpc(
         'unsend_diamond',
         params: {
           'd_user_id': userId,
@@ -333,7 +331,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       //   'user_id': userId,
       //   'comment': comment,
       //   'created_at': DateTime.now().toIso8601String()});
-      await supabaseClient.rpc(
+      await _supabaseClient.rpc(
         'add_post_comment',
         params: {
           'd_user_id': userId,
@@ -356,7 +354,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       required String commentId}) async {
     try {
       // Assumes you have a Supabase RPC function named 'unsend_diamond'
-      await supabaseClient.rpc(
+      await _supabaseClient.rpc(
         'like_comment',
         params: {
           'd_user_id': userId,
@@ -379,7 +377,7 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
       required String commentId}) async {
     try {
       // Assumes you have a Supabase RPC function named 'unsend_diamond'
-      await supabaseClient.rpc(
+      await _supabaseClient.rpc(
         'unlike_comment',
         params: {
           'd_user_id': userId,
@@ -393,5 +391,11 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
     } catch (e) {
       throw ServerException(e.toString());
     }
+  }
+
+  @override
+  Stream<List<PostModel>> streamFeed() {
+    // TODO: implement streamFeed
+    throw UnimplementedError();
   }
 }

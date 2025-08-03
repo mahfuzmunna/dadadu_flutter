@@ -5,9 +5,8 @@ import 'package:dadadu_app/core/errors/failures.dart';
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/errors/exceptions.dart';
-import '../../../auth/domain/entities/user_entity.dart';
-import '../../../comments/data/models/comment_model.dart';
-import '../../../comments/domain/entities/comment_entity.dart';
+import '../../../now/data/models/comment_model.dart';
+import '../../../now/domain/entities/comment_entity.dart';
 import '../../data/datasources/post_remote_data_source.dart';
 import '../entities/post_entity.dart';
 
@@ -27,8 +26,7 @@ abstract class PostRepository {
 
   Either<Failure, Stream<List<PostEntity>>> streamAllPosts();
 
-  Either<Failure, Stream<Tuple2<List<PostEntity>, Map<String, UserEntity>>>>
-      streamFeed();
+  Either<Failure, Stream<List<PostEntity>>> streamFeed();
 
   Future<Either<Failure, List<CommentEntity>>> getPostComments(String postId);
 
@@ -120,8 +118,7 @@ class PostRepositoryImpl implements PostRepository {
   }
 
   @override
-  Either<Failure, Stream<Tuple2<List<PostEntity>, Map<String, UserEntity>>>>
-      streamFeed() {
+  Either<Failure, Stream<List<PostEntity>>> streamFeed() {
     try {
       final feedStream = remoteDataSource.streamFeed();
       return Right(feedStream);
