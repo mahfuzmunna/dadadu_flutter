@@ -1,52 +1,57 @@
-// lib/features/now/presentation/bloc/feed_bloc.dart
+// feed_bloc.dart
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
-import 'package:dadadu_app/features/posts/domain/entities/post_entity.dart';
-import 'package:dadadu_app/features/posts/domain/usecases/stream_feed_usecase.dart';
-import 'package:dartz/dartz.dart';
 import 'package:equatable/equatable.dart';
+
+import '../../data/datasources/feed_remote_data_source.dart';
+import '../../domain/repositories/feed_repository.dart';
 
 part 'feed_event.dart';
 part 'feed_state.dart';
 
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
-  final StreamFeedUseCase _streamFeedUseCase;
-  StreamSubscription<Tuple2<List<PostEntity>, Map<String, UserEntity>>>?
-      _feedSubscription;
+  final FeedRepository _repository;
+  StreamSubscription<FeedResult>? _subscription;
 
-  FeedBloc({required StreamFeedUseCase streamFeedUseCase})
-      : _streamFeedUseCase = streamFeedUseCase,
+  FeedBloc({required FeedRepository repository})
+      : _repository = repository,
         super(FeedInitial()) {
-    on<SubscribeToFeed>(_onSubscribeToFeed);
-    on<_FeedUpdated>(_onFeedUpdated);
+    on<SubscribeToFeed>(_onSubscribe);
+    on<RefreshFeed>(_onRefresh);
   }
 
-  Future<void> _onSubscribeToFeed(SubscribeToFeed event,
-      Emitter<FeedState> emit,) async {
+  void _onSubscribe(SubscribeToFeed event, Emitter<FeedState> emit) {
     emit(FeedLoading());
-    await _feedSubscription?.cancel();
+    _subscription?.cancel();
+    _subscription = _repository.streamFeed().listen(
+      (result) {
+        if (result.data.posts.isEmpty) {
+          emit(const FeedLoaded(data: FeedData([], {})));
+          return;
+        }
 
-    final result = await _streamFeedUseCase(null);
-
-    result.fold(
-      (failure) => emit(FeedError(message: failure.message)),
-      (feedStream) {
-        _feedSubscription = feedStream.listen((feedData) {
-          add(_FeedUpdated(posts: feedData.head, authors: feedData.tail));
-        });
+        if (result.isPartial) {
+          emit(FeedLoaded(
+              data: result.data, degraded: true, message: result.errorMessage));
+        } else {
+          emit(FeedLoaded(data: result.data));
+        }
+      },
+      onError: (e) {
+        emit(FeedError(message: e.toString()));
       },
     );
   }
 
-  void _onFeedUpdated(_FeedUpdated event, Emitter<FeedState> emit) {
-    emit(FeedLoaded(posts: event.posts, authors: event.authors));
+  void _onRefresh(RefreshFeed event, Emitter<FeedState> emit) {
+    // Re-subscribe to force fresh data if needed
+    add(SubscribeToFeed());
   }
 
   @override
   Future<void> close() {
-    _feedSubscription?.cancel();
+    _subscription?.cancel();
     return super.close();
   }
 }

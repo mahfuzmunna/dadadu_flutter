@@ -1,5 +1,5 @@
-import 'package:dadadu_app/features/comments/presentation/bloc/comments_bloc.dart';
 import 'package:dadadu_app/features/comments/presentation/bloc/like_unlike_comment_bloc.dart';
+import 'package:dadadu_app/features/now/presentation/bloc/comments_bloc.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usecase.dart';
 
 import '../../injection_container.dart';

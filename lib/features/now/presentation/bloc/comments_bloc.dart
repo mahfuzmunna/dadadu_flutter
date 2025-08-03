@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:dadadu_app/features/comments/domain/entities/comment_entity.dart';
+import 'package:dadadu_app/features/now/domain/entities/comment_entity.dart';
 import 'package:dadadu_app/features/posts/domain/usecases/get_post_comments_usecase.dart';
 import 'package:equatable/equatable.dart';
 
@@ -9,6 +9,7 @@ part 'comments_event.dart';
 part 'comments_state.dart';
 
 class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
+  // Comment Stream Subscription
   final GetPostCommentsUseCase _getPostCommentsUseCase;
   final AddCommentUseCase _addCommentUseCase;
 
@@ -33,7 +34,7 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
       (comments) {
         // Sort for "Recent" tab
         final recentComments = List<CommentEntity>.from(comments)
-          ..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+          ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         // Sort for "Popular" tab
         final popularComments = List<CommentEntity>.from(comments)

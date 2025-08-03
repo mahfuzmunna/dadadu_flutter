@@ -10,12 +10,12 @@ abstract class FeedEvent extends Equatable {
 
 class SubscribeToFeed extends FeedEvent {}
 
-class _FeedUpdated extends FeedEvent {
-  final List<PostEntity> posts;
-  final Map<String, UserEntity> authors;
+class SubscribeToFeedWithTags extends FeedEvent {
+  final List<String> tags;
 
-  const _FeedUpdated({required this.posts, required this.authors});
-
+  const SubscribeToFeedWithTags({required this.tags});
   @override
-  List<Object> get props => [posts, authors];
+  List<Object> get props => [tags];
 }
+
+class RefreshFeed extends FeedEvent {}

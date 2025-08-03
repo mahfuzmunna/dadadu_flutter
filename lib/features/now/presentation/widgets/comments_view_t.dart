@@ -8,8 +8,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../comments/domain/entities/comment_entity.dart';
-import '../../../comments/presentation/bloc/comments_bloc.dart';
+import '../../domain/entities/comment_entity.dart';
+import '../bloc/comments_bloc.dart';
 
 class CommentsView extends StatelessWidget {
   final ScrollController scrollController;

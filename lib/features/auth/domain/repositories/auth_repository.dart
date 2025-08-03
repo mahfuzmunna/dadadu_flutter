@@ -25,6 +25,8 @@ abstract class AuthRepository {
 
   Future<Either<Failure, Unit>> signOut();
 
+  Future<Either<Failure, UserEntity>> signInWithGoogle();
+
   Future<Either<Failure, Unit>> signInWithOAuth({
     required OAuthProvider provider,
   });
@@ -145,5 +147,15 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Stream<UserEntity?> onAuthStateChange() {
     return remoteDataSource.onAuthStateChange().map((userModel) => userModel);
+  }
+
+  @override
+  Future<Either<Failure, UserEntity>> signInWithGoogle() async {
+    try {
+      final user = await remoteDataSource.signInWithGoogle();
+      return Right(user);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message, code: e.code));
+    }
   }
 }

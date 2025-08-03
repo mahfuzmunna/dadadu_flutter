@@ -1,7 +1,10 @@
 // lib/features/auth/data/datasources/auth_remote_data_source.dart
 
+import 'dart:async';
+
 import 'package:dadadu_app/config/app_config.dart';
 import 'package:flutter/foundation.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../core/errors/exceptions.dart' hide AuthException;
@@ -23,6 +26,8 @@ abstract class AuthRemoteDataSource {
   });
 
   Future<void> signOut();
+
+  Future<UserModel> signInWithGoogle();
 
   Future<void> signInWithOAuth({
     required OAuthProvider provider,
@@ -166,7 +171,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         provider,
         redirectTo: kIsWeb
             ? null
-            : 'io.supabase.dadaduapp://login-callback/', // Your deep link scheme
+            : 'com.dadadu.app://login-callback/', // Your deep link scheme
         // You might need to set up a `context` for mobile platforms
         // context: context, // Pass BuildContext if you want to use in-app browser
       );
@@ -249,5 +254,75 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
       return null; // For signedOut, tokenExpired, userDeleted, etc.
     });
+  }
+
+  @override
+  Future<UserModel> signInWithGoogle() async {
+    try {
+      String? clientId =
+          '871770676449-3oj0ngld42jae44qhvgiprc4tfmbolu1.apps.googleusercontent.com';
+      String? serverClientId =
+          '871770676449-kh86i0rmm3np6or694cqc7pt0272ijul.apps.googleusercontent.com';
+
+      final GoogleSignIn signIn = GoogleSignIn.instance;
+      unawaited(signIn
+          .initialize(clientId: clientId, serverClientId: serverClientId)
+          .then((_) {
+        signIn.authenticationEvents
+            .listen(_handleAuthenticationEvent)
+            .onError(_handleAuthenticationError);
+        // signIn.attemptLightweightAuthentication();
+      }));
+
+      final id = await GoogleSignIn.instance.authenticate();
+      final idToken = id.authentication.idToken;
+
+      if (idToken == null) {
+        throw ServerException('No ID Token found.', code: 'NO_ID_TOKEN');
+      }
+
+      final response = await supabaseClient.auth.signInWithIdToken(
+        provider: OAuthProvider.google,
+        idToken: idToken,
+      );
+
+      if (response.user == null) {
+        throw ServerException('Sign in with Google failed.',
+            code: 'SIGN_IN_FAILED');
+      }
+
+      // Fetch the user's profile from your users_data table
+      final profileData = await supabaseClient
+          .from('users_data')
+          .select()
+          .eq('id', response.user!.id)
+          .single();
+
+      return UserModel.fromMap(profileData);
+    } on ServerException {
+      rethrow; // Re-throw exceptions you've already handled
+    } catch (e) {
+      throw ServerException('An unexpected error occurred: ${e.toString()}');
+    }
+  }
+
+  Future<GoogleSignInAccount?> _handleAuthenticationEvent(
+      GoogleSignInAuthenticationEvent event) async {
+    // #docregion CheckAuthorization
+    final GoogleSignInAccount? user = // ...
+        // #enddocregion CheckAuthorization
+        switch (event) {
+      GoogleSignInAuthenticationEventSignIn() => event.user,
+      GoogleSignInAuthenticationEventSignOut() => null,
+    };
+
+    return user;
+
+    // If the user has already granted access to the required scopes, call the
+    // REST API.
+  }
+
+  Future<void> _handleAuthenticationError(Object e) async {
+    return;
   }
 }

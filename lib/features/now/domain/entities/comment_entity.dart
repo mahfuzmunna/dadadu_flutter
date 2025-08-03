@@ -4,22 +4,25 @@ import 'package:equatable/equatable.dart';
 class CommentEntity extends Equatable {
   final String id;
   final String userId;
+  final String postId;
   final String comment;
-  final DateTime timestamp;
+  final DateTime createdAt;
   final int likes;
-  final List<dynamic> likedBy;
+  final List<String> likedBy;
   final UserEntity? author; // Author details will be populated later
 
   const CommentEntity({
     required this.id,
     required this.userId,
+    required this.postId,
     required this.comment,
-    required this.timestamp,
-    required this.likes,
-    required this.likedBy,
+    required this.createdAt,
+    this.likes = 0,
+    this.likedBy = const [],
     this.author,
   });
 
   @override
-  List<Object?> get props => [id, userId, comment, timestamp, likedBy, author, likes];
+  List<Object?> get props =>
+      [id, userId, postId, comment, createdAt, likes, likedBy, author];
 }
