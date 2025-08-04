@@ -3,12 +3,12 @@
 import 'package:dadadu_app/core/locale/locale_cubit.dart';
 import 'package:dadadu_app/core/theme/theme_cubit.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../l10n/app_localizations.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});

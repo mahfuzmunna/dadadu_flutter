@@ -9,6 +9,7 @@ import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 // import 'package:dadadu_app/features/upload/presentation/pages/camera_screen.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,7 +19,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'core/locale/locale_cubit.dart';
 import 'core/theme/app_theme.dart';
-import 'l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,11 +1,11 @@
 // lib/features/auth/presentation/pages/quick_sign_up_page.dart
 
 import 'package:dadadu_app/core/util/check_for_deferred.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 
 class SignUpPage extends StatefulWidget {

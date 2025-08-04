@@ -8,7 +8,7 @@ import 'package:dadadu_app/features/discover/presentation/pages/vibe_users_page_
 import 'package:dadadu_app/features/location/domain/usecases/get_location_name_usecase.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:dadadu_app/shared/widgets/pulsing_radar_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

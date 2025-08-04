@@ -24,7 +24,7 @@ class ChatRoomBloc extends Bloc<ChatRoomEvent, ChatRoomState> {
 
     // 3. Emit success or error based on the result
     result.fold(
-      (failure) => emit(ChatRoomError(message: failure.message)),
+          (failure) => emit(ChatRoomError(message: failure.message.toString())),
       (roomId) => emit(ChatRoomCreated(roomId: roomId)),
     );
   }

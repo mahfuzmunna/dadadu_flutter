@@ -4,7 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/chat/domain/entities/chat_room_entity.dart';
 import 'package:dadadu_app/features/chat/presentation/bloc/chat_list_bloc.dart';
 import 'package:dadadu_app/injection_container.dart';
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';

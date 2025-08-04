@@ -30,7 +30,7 @@ class FollowBloc extends Bloc<FollowEvent, FollowState> {
       followingId: event.profileUserId,
     ));
     result.fold(
-      (failure) => emit(FollowError(failure.message)),
+          (failure) => emit(FollowError(failure.message.toString())),
       (_) => emit(FollowSuccess()),
     );
   }
@@ -43,7 +43,7 @@ class FollowBloc extends Bloc<FollowEvent, FollowState> {
       followingId: event.profileUserId,
     ));
     result.fold(
-      (failure) => emit(FollowError(failure.message)),
+          (failure) => emit(FollowError(failure.message.toString())),
       (_) => emit(FollowSuccess()),
     );
   }

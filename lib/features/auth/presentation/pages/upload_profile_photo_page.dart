@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart' hide AspectRatio;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -11,8 +12,6 @@ import 'package:image_editor_plus/image_editor_plus.dart';
 import 'package:image_editor_plus/options.dart';
 import 'package:image_picker/image_picker.dart'; // Keep image_picker for selecting
 import 'package:path_provider/path_provider.dart';
-
-import '../../../../l10n/app_localizations.dart';
 
 class UploadProfilePhotoPage extends StatefulWidget {
   const UploadProfilePhotoPage({super.key});

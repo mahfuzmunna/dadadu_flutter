@@ -37,7 +37,7 @@ class CommentsBloc extends Bloc<CommentsEvent, CommentsState> {
     final result = await _addCommentUseCase(event.params);
 
     result.fold(
-      (failure) => emit(CommentsError(failure.message)),
+          (failure) => emit(CommentsError(failure.message.toString())),
       (_) {
         emit(CommentAdded());
         add(RefreshComments(postId: event.params.postId));

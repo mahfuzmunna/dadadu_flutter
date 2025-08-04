@@ -31,7 +31,7 @@ class LikeUnlikeCommentBloc extends Bloc<LikeUnlikeEvent, LikeUnlikeState> {
       commentId: event.commentId,
     ));
     result.fold(
-      (failure) => emit(LikeUnlikeError(failure.message)),
+          (failure) => emit(LikeUnlikeError(failure.message.toString())),
       (_) => emit(LikeUnlikeSuccess()),
     );
   }
@@ -45,7 +45,7 @@ class LikeUnlikeCommentBloc extends Bloc<LikeUnlikeEvent, LikeUnlikeState> {
       commentId: event.commentId,
     ));
     result.fold(
-      (failure) => emit(LikeUnlikeError(failure.message)),
+          (failure) => emit(LikeUnlikeError(failure.message.toString())),
       (_) => emit(LikeUnlikeSuccess()),
     );
   }

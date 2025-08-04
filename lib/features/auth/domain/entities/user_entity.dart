@@ -160,45 +160,104 @@ class UserEntity extends Equatable {
     );
   }
 
+
   factory UserEntity.fromMap(Map<String, dynamic> map) {
+    final id = map['id'];
+    if (id is! String) {
+      throw ArgumentError.value(map['id'], 'id', 'Expected non-null String');
+    }
+
+    final interestedIn = map._stringList('interested_in');
+    final postIds = map._stringList('video_post_ids');
+    final followerIds = map._stringList('follower_ids');
+    final followingIds = map._stringList('following_ids');
+    final commentIds = map._stringList('comments_ids'); // confirm key
+    final chatroomIds = map._stringList('chatroom_ids');
+    final referredIds = map._stringList('referred_ids');
+
+    FeedTagsEntity? feedTags;
+    final rawFeedTags = map['feed_tags'];
+    if (rawFeedTags is Map) {
+      try {
+        feedTags = FeedTagsEntity.fromMap(
+            Map<String, dynamic>.from(rawFeedTags as Map<dynamic, dynamic>));
+      } catch (_) {
+        feedTags = null;
+      }
+    }
+
+    LocationEntity? location;
+    final rawLocation = map['location'];
+    if (rawLocation is Map) {
+      try {
+        location = LocationEntity.fromMap(
+            Map<String, dynamic>.from(rawLocation as Map<dynamic, dynamic>));
+      } catch (_) {
+        location = null;
+      }
+    }
+
     return UserEntity(
-      id: map['id'] as String,
-      username: map['username'] as String?,
-      email: map['email'] as String?,
-      phone: map['phone'] as String?,
-      gender: map['gender'] as String?,
-      interestedIn: List<String>.from(map['interested_in'] ?? []),
-      lookingFor: map['looking_for'] as String?,
-      createdAt: map['created_at'] == null
-          ? null
-          : DateTime.parse(map['created_at'] as String),
-      updatedAt: map['updated_at'] == null
-          ? null
-          : DateTime.parse(map['updated_at'] as String),
-      diamonds: map['diamonds'] as int? ?? 0,
-      postIds: List<String>.from(map['video_post_ids'] ?? []),
-      followerIds: List<String>.from(map['follower_ids'] ?? []),
-      followingIds: List<String>.from(map['following_ids'] ?? []),
-      commentIds: List<String>.from(map['comments_ids'] ?? []),
-      chatroomIds: List<String>.from(map['chatroom_ids'] ?? []),
-      referredIds: List<String>.from(map['referred_ids'] ?? []),
-      referredBy: map['referred_by'] as String?,
-      lastLoginAt: map['last_login_at'] == null
-          ? null
-          : DateTime.parse(map['last_login_at'] as String),
-      feedTags: map['feed_tags'] == null
-          ? null
-          : FeedTagsEntity.fromMap(map['feed_tags']),
-      location: map['location'] == null
-          ? null
-          : LocationEntity.fromMap(map['location']),
-      activeStatus: map['active_status'] as bool?,
-      fullName: map['full_name'] as String?,
-      profilePhotoUrl: map['profile_photo_url'] as String?,
-      bio: map['bio'] as String?,
-      rank: map['rank'] as int?,
-      moodStatus: map['mood_status'] as int?,
-      referralsCount: map['referrals_count'] as int?,
+      id: id,
+      username: map._string('username'),
+      email: map._string('email'),
+      phone: map._string('phone'),
+      gender: map._string('gender'),
+      interestedIn: interestedIn,
+      lookingFor: map._string('looking_for'),
+      createdAt: map._dateTime('created_at'),
+      updatedAt: map._dateTime('updated_at'),
+      diamonds: map._int('diamonds') ?? 0,
+      postIds: postIds,
+      followerIds: followerIds,
+      followingIds: followingIds,
+      commentIds: commentIds,
+      chatroomIds: chatroomIds,
+      referredIds: referredIds,
+      referredBy: map._string('referred_by'),
+      lastLoginAt: map._dateTime('last_login_at'),
+      feedTags: feedTags,
+      location: location,
+      activeStatus: map['active_status'] is bool
+          ? map['active_status'] as bool
+          : null,
+      fullName: map._string('full_name'),
+      profilePhotoUrl: map._string('profile_photo_url'),
+      bio: map._string('bio'),
+      rank: map._int('rank'),
+      moodStatus: map._int('mood_status'),
+      referralsCount: map._int('referrals_count'),
     );
+  }
+
+}
+
+
+extension _ParsingHelpers on Map<String, dynamic> {
+  String? _string(String key) {
+    final val = this[key];
+    return val is String ? val : null;
+  }
+
+  DateTime? _dateTime(String key) {
+    final val = this[key];
+    if (val is String) return DateTime.tryParse(val);
+    if (val is DateTime) return val;
+    return null;
+  }
+
+  int? _int(String key) {
+    final val = this[key];
+    if (val is int) return val;
+    if (val is String) return int.tryParse(val);
+    return null;
+  }
+
+  List<String> _stringList(String key) {
+    final val = this[key];
+    if (val is Iterable) {
+      return val.whereType<String>().toList();
+    }
+    return [];
   }
 }

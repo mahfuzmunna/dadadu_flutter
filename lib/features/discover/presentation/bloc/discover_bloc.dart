@@ -27,7 +27,7 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
       maxDistanceInKm: event.distance,
     ));
     result.fold(
-      (failure) => emit(DiscoverError(failure.message)),
+          (failure) => emit(DiscoverError(failure.message.toString())),
       (users) => emit(DiscoverUsersLoaded(users)),
     );
   }

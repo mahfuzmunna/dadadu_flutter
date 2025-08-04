@@ -5,7 +5,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:dio/dio.dart';
 import 'package:ffmpeg_kit_flutter_new/ffmpeg_kit.dart';
 import 'package:flutter/material.dart';

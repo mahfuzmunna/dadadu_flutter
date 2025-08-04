@@ -30,7 +30,7 @@ class DiamondBloc extends Bloc<DiamondEvent, DiamondState> {
       authorId: event.authorId,
     ));
     result.fold(
-      (failure) => emit(DiamondError(failure.message)),
+          (failure) => emit(DiamondError(failure.message.toString())),
       (_) => emit(DiamondSuccess()),
     );
   }
@@ -44,7 +44,7 @@ class DiamondBloc extends Bloc<DiamondEvent, DiamondState> {
       authorId: event.authorId,
     ));
     result.fold(
-      (failure) => emit(DiamondError(failure.message)),
+          (failure) => emit(DiamondError(failure.message.toString())),
       (_) => emit(DiamondSuccess()),
     );
   }

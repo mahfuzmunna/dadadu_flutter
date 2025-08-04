@@ -2,11 +2,11 @@
 
 import 'package:dadadu_app/core/locale/locale_cubit.dart';
 import 'package:dadadu_app/core/theme/theme_cubit.dart'; // Import ThemeCubit
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 
 class SignInPage extends StatefulWidget {

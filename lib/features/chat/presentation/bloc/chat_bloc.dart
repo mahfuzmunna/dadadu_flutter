@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:dadadu_app/features/chat/domain/entities/chat_message_entity.dart';
 import 'package:dadadu_app/features/chat/domain/usecases/send_message_usecase.dart';
@@ -6,7 +7,6 @@ import 'package:dadadu_app/features/chat/domain/usecases/stream_messages_usecase
 import 'package:equatable/equatable.dart';
 
 part 'chat_event.dart';
-
 part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -33,7 +33,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     await _messagesSubscription?.cancel();
     final result = await _streamMessagesUseCase(event.roomId);
     result.fold(
-      (failure) => emit(ChatError(failure.message)),
+          (failure) => emit(ChatError(failure.message.toString())),
       (stream) {
         _messagesSubscription = stream.listen((messages) {
           add(_MessagesUpdated(messages: messages, roomId: event.roomId));

@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
 import 'package:dadadu_app/features/posts/presentation/pages/video_editor_page.dart';
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';

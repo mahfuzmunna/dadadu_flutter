@@ -41,17 +41,18 @@ class PostBloc extends Bloc<PostEvent, PostState> {
     final initialPostResult = await _postRepository.getPostById(event.postId);
 
     await initialPostResult.fold(
-      (failure) async => emit(PostError(failure.message)),
+          (failure) async => emit(PostError(failure.message.toString())),
       (post) async {
         final authorResult =
             await _profileRepository.getUserProfile(post.userId ?? '');
         authorResult.fold(
-          (failure) => emit(PostError(failure.message)),
+              (failure) => emit(PostError(failure.message.toString())),
           (author) {
             emit(PostLoaded(post: post, author: author));
             final streamResult =
                 _postRepository.subscribeToPostChanges(event.postId);
-            streamResult.fold((failure) => emit(PostError(failure.message)),
+            streamResult.fold((failure) =>
+                emit(PostError(failure.message.toString())),
                 (postStream) {
               _postSubscription = postStream.listen(
                   (updatedPost) => add(_PostUpdated(post: updatedPost)));
@@ -84,7 +85,7 @@ class PostBloc extends Bloc<PostEvent, PostState> {
       },
     ));
     result.fold(
-      (failure) => emit(UploadFailure(failure.message)),
+          (failure) => emit(UploadFailure(failure.message.toString())),
       (_) => emit(UploadSuccess()),
     );
   }

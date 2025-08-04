@@ -1,8 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dadadu_app/features/auth/domain/entities/user_entity.dart';
 import 'package:dadadu_app/features/discover/domain/usecases/find_users_by_vibe_usecase.dart';
 import 'package:dadadu_app/features/discover/presentation/bloc/discover_bloc.dart';
 import 'package:dadadu_app/injection_container.dart' as di;
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
@@ -181,7 +182,8 @@ class _UserCard extends StatelessWidget {
     );
   }
 
-  Widget _buildUserInfo(BuildContext context, dynamic user, String distance) {
+  Widget _buildUserInfo(BuildContext context, UserEntity user,
+      String distance) {
     // Get theme and color scheme from context for cleaner M3 implementation
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -247,7 +249,7 @@ class _UserCard extends StatelessWidget {
                   side: BorderSide(color: colorScheme.outline.withOpacity(0.3)),
                 ),
                 // Location Chip (only shows if location exists)
-                if (user.location != null && user.location!.isNotEmpty)
+                if (user.location != null)
                   Chip(
                     avatar: Icon(
                       Icons.public_outlined,
@@ -255,7 +257,7 @@ class _UserCard extends StatelessWidget {
                       color: colorScheme.secondary,
                     ),
                     label: Text(
-                      user.location!,
+                      user.location!.locationName!,
                       style: theme.textTheme.labelLarge?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                       ),

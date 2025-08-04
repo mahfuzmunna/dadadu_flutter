@@ -1,8 +1,8 @@
 // lib/features/auth/presentation/pages/forgot_password_page.dart
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../l10n/app_localizations.dart';
 import '../bloc/auth_bloc.dart';
 
 class ForgotPasswordPage extends StatefulWidget {

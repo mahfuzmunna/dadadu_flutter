@@ -216,16 +216,29 @@ class PostRemoteDataSourceImpl implements PostRemoteDataSource {
           .eq('id', postId)
           .single();
 
-      // The comments are returned as a List<dynamic> which we cast
-      // to List of CommentModel
+      final rawComments = response['comments'];
 
-      return List<Map<String, dynamic>>.from(response['comments'] ?? []);
+      if (rawComments == null) return [];
+
+      if (rawComments is! List) {
+        throw ServerException('Unexpected comments format');
+      }
+
+      // Safely cast each element to Map<String, dynamic>
+      final comments = rawComments.whereType<Map>().map((dynamic item) {
+        if (item is Map<String, dynamic>) return item;
+        if (item is Map) return Map<String, dynamic>.from(item);
+        throw ServerException('Invalid comment item format');
+      }).toList();
+
+      return comments;
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
   }
+
 
   @override
   Future<Either<Failure, List<UserEntity>>> getUsersByIds(

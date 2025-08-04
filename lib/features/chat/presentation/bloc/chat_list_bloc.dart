@@ -28,7 +28,7 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
     await _roomsSubscription?.cancel();
     final result = await _streamChatRoomsUseCase(null);
     result.fold(
-      (failure) => emit(ChatListError(failure.message)),
+          (failure) => emit(ChatListError(failure.message.toString())),
       (stream) {
         _roomsSubscription = stream.listen((rooms) {
           add(_ChatRoomsUpdated(rooms));

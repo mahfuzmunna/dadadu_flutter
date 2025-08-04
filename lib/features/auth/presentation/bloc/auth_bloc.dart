@@ -120,7 +120,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _signInUseCase(
         SignInParams(email: event.email, password: event.password));
     result.fold(
-        (failure) => emit(AuthUnauthenticated(message: failure.message)),
+            (failure) =>
+            emit(AuthUnauthenticated(message: failure.message.toString())),
         (user) {
       // add(AuthUserChanged(user));
     }
@@ -142,7 +143,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) {
         _authStateSubscription?.resume();
-        emit(AuthUnauthenticated(message: failure.message));
+        emit(AuthUnauthenticated(message: failure.message.toString()));
       }, (user) {
       emit(AuthSignUpSuccess(user: user));
 
@@ -163,7 +164,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     ));
     result.fold((failure) {
       _authStateSubscription?.resume();
-      emit(AuthUnauthenticated(message: failure.message));
+      emit(AuthUnauthenticated(message: failure.message.toString()));
     }, (user) {
       emit(AuthAuthenticated(user: user));
       _authStatusController.add(AuthenticationStatus.authenticated);
@@ -253,7 +254,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result =
         await resetPasswordUseCase(ResetPasswordParams(email: event.email));
     result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
+          (failure) => emit(AuthError(message: failure.message.toString())),
       (_) => emit(AuthPasswordResetEmailSent(email: event.email)),
     );
   }
@@ -303,7 +304,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     final result = await _signInWithGoogleUseCase();
     result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
+          (failure) => emit(AuthError(message: failure.message.toString())),
       (user) => emit(AuthAuthenticated(user: user)),
     );
   }

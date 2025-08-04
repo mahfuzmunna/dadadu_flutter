@@ -1,6 +1,13 @@
 import '../../domain/entities/user_entity.dart';
-import 'feed_tags_model.dart';
 import 'location_model.dart';
+
+List<String> _toStringList(dynamic maybeList) {
+  if (maybeList is Iterable) {
+    // Keeps only string elements, avoids runtime cast exceptions.
+    return maybeList.whereType<String>().toList();
+  }
+  return [];
+}
 
 class UserModel extends UserEntity {
   const UserModel({
@@ -22,7 +29,7 @@ class UserModel extends UserEntity {
     super.referredIds,
     super.referredBy,
     super.lastLoginAt,
-    super.feedTags, // ✅ Updated
+    super.feedTags,
     super.location,
     super.activeStatus,
     super.fullName,
@@ -40,28 +47,42 @@ class UserModel extends UserEntity {
       email: map['email'] as String?,
       phone: map['phone'] as String?,
       gender: map['gender'] as String?,
-      interestedIn: List<String>.from(map['interested_in'] ?? []),
+      interestedIn: _toStringList(map['interested_in']),
       lookingFor: map['looking_for'] as String?,
+
       createdAt: map['created_at'] == null
           ? null
-          : DateTime.parse(map['updated_at'] as String),
+          : DateTime.tryParse(map['created_at'] as String? ?? ''),
       updatedAt: map['updated_at'] == null
           ? null
-          : DateTime.parse(map['updated_at'] as String),
-      diamonds: map['diamonds'] as int? ?? 0,
-      postIds: List<String>.from(map['video_post_ids'] ?? []),
-      followerIds: List<String>.from(map['follower_ids'] ?? []),
-      followingIds: List<String>.from(map['following_ids'] ?? []),
-      commentIds: List<String>.from(map['comments_ids'] ?? []),
-      chatroomIds: List<String>.from(map['chatroom_ids'] ?? []),
-      referredIds: List<String>.from(map['referred_ids'] ?? []),
+          : DateTime.tryParse(map['updated_at'] as String? ?? ''),
+
+      diamonds: map['diamonds'] is int
+          ? map['diamonds'] as int
+          : int.tryParse((map['diamonds'] ?? '0').toString()) ?? 0,
+
+      postIds: _toStringList(map['video_post_ids']),
+      followerIds: _toStringList(map['follower_ids']),
+      followingIds: _toStringList(map['following_ids']),
+      commentIds: _toStringList(map['comments_ids']),
+      // verify key name: comments_ids vs comment_ids
+      chatroomIds: _toStringList(map['chatroom_ids']),
+      referredIds: _toStringList(map['referred_ids']),
       referredBy: map['referred_by'] as String?,
       lastLoginAt: map['last_login_at'] == null
           ? null
-          : DateTime.parse(map['last_login_at'] as String),
-      // ✅ CHANGED: Safely parse the map from the database
-      feedTags: FeedTagsModel.fromMap(map['feed_tags'] as List<dynamic>?),
-      location: LocationModel.fromMap(map['location'] as Map<String, dynamic>?),
+          : DateTime.tryParse(map['last_login_at'] as String? ?? ''),
+
+      // feedTags: (map['feed_tags'] is Map)
+      //     ? FeedTagsModel.fromMap(
+      //     Map<String, dynamic>.from(map['feed_tags'] as Map))
+      //     : null,
+
+      location: (map['location'] is Map)
+          ? LocationModel.fromMap(
+          Map<String, dynamic>.from(map['location'] as Map))
+          : null,
+
       activeStatus: map['active_status'] as bool?,
       fullName: map['full_name'] as String?,
       profilePhotoUrl: map['profile_photo_url'] as String?,

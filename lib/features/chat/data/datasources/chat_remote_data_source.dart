@@ -68,78 +68,133 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
 
   @override
   Stream<List<ChatRoomModel>> streamChatRooms() {
-    try {
-      final currentUserId = supabaseClient.auth.currentUser?.id;
-      if (currentUserId == null)
-        throw ServerException('User not authenticated.');
-
-      final stream = supabaseClient
-          .from('chat_rooms')
-          .stream(primaryKey: ['id'])
-          // .contains('participant_ids', [currentUserId])
-          // .in_('column', [value1, value2])
-          .eq('is_private', true)
-          .order('updated_at')
-          .map((listOfRoomMaps) async {
-            if (listOfRoomMaps.isEmpty) return <ChatRoomModel>[];
-
-            // 1. Get all participant and last message IDs
-            final otherParticipantIds = <String>{};
-            final lastMessageIds = <String>{};
-            for (final roomMap in listOfRoomMaps) {
-              final participantIds =
-                  List<String>.from(roomMap['participant_ids']);
-              otherParticipantIds
-                  .add(participantIds.firstWhere((id) => id != currentUserId));
-              if (roomMap['last_message_id'] != null) {
-                lastMessageIds.add(roomMap['last_message_id']);
-              }
-            }
-
-            // 2. Fetch all required profiles and messages in batch
-            final [authorMaps, messageMaps] = await Future.wait([
-              supabaseClient
-                  .from(AppConfig.supabaseUserTable)
-                  .select()
-                  .filter('id', 'in', '(${otherParticipantIds.join(',')})'),
-              if (lastMessageIds.isNotEmpty)
-                supabaseClient
-                    .from('chat_messages')
-                    .select()
-                    .filter('id', 'in', '(${lastMessageIds.join(',')})')
-              else
-                Future.value(<Map<String, dynamic>>[])
-            ]);
-
-            final authorsById = {
-              for (var map in authorMaps) map['id']: UserModel.fromMap(map)
-            };
-            final messagesById = {
-              for (var map in messageMaps)
-                map['id']: ChatMessageModel.fromMap(map)
-            };
-
-            // 3. Build the final ChatRoomModel list
-            return listOfRoomMaps.map((roomMap) {
-              final participantIds =
-                  List<String>.from(roomMap['participant_ids']);
-              final otherId =
-                  participantIds.firstWhere((id) => id != currentUserId);
-              return ChatRoomModel.fromMap(
-                roomMap,
-                otherParticipant: authorsById[otherId]!,
-                lastMessage: messagesById[roomMap['last_message_id']],
-              );
-            }).toList();
-          });
-
-      // Since the inner map is async, the stream returns Future<List<ChatRoomModel>>.
-      // We need to flatten it.
-      return stream.asyncExpand((futureList) => Stream.fromFuture(futureList));
-    } catch (e) {
-      throw ServerException(e.toString());
+    final currentUserId = supabaseClient.auth.currentUser?.id;
+    if (currentUserId == null) {
+      // Early failure; return a stream that immediately errors.
+      return Stream<List<ChatRoomModel>>.error(
+        ServerException('User not authenticated.'),
+      );
     }
+
+    Stream<List<dynamic>> rawStream = supabaseClient
+        .from('chat_rooms')
+        .stream(primaryKey: ['id'])
+        .inFilter('participant_ids',
+        [currentUserId]) // include only rooms involving current user
+    // .eq('is_private', true)
+        .order('updated_at');
+
+    return rawStream.asyncMap((listOfRoomMaps) async {
+      if (listOfRoomMaps.isEmpty) return <ChatRoomModel>[];
+
+      // 1. Collect other participant IDs and last message IDs.
+      final otherParticipantIds = <String>{};
+      final lastMessageIds = <String>{};
+
+      for (final dynamic roomRaw in listOfRoomMaps) {
+        if (roomRaw is! Map<String, dynamic>) continue;
+        final participantIdsRaw = roomRaw['participant_ids'];
+        if (participantIdsRaw is! Iterable) continue;
+        final participantIds = participantIdsRaw.whereType<String>().toList();
+        if (participantIds.isEmpty) continue;
+        final otherId = participantIds.firstWhere(
+              (id) => id != currentUserId,
+          orElse: () => '',
+        );
+        if (otherId.isNotEmpty) {
+          otherParticipantIds.add(otherId);
+        }
+
+        final lastMsgId = roomRaw['last_message_id'];
+        if (lastMsgId is String && lastMsgId.isNotEmpty) {
+          lastMessageIds.add(lastMsgId);
+        }
+      }
+
+      // 2. Batch fetch required users and messages.
+      final futures = <Future<dynamic>>[
+        supabaseClient
+            .from(AppConfig.supabaseUserTable)
+            .select()
+            .inFilter('id', otherParticipantIds.toList()),
+        lastMessageIds.isNotEmpty
+            ? supabaseClient
+            .from('chat_messages')
+            .select()
+            .inFilter('id', lastMessageIds.toList())
+            : Future.value(<Map<String, dynamic>>[]),
+      ];
+
+      final results = await Future.wait(futures);
+      final authorMapsRaw = results[0];
+      final messageMapsRaw = results[1];
+
+      final authorsById = <String, UserModel>{};
+      if (authorMapsRaw is Iterable) {
+        for (final dynamic m in authorMapsRaw) {
+          if (m is Map<String, dynamic> && m['id'] is String) {
+            try {
+              authorsById[m['id'] as String] = UserModel.fromMap(m);
+            } catch (_) {
+              // skip malformed user
+            }
+          }
+        }
+      }
+
+      final messagesById = <String, ChatMessageModel>{};
+      if (messageMapsRaw is Iterable) {
+        for (final dynamic m in messageMapsRaw) {
+          if (m is Map<String, dynamic> && m['id'] is String) {
+            try {
+              messagesById[m['id'] as String] = ChatMessageModel.fromMap(m);
+            } catch (_) {
+              // skip malformed message
+            }
+          }
+        }
+      }
+
+      // 3. Build final models, skipping any room missing required data.
+      final chatRooms = <ChatRoomModel>[];
+      for (final dynamic roomRaw in listOfRoomMaps) {
+        if (roomRaw is! Map<String, dynamic>) continue;
+
+        final participantIdsRaw = roomRaw['participant_ids'];
+        if (participantIdsRaw is! Iterable) continue;
+        final participantIds = participantIdsRaw.whereType<String>().toList();
+        if (participantIds.isEmpty) continue;
+
+        final otherId = participantIds.firstWhere(
+              (id) => id != currentUserId,
+          orElse: () => '',
+        );
+        if (otherId.isEmpty) continue;
+
+        final otherParticipant = authorsById[otherId];
+        if (otherParticipant == null)
+          continue; // skip if we don't have the other user
+
+        final lastMessageId = roomRaw['last_message_id'];
+        final lastMessage =
+        (lastMessageId is String) ? messagesById[lastMessageId] : null;
+
+        try {
+          final roomModel = ChatRoomModel.fromMap(
+            roomRaw,
+            otherParticipant: otherParticipant,
+            lastMessage: lastMessage,
+          );
+          chatRooms.add(roomModel);
+        } catch (_) {
+          // skip malformed room
+        }
+      }
+
+      return chatRooms;
+    });
   }
+
 
   @override
   Future<String> createChatRoom(

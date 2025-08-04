@@ -8,6 +8,7 @@ import 'package:dadadu_app/features/chat/presentation/bloc/chatroom_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/post_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/follow_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:dadadu_app/shared/widgets/emoji_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // For Clipboard
@@ -16,7 +17,6 @@ import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../injection_container.dart' as di;
-import '../../../../l10n/app_localizations.dart';
 import '../../../../shared/utils/rank_info.dart';
 import '../../../now/presentation/bloc/feed_bloc.dart';
 import '../../../posts/domain/entities/post_entity.dart'; // For sharing content

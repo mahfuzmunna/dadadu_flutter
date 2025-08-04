@@ -4,7 +4,7 @@ import 'package:dadadu_app/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:dadadu_app/features/chat/presentation/bloc/chat_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/profile_bloc.dart';
 import 'package:dadadu_app/injection_container.dart';
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:dash_chat_3/dash_chat_3.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

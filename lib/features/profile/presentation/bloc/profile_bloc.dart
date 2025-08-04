@@ -99,7 +99,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       UpdateUserProfileParams(user: event.user, photoFile: event.photoFile),
     );
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+          (failure) => emit(ProfileError(message: failure.message.toString())),
       (_) => emit(ProfileUpdateSuccess()),
     );
   }
@@ -135,7 +135,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
           userId: event.userId, photoFile: event.photoFile),
     );
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+          (failure) => emit(ProfileError(message: failure.message.toString())),
       (photoUrl) => emit(ProfilePhotoUpdateSuccess(photoUrl)),
     );
   }
@@ -191,7 +191,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     // Handle the result using fold
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+          (failure) => emit(ProfileError(message: failure.message.toString())),
       (_) => emit(UserLocationUpdateSuccess()),
     );
   }
@@ -206,7 +206,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         UpdateUserMoodParams(userId: event.userId, moodStatus: event.mood));
 
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+          (failure) => emit(ProfileError(message: failure.message.toString())),
       (_) {
         // We don't need to emit a success state because the real-time stream
         // will automatically push a new ProfileLoaded state, updating the UI.
@@ -224,7 +224,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     final result = await _streamUserProfileUseCase(event.userId);
 
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+          (failure) => emit(ProfileError(message: failure.message.toString())),
       (userStream) {
         _profileSubscription = userStream.listen((user) {
           add(_UserProfileUpdated(user));
@@ -248,7 +248,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         userId: event.userId, discoverMode: event.discoverMode));
 
     result.fold(
-      (failure) => emit(ProfileError(message: failure.message)),
+          (failure) => emit(ProfileError(message: failure.message.toString())),
       (_) {
         // We don't need to emit a success state because the real-time stream
         // will automatically push a new ProfileLoaded state, updating the UI.

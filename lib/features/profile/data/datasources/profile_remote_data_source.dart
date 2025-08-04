@@ -213,8 +213,7 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
           .eq('id', userId)
           .single();
 
-      if (response['profile_photo_url'] == null ||
-          response['profile_photo_url'].isEmpty) {
+      if (response['profile_photo_url'] == null) {
         return; // No image to delete or URL not found
       }
 

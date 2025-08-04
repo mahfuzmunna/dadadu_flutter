@@ -4,7 +4,7 @@ import 'package:dadadu_app/features/now/presentation/bloc/feed_bloc.dart';
 import 'package:dadadu_app/features/posts/presentation/bloc/diamond_bloc.dart';
 import 'package:dadadu_app/features/profile/presentation/bloc/follow_bloc.dart';
 import 'package:dadadu_app/injection_container.dart';
-import 'package:dadadu_app/l10n/app_localizations.dart';
+import 'package:dadadu_app/l10n/gen/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
